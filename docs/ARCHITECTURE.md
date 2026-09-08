@@ -1,6 +1,7 @@
 # ECP Architecture
 
-Version 0.1.0-draft (R0 foundation). Normative contract details live in
+Version 0.2.0-draft (R1-I minimal coupled foundation, additive over R0).
+Normative contract details live in
 [spec/ECP-SPEC.md](../spec/ECP-SPEC.md); this document explains the
 *shape* of the system.
 
@@ -23,29 +24,41 @@ therefore optimizes for three properties, in this order:
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
-│  PUBLIC REPOSITORY (this repository — provenance/distribution) │
+│  PUBLIC CONTRACT REPOSITORY (this repository)                  │
 │                                                                │
-│  spec/          normative protocol specification               │
-│  schemas/       machine-validatable object contracts (2020-12) │
+│  spec/          normative protocol specification (§1–§18)      │
+│  schemas/       12 machine-validatable contracts (2020-12)     │
 │  src/ecp/       reference core:                                │
 │      identity       pinned protocol identity                   │
 │      canonical       ECP-CANONICAL-JSON-1.0                    │
 │      hashing         deterministic sha256 (docs/files/fields)  │
 │      manifest        deterministic manifests                   │
 │      validate        schema validation                         │
+│      versions        explicit 0.1.x↔0.2.0 compatibility        │
 │      verification    integrity checks (NOT adjudication)       │
-│      boundaries      public/protected boundary enforcement     │
+│      boundaries      public/protected + ledger-tree scanning   │
 │      linkage         cross-document provenance linkage         │
+│      store           protected store core (R1-I)              │
+│      ledger          registration ledger core (R1-I)          │
 │  tools/         ecp_cli.py — identity/validate/hash/manifest/   │
-│                 boundary-scan/verify-commitment                │
+│                 boundary-scan/verify-commitment + store-init/  │
+│                 seal/verify, ledger-init/register/invalidate/  │
+│                 ledger-verify/anchor-publish                   │
 │  examples/      format illustrations (clearly marked)          │
 │  cases/ evaluation/ evidence/ verification/  RESERVED (empty)   │
 └────────────────────────────────────────────────────────────────┘
-                    no data flows, only contracts
 ┌────────────────────────────────────────────────────────────────┐
-│  PROTECTED STORE (outside this repository — future phase)      │
-│  sealed ground truth · hidden cases · scoring commitments ·    │
-│  protected evidence · controlled execution metadata            │
+│  PUBLIC LEDGER REPOSITORY (separate repo — R1-I, starts EMPTY) │
+│  chained entries/ · records/ · ANCHOR.json                     │
+│  public verification from public data alone                    │
+└────────────────────────────────────────────────────────────────┘
+                    the seam: sha256 commitments
+┌────────────────────────────────────────────────────────────────┐
+│  PROTECTED STORE (outside all repositories — R1-I implemented) │
+│  zones/sealed-gt/ CAS write-once blobs (canonical bytes)       │
+│  registry manifest (store.json, deterministic)                 │
+│  oplog/ hash-chained append-only operation log                 │
+│  hidden-cases/ evidence/ exports/  RESERVED (R1-I)             │
 └────────────────────────────────────────────────────────────────┘
                     bound by sha256 commitments only
 ┌────────────────────────────────────────────────────────────────┐
@@ -54,9 +67,13 @@ therefore optimizes for three properties, in this order:
 └────────────────────────────────────────────────────────────────┘
 ```
 
-At R0 only the public repository layer exists. The other two layers are
-architectural placeholders with contracts (system identity, evidence
-references) but no implementation — deliberately.
+At R1-I the public contract repository, the (empty) public ledger
+repository and the protected store machinery exist; the integration layer
+remains a placeholder. The store and the ledger form the **coupled seam**
+decided in M3-R1 (Option C): the store provides custody (write-once CAS),
+the ledger provides the public freeze (chained appends + anchoring), and
+the seam — the commitment — is verified in both directions at
+registration time and by public verification.
 
 ## 3. Object hierarchy and lifecycle
 
@@ -106,31 +123,37 @@ The public/protected boundary is not a convention — it is executable:
 | `spec/` | normative specification | complete for foundation |
 | `schemas/` | 10 versioned JSON Schemas | complete, tested |
 | `src/ecp/` | reference core | complete, tested |
-| `tests/` | foundation tests | 229 tests, all passing |
+| `tests/` | foundation tests | 319 tests, all passing |
 | `tools/` | CLI | complete |
 | `examples/` | format illustrations | valid, hashes real |
 | `docs/` | architecture/trust/repro/security/open-core/contributing | complete |
 | `cases/`, `evaluation/`, `evidence/`, `verification/` | reserved | **empty** (README only) |
 
-## 7. Extension points (future, separately gated)
+## 7. Extension points (status after R1-I)
 
 1. **Case pipeline** — authoring → independent review → leakage/novelty
    gates → registration. The case schema already carries
    `authoring_provenance` (author role, information boundary,
    environment), `difficulty`, `structural_signature`, and
    `proposed_reasoning_family` as optional fields so authored candidates
-   have a contract to land in.
+   have a contract to land in. Status: **future gate** (a real-case
+   registration is not possible before the review pipeline exists).
 2. **Registration authority** — an append-only registry implementing the
-   registration contract.
+   registration contract. Status: **implemented at R1-I** as the CLI
+   ceremony + chained file ledger + public verification (`ecp.ledger`);
+   the public ledger exists and is empty.
 3. **Execution harness** — outside the core; adapters translate the
-   system identity contract into concrete invocations.
+   system identity contract into concrete invocations. Status: **future
+   gate**.
 4. **Protected store** — holds sealed ground truth; publishes
-   commitments into public cases.
+   commitments into public cases. Status: **implemented at R1-I**
+   (`ecp.store`: CAS write-once, op log, manifest, verification).
 5. **Verification service** — records verification results into the
-   reserved `verification/` area.
-6. **Analysis layer** — only after evidence exists.
+   reserved `verification/` area. Status: **future gate**.
+6. **Analysis layer** — only after evidence exists. Status: **future
+   gate**.
 
-None of these exist at R0; all have contracts ready.
+Contracts are ready for all of them; machinery exists for 2 and 4.
 
 ## 8. What deliberately does not exist
 

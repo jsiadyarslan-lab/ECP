@@ -1,6 +1,7 @@
 # ECP Trust Model
 
-Version 0.1.0-draft (R0 foundation).
+Version 0.2.0-draft (R1-I minimal coupled foundation, additive
+over R0).
 
 ## 1. The question this document answers
 
@@ -96,12 +97,18 @@ when a disagreement exists.
 
 ## 7. Trust in this repository's own contents (R0 self-assessment)
 
-At R0 the repository contains contracts and tooling only — no cases, no
-executions, no evidence. Its trustworthiness currently rests on: the
-test suite (229 tests), the boundary scanner, and the determinism of
-the core. It claims nothing else. In particular it does not claim that
-the protocol itself has been scientifically validated (see README
-status banner).
+At R1-I the repository contains contracts, tooling, the protected-store
+and ledger machinery, and zero scientific data — no cases registered
+(the public ledger is empty), no executions, no evidence. Its
+trustworthiness currently rests on: the test suite (319 tests, including
+tamper-detection batteries for the store op log and the ledger chain),
+the boundary scanners (public tree + public ledger tree), the determinism
+of the core, and the write-once/append-only semantics now enforced in
+code. It claims nothing else. In particular it does not claim that the
+protocol itself has been scientifically validated (see README status
+banner). The M3-R1 threat model (T1–T14, with residual risks stated
+honestly) is recorded in
+[docs/M3-R1-ARCHITECTURE-DECISION.md](M3-R1-ARCHITECTURE-DECISION.md).
 
 ## 8. Threat boundary
 

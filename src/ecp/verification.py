@@ -26,22 +26,28 @@ from .validate import validate_document
 def verify_protocol_compatibility(
     document: dict, identity: "dict | None" = None
 ) -> "list[str]":
-    """Check that *document* cites the pinned protocol (and schema) versions."""
+    """Check that *document* cites a protocol (and schema) version that is
+    explicitly compatible with this repository's protocol.
+
+    Since the 0.2.0 additive bundle (R1-I), compatibility is an explicit
+    matrix (see :mod:`ecp.versions`): 0.1.x artifacts remain valid — they
+    are not silently reinterpreted, and they are not silently invalidated.
+    The document's cited versions must be members of the accepted sets:
+    ``protocol_version`` in ``("0.1.0", "0.2.0")`` for every object type,
+    and ``schema_version`` in the per-object-type accepted set (0.1.0
+    contracts unchanged since 0.1.0 accept both 0.1.0 and 0.2.0; contracts
+    introduced at 0.2.0 accept only 0.2.0).
+    """
+    from .versions import version_issues
+
     identity = identity or load_identity()
-    issues = []
-    protocol_version = document.get("protocol_version")
-    if protocol_version is None:
-        issues.append("<root>: missing protocol_version (no implicit 'current version')")
-    elif protocol_version != identity["protocol_version"]:
+    issues = version_issues(document)
+    # The identity itself pins the CURRENT bundle; cross-check that the
+    # repository is in a state this tooling understands.
+    if identity.get("schema_version") not in ("0.1.0", "0.2.0"):
         issues.append(
-            f"protocol_version: document cites {protocol_version!r}, "
-            f"repository pins {identity['protocol_version']!r}"
-        )
-    schema_version = document.get("schema_version")
-    if schema_version is not None and schema_version != identity["schema_version"]:
-        issues.append(
-            f"schema_version: document cites {schema_version!r}, "
-            f"repository pins {identity['schema_version']!r}"
+            f"identity: repository pins unsupported schema_version "
+            f"{identity.get('schema_version')!r}"
         )
     return issues
 

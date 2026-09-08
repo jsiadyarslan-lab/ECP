@@ -6,6 +6,7 @@ import json
 import pytest
 
 from ecp.validate import SCHEMA_FILES, load_schema, validate_document
+from ecp.versions import SCHEMA_VERSIONS
 
 EXAMPLE_SCHEMA_MAP = [
     ("case.development.example.json", "case"),
@@ -19,6 +20,8 @@ EXAMPLE_SCHEMA_MAP = [
     ("manifest.example.json", "manifest"),
     ("audit.two-auditor.example.json", "audit"),
     ("audit.single-auditor-fallback.example.json", "audit"),
+    ("ledger-entry.example.json", "ledger-entry"),
+    ("store-manifest.example.json", "store-manifest"),
 ]
 
 
@@ -32,7 +35,15 @@ def test_schema_is_valid_draft_2020_12(schema_name):
 @pytest.mark.parametrize("schema_name", sorted(SCHEMA_FILES))
 def test_schema_declares_stable_id(schema_name):
     schema = load_schema(schema_name)
-    assert schema["$id"].startswith("https://schemas.ecp-protocol.org/0.1.0/")
+    # $id pins the contract version: 0.1.0 contracts keep their original
+    # $id (files unchanged in the 0.2.0 bundle); 0.2.0 contracts (new
+    # object types) carry the 0.2.0 bundle version. The accepted set is
+    # the explicit compatibility matrix.
+    contract_version = SCHEMA_VERSIONS[schema_name][0]
+    assert schema["$id"].startswith(
+        f"https://schemas.ecp-protocol.org/{contract_version}/"
+    )
+    assert schema["$id"].endswith(f"/{SCHEMA_FILES[schema_name]}")
 
 
 @pytest.mark.parametrize("schema_name", sorted(SCHEMA_FILES))

@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ecp-protocol.org/0.2.0/ledger-entry.schema.json",
+  "title": "ECP Ledger Entry",
+  "description": "Append-only, hash-chained ledger entry of the ECP Registration Authority (R1-I, Option C minimal coupled foundation). The ledger is a plain-file directory of chained entries wrapping registration records. entry_hash = SHA-256 over the ECP-CANONICAL-JSON-1.0 serialization of this document with the top-level entry_hash field removed. prev_entry_hash is the entry_hash of the previous entry (64 zeros for the genesis entry at index 1). Entries are never edited, removed or reordered; corrections are new superseding records; invalidations are explicit entries of kind 'invalidation'. The chain head is published via the ledger ANCHOR file and public Git anchoring. The kinds 'anchor' and 'store-checkpoint' are schema-reserved for future use; R1-I tooling writes only 'registration' and 'invalidation' entries.",
+  "type": "object",
+  "required": [
+    "ecp_object",
+    "ledger_id",
+    "entry_index",
+    "entry_kind",
+    "registrar",
+    "record_ref",
+    "protocol_version",
+    "schema_version",
+    "claimed_at",
+    "prev_entry_hash",
+    "entry_hash"
+  ],
+  "properties": {
+    "ecp_object": { "const": "ledger-entry" },
+    "ledger_id": {
+      "type": "string",
+      "pattern": "^ECP-LEDGER-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "entry_index": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Monotone chain position (1-based). Chain position, not claimed_at, is the canonical order."
+    },
+    "entry_kind": {
+      "enum": ["registration", "invalidation", "anchor", "store-checkpoint"],
+      "description": "'registration' wraps a new registration record; 'invalidation' explicitly invalidates an existing registration (record_ref points at the invalidated record); 'anchor' and 'store-checkpoint' are reserved for future phases."
+    },
+    "registrar": {
+      "type": "string",
+      "pattern": "^ECP-REGISTRAR-[A-Za-z0-9][A-Za-z0-9._:-]*$",
+      "description": "Identity of the registrar performing the append (attribution, not authorization by itself)."
+    },
+    "record_ref": {
+      "type": "object",
+      "required": ["registration_id", "record_hash"],
+      "properties": {
+        "registration_id": {
+          "type": "string",
+          "pattern": "^ECP-REG-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "record_hash": {
+          "$ref": "#/$defs/sha256_hex",
+          "description": "SHA-256 over the ECP-CANONICAL-JSON-1.0 serialization of the referenced registration record document (the full record, not its internal registration_hash)."
+        }
+      },
+      "additionalProperties": false
+    },
+    "ground_truth_commitments": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["case_id", "case_version", "commitment"],
+        "properties": {
+          "case_id": {
+            "type": "string",
+            "pattern": "^ECP-CASE-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "case_version": { "$ref": "#/$defs/semver" },
+          "commitment": {
+            "$ref": "#/$defs/sha256_hex",
+            "description": "The ground-truth commitment frozen by this entry: equals the public case's ground_truth_reference.commitment and the protected store seal commitment (verified at registration time and re-verifiable from public data)."
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Ground-truth commitments bound by this entry. Registration entries MUST carry the commitment of every case version frozen by the referenced record (usually one); this makes the ledger an independent freeze-of-record for the commitments, not merely a pointer to public case documents."
+    },
+    "protocol_version": { "$ref": "#/$defs/semver" },
+    "schema_version": { "$ref": "#/$defs/semver" },
+    "claimed_at": {
+      "$ref": "#/$defs/iso8601_utc",
+      "description": "Registrar-claimed timestamp. An assertion, not evidence: canonical order is the chain position; independent time evidence comes from external anchoring."
+    },
+    "prev_entry_hash": {
+      "$ref": "#/$defs/sha256_hex",
+      "description": "entry_hash of the previous entry; exactly 64 zeros for the genesis entry (entry_index 1)."
+    },
+    "entry_hash": {
+      "$ref": "#/$defs/sha256_hex",
+      "description": "SHA-256 over the canonical serialization of this document with the top-level entry_hash field removed."
+    },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Optional commentary (covered by entry_hash)."
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "sha256_hex": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "iso8601_utc": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+    }
+  }
+}

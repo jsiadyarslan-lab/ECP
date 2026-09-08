@@ -1,4 +1,4 @@
-"""ECP — Evidentiary Evaluation Protocol: provider-neutral scientific core (R0).
+"""ECP — Evidentiary Evaluation Protocol: provider-neutral scientific core.
 
 This package implements the repository's scientific core:
 
@@ -7,16 +7,20 @@ This package implements the repository's scientific core:
 - deterministic hashing (:mod:`ecp.hashing`);
 - manifest construction (:mod:`ecp.manifest`);
 - schema validation (:mod:`ecp.validate`);
+- explicit protocol/schema version compatibility (:mod:`ecp.versions`);
 - verification primitives — integrity only, never scientific adjudication
   (:mod:`ecp.verification`);
 - public/protected boundary enforcement (:mod:`ecp.boundaries`);
-- cross-document provenance linkage (:mod:`ecp.linkage`).
+- cross-document provenance linkage (:mod:`ecp.linkage`);
+- protected evidence store — CAS write-once custody (:mod:`ecp.store`);
+- registration ledger — append-only hash-chained authority
+  (:mod:`ecp.ledger`).
 
 It deliberately contains NO model adapters, NO execution machinery, NO scoring
 logic and NO provider-specific code (see spec/ECP-SPEC.md, "Provider neutrality").
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 from .canonical import CANONICALIZATION_ID, canonical_bytes, canonical_dumps
 from .hashing import (

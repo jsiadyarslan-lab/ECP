@@ -143,3 +143,90 @@ def format_violations(violations: "list[dict]") -> str:
             f"  [{violation['rule']}] {violation['path']}: {violation['detail']}"
         )
     return "\n".join(lines)
+
+
+# --- public ledger tree boundary (R1-I, Option C / O1) ---------------------
+#
+# The public registration ledger (a separate repository from the ECP
+# contract repository) carries public metadata only: chained entries,
+# registration records, the ANCHOR checkpoint. These rules machine-check
+# that nothing protected ever lands in it.
+
+LEDGER_REQUIRED_PATHS = ("ANCHOR.json", "entries", "records")
+LEDGER_ALLOWED_OBJECTS = ("ledger-entry", "registration")
+
+
+def scan_ledger_tree(ledger_root: "str | Path") -> "list[dict]":
+    """Scan a public ledger tree for boundary violations.
+
+    Rules:
+
+    - LR1  the required ledger structure exists (``ANCHOR.json``,
+      ``entries/``, ``records/``);
+    - LR2  no ground-truth content keys (``expected_answer``,
+      ``derivation``) in any JSON document;
+    - LR3  no ``ecp_object: "ground-truth"`` document;
+    - LR4  only ``ledger-entry`` and ``registration`` ECP objects appear
+      (any other ECP object type is foreign to the ledger repository);
+    - LR5  every JSON file parses (an unparseable file is a violation).
+
+    Chain integrity itself is verified by ``ecp.ledger.ledger_verify``,
+    not by this scanner.
+    """
+    root = Path(ledger_root)
+    violations: "list[dict]" = []
+
+    # LR1 — structure
+    for required in LEDGER_REQUIRED_PATHS:
+        if not (root / required).exists():
+            violations.append(
+                {
+                    "rule": "ledger-structure-missing",
+                    "path": required,
+                    "detail": f"public ledger requires {required}",
+                }
+            )
+
+    # LR2–LR5 — walk all JSON documents
+    for path in sorted(root.rglob("*.json")):
+        rel = path.relative_to(root).as_posix()
+        if any(part.startswith(".") for part in path.relative_to(root).parts[:-1]):
+            continue  # skip .git and friends
+        try:
+            with open(path, "r", encoding="utf-8") as fh:
+                document = json.load(fh)
+        except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+            violations.append(
+                {
+                    "rule": "ledger-invalid-json",
+                    "path": rel,
+                    "detail": f"unparseable JSON: {exc}",
+                }
+            )
+            continue
+        if not isinstance(document, dict):
+            continue
+
+        has_gt_keys = any(key in document for key in GROUND_TRUTH_CONTENT_KEYS)
+        is_gt_object = document.get("ecp_object") == "ground-truth"
+        if has_gt_keys or is_gt_object:
+            violations.append(
+                {
+                    "rule": "ledger-ground-truth-content",
+                    "path": rel,
+                    "detail": "protected ground-truth content is forbidden in "
+                    "the public ledger",
+                }
+            )
+        ecp_object = document.get("ecp_object")
+        if isinstance(ecp_object, str) and ecp_object not in LEDGER_ALLOWED_OBJECTS:
+            violations.append(
+                {
+                    "rule": "ledger-foreign-ecp-object",
+                    "path": rel,
+                    "detail": f"ecp_object {ecp_object!r} does not belong in "
+                    "the ledger repository",
+                }
+            )
+
+    return violations

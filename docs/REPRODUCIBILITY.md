@@ -1,6 +1,7 @@
 # ECP Reproducibility Model
 
-Version 0.1.0-draft (R0 foundation).
+Version 0.2.0-draft (R1-I minimal coupled foundation, additive
+over R0).
 
 ## 1. The four classes are NOT synonyms
 
@@ -60,9 +61,12 @@ possible) by an external researcher, the evaluation must expose:
 9. **Environment description** — sufficient runtime description to
    understand (not necessarily repeat) the execution context.
 
-Items 1–8 have contracts at R0; item 9 has a schema slot. None of the
-*content* (cases, executions, evidence) exists yet — that is the R0
-scope boundary.
+Items 1–8 have contracts (R0) and items 4 and 8 now have operating
+machinery (R1-I): the registration ledger records item 4 as chained,
+anchored, publicly verifiable entries, and this repository at a pinned
+commit is item 8. Item 9 has a schema slot. None of the *content*
+(cases, executions, evidence) exists yet — no evaluation is registered
+and the public ledger is empty; that is the R1-I scope boundary.
 
 ## 4. What R0 already guarantees
 
@@ -76,6 +80,11 @@ scope boundary.
   party will use on real cases later.
 - **Auditable tooling**: the verification layer re-verifies every
   integrity claim from public data alone.
+- **R1-I additions**: a ledger chain that anyone can recompute
+  (`ledger-verify`), a store whose full state re-derives from its
+  operation log (`store-verify`), and deterministic ceremonies — for
+  pinned timestamps, byte-identical records, entries and manifests
+  across runs (pinned by tests).
 
 ## 5. What R0 explicitly does not guarantee
 

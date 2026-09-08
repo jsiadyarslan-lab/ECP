@@ -1,15 +1,20 @@
 # ECP Security Foundation — Threat Boundary
 
-Version 0.1.0-draft (R0 foundation).
+Version 0.2.0-draft (R1-I minimal coupled foundation, additive over R0).
 
 ## 1. Status
 
-At R0 the security posture is **documented, not implemented**. This file
-enumerates the threats the future evaluation architecture must address
-and states, for each, the boundary decision already taken. Per the R0
-order, no adversarial sandbox is built now; implementation belongs to
-later, separately gated phases. Nothing here is a claim of current
-protection.
+The full security posture remains **documented, not fully implemented**.
+R1-I implemented the integrity half of the boundary decisions below
+(hash-chained append-only ledger, CAS write-once store, atomic writes,
+external anchoring, duplicate/replay control, tamper-evidence verified by
+tests). Confidentiality enforcement at the filesystem/host level
+(encryption at rest, access control beyond tool-enforced role rules,
+runtime isolation) remains deferred per the M3-R1 decision (O3) and the
+threat model in
+[docs/M3-R1-ARCHITECTURE-DECISION.md](M3-R1-ARCHITECTURE-DECISION.md)
+(T1–T14, each with residual risk stated honestly). Nothing here is a
+claim of complete current protection.
 
 ## 2. Asset model
 
@@ -87,9 +92,22 @@ protection.
 ## 5. Deferred implementations (future gates)
 
 Execution-time sandboxing, network egress control, sealed-case
-distribution mechanics, protected-store hardening, access-control and
-audit logging for the protected layer, adversarial-input review for
+distribution mechanics, protected-store hardening beyond the tool layer
+(encryption at rest — decision O3), multi-registrar federation (O4),
+evidence ingestion implementation (O7), adversarial-input review for
 public contributions (see CONTRIBUTING).
+
+## 6. Implemented at R1-I (for the record)
+
+For threats 1, 4 and 5 of §3 above (benchmark modification,
+ground-truth access via public artifacts, evidence modification): the
+ledger chain + anchoring, the case/ground-truth commitment seam enforced
+at registration time, and the CAS write-once store with op-logged
+rejections. Tamper detection for these paths is pinned by the test suite
+(edit / remove / reorder / duplicate / partial-write / commitment-swap
+batteries). Residual risks (anchor window, single-operator limits) are
+documented in the M3-R1 decision record §5 (T1–T3) and remain accepted
+at this scale.
 
 ## 6. Reporting
 

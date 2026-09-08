@@ -25,9 +25,11 @@ def test_identity_core_fields(repo_root):
     with open(repo_root / "ECP-IDENTITY.json", encoding="utf-8") as fh:
         document = json.load(fh)
     assert document["protocol_name"] == "ECP"
-    assert document["protocol_version"] == "0.1.0"
-    assert document["schema_version"] == "0.1.0"
-    assert document["repository_version"] == "0.1.0"
+    # 0.2.0 (R1-I): additive schema bundle + protocol semantics (store /
+    # ledger / anchoring); 0.1.0 contracts unchanged and still valid.
+    assert document["protocol_version"] == "0.2.0"
+    assert document["schema_version"] == "0.2.0"
+    assert document["repository_version"] == "0.2.0"
     assert document["protocol_status"] == "draft"
 
 

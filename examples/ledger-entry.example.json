@@ -1,0 +1,26 @@
+{
+  "ecp_object": "ledger-entry",
+  "ledger_id": "ECP-LEDGER-EXAMPLE-0001",
+  "entry_index": 1,
+  "entry_kind": "registration",
+  "registrar": "ECP-REGISTRAR-EXAMPLE-0001",
+  "record_ref": {
+    "registration_id": "ECP-REG-DEMO-0001",
+    "record_hash": "1495ac15fd2ff71bf59b71af8dfdf1dc5930997bb2d2c4191bc3fb1dc052bf71"
+  },
+  "ground_truth_commitments": [
+    {
+      "case_id": "ECP-CASE-DEV-0001",
+      "case_version": "0.1.0",
+      "commitment": "7b5063955df6b0a70d889ef53e35f23b7139ee147c22fccbf27f388f072fef82"
+    }
+  ],
+  "protocol_version": "0.2.0",
+  "schema_version": "0.2.0",
+  "claimed_at": "1970-01-01T00:00:00Z",
+  "prev_entry_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "notes": [
+    "FORMAT EXAMPLE - ledger entry structure (hash-chained append). No ledger exists in the public ECP repository and nothing is registered; the wrapped record and commitment are the public format examples."
+  ],
+  "entry_hash": "8ececd0dd6231392f8c2056b208386b6bb93a240b99ebdb59820bca0febc4679"
+}

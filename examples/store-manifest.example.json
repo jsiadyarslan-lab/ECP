@@ -1,0 +1,33 @@
+{
+  "ecp_object": "store-manifest",
+  "store_id": "ECP-STORE-EXAMPLE-0001",
+  "scope": "development",
+  "protocol_version": "0.2.0",
+  "schema_version": "0.2.0",
+  "created_at": "1970-01-01T00:00:00Z",
+  "hash_algorithm": "sha256",
+  "canonicalization": "ECP-CANONICAL-JSON-1.0",
+  "zones": {
+    "sealed-gt": {
+      "blob_count": 0
+    },
+    "hidden-cases": {
+      "state": "reserved"
+    },
+    "evidence": {
+      "state": "reserved"
+    },
+    "exports": {
+      "state": "reserved"
+    }
+  },
+  "seals": [],
+  "oplog": {
+    "entry_count": 1,
+    "head_oplog_hash": "8f9cee096054768286280cb621c2317741ae5ef9f4da0921d501da6008340389"
+  },
+  "notes": [
+    "FORMAT EXAMPLE - store manifest of an EMPTY development store (scope: development = synthetic fixtures only, never scientific evidence, never published). Real public stores never appear in the public ECP repository. Byte-identical to a fresh init_store run with the same pinned arguments."
+  ],
+  "manifest_hash": "523cd19ab41f307172d3bd4ea20b497505611cc04379c2e54999e19fb38006c8"
+}

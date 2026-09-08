@@ -20,7 +20,9 @@ def test_cli_identity(repo_root):
     assert result.returncode == 0
     document = json.loads(result.stdout)
     assert document["protocol_name"] == "ECP"
-    assert document["protocol_version"] == "0.1.0"
+    # 0.2.0 (R1-I additive bundle: ledger-entry + store-manifest contracts)
+    assert document["protocol_version"] == "0.2.0"
+    assert document["schema_version"] == "0.2.0"
 
 
 def test_cli_validate_valid_document(repo_root):

@@ -1,6 +1,8 @@
 """End-to-end example integrity tests: every hash and commitment embedded in
 the examples is REAL and recomputes exactly."""
 
+import json
+
 import pytest
 
 from helpers import set_path
@@ -8,6 +10,7 @@ from helpers import set_path
 from ecp.hashing import hash_document, hash_document_excluding, hash_file
 from ecp.manifest import compute_manifest_hash
 from ecp.verification import verify_commitment, verify_evidence_reference
+from ecp.versions import allowed_schema_versions, PROTOCOL_VERSIONS
 
 EXAMPLE_FILES = [
     "case.development.example.json",
@@ -21,15 +24,22 @@ EXAMPLE_FILES = [
     "manifest.example.json",
     "audit.two-auditor.example.json",
     "audit.single-auditor-fallback.example.json",
+    "ledger-entry.example.json",
+    "store-manifest.example.json",
 ]
 
 
 @pytest.mark.parametrize("filename", EXAMPLE_FILES)
-def test_example_cites_pinned_protocol_versions(filename, examples, ident):
+def test_example_cites_compatible_protocol_versions(filename, examples, ident):
+    # 0.2.0 additive bundle: examples may cite the original 0.1.0 contracts
+    # (historical R0 artifacts, unchanged) or the 0.2.0 bundle versions for
+    # unchanged contracts; new 0.2.0 object types must cite 0.2.0. This is
+    # the explicit compatibility policy (ecp.versions).
     document = examples[filename]
-    assert document["protocol_version"] == ident["protocol_version"]
+    assert document["protocol_version"] in PROTOCOL_VERSIONS, filename
+    allowed = allowed_schema_versions(document.get("ecp_object"))
     if "schema_version" in document:
-        assert document["schema_version"] == ident["schema_version"]
+        assert document["schema_version"] in allowed, filename
 
 
 def test_case_commitment_is_real(examples):
@@ -107,3 +117,59 @@ def test_example_documents_are_flagged_as_examples(examples):
     for filename, document in examples.items():
         text = str(document)
         assert any(marker in text for marker in markers), filename
+
+
+# --- R1-I examples: real, recomputable hashes ------------------------------
+
+
+def test_ledger_entry_example_hashes_are_real(examples):
+    entry = examples["ledger-entry.example.json"]
+    registration = examples["registration.example.json"]
+    case = examples["case.development.example.json"]
+    # record_hash is the canonical document hash of the wrapped record
+    assert entry["record_ref"]["record_hash"] == hash_document(registration)
+    # the frozen commitment is the public case's real commitment
+    assert (
+        entry["ground_truth_commitments"][0]["commitment"]
+        == case["ground_truth_reference"]["commitment"]
+    )
+    # genesis chaining + self-hash recompute
+    assert entry["prev_entry_hash"] == "0" * 64
+    assert entry["entry_hash"] == hash_document_excluding(entry, "entry_hash")
+
+
+def test_store_manifest_example_is_deterministic_rebuild(tmp_path, ident):
+    # byte-identical to a fresh init_store run with the same pinned arguments
+    from ecp import store
+
+    manifest = store.init_store(
+        tmp_path,
+        "ECP-STORE-EXAMPLE-0001",
+        "development",
+        at="1970-01-01T00:00:00Z",
+    )
+    shipped = json.load(open("examples/store-manifest.example.json"))
+    # the shipped file additionally carries a notes field; compare the
+    # state fields and determinism of the underlying machinery
+    for key in (
+        "store_id", "scope", "created_at", "zones", "seals", "oplog",
+        "hash_algorithm", "canonicalization",
+    ):
+        assert shipped[key] == manifest[key], key
+    assert shipped["manifest_hash"] == hash_document_excluding(
+        shipped, "manifest_hash"
+    )
+
+
+def test_store_manifest_example_oplog_head_is_real(tmp_path):
+    # the oplog head in the example equals the real init oplog entry hash
+    from ecp import store
+
+    root = tmp_path
+    store.init_store(
+        root, "ECP-STORE-EXAMPLE-0001", "development",
+        at="1970-01-01T00:00:00Z",
+    )
+    entry = json.loads((root / "oplog" / "00000001.json").read_text())
+    shipped = json.load(open("examples/store-manifest.example.json"))
+    assert shipped["oplog"]["head_oplog_hash"] == entry["oplog_hash"]

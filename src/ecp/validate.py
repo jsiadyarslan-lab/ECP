@@ -24,6 +24,9 @@ SCHEMA_FILES = {
     "evidence": "evidence.schema.json",
     "audit": "audit.schema.json",
     "manifest": "manifest.schema.json",
+    # 0.2.0 additive contracts (R1-I, Option C):
+    "ledger-entry": "ledger-entry.schema.json",
+    "store-manifest": "store-manifest.schema.json",
 }
 
 _CACHE: dict = {}

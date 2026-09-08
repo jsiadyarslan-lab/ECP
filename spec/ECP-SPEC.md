@@ -1,19 +1,19 @@
 # ECP Specification
 
-**Version 0.1.0-draft — R0 Repository Foundation**
+**Version 0.2.0-draft — R1-I Minimal Coupled Foundation (additive over R0)**
 
-Status: normative for the R0 repository foundation. This document uses
-RFC 2119-style language (MUST / MUST NOT / SHOULD / MAY). The repository
-root `ECP-IDENTITY.json` pins the versions this specification is normative
-for:
+Status: normative for the repository foundation at schema bundle 0.2.0.
+This document uses RFC 2119-style language (MUST / MUST NOT / SHOULD /
+MAY). The repository root `ECP-IDENTITY.json` pins the versions this
+specification is normative for:
 
 ```
 protocol_name      ECP
 protocol_title     Evidentiary Evaluation Protocol
-protocol_version   0.1.0
+protocol_version   0.2.0
 protocol_status    draft
-schema_version     0.1.0
-repository_version 0.1.0
+schema_version     0.2.0
+repository_version 0.2.0
 canonicalization   ECP-CANONICAL-JSON-1.0
 hash_algorithm     sha256
 ```
@@ -25,6 +25,14 @@ honest two-auditor audit model, cryptographic provenance, and a strict
 separation between verification (integrity) and scientific adjudication
 (validity). This specification defines the foundation contracts and the
 deterministic machinery they rely on.
+
+The 0.2.0 revision (R1-I) is **additive**: it introduces the protected
+evidence store (§15), the registration ledger (§16), external anchoring
+(§17) and the explicit version-compatibility policy (§18), per the
+architecture decision recorded in
+`docs/M3-R1-ARCHITECTURE-DECISION.md` (Option C — minimal coupled
+foundation). No 0.1.0 contract is modified and no 0.1.x artifact is
+reinterpreted (§18).
 
 ---
 
@@ -255,14 +263,19 @@ API, agent framework, cloud, or specific evaluated system. Integrations
 with concrete systems live outside the core and are future work under
 separate authorization.
 
-## 13. R0 scope boundary
+## 13. Scope boundary (R0 → R1-I)
 
-R0 provides the foundation only. The following do not exist and MUST NOT
-be claimed: model adapters, benchmark execution, external model calls,
-scientific case generation, case registration, scoring, hidden benchmark
-publication, commercial features, and M3 validation. Anything beyond the
-foundation is a future gate, recorded explicitly — never silently
-implemented.
+R0 provided the foundation only. R1-I (0.2.0) added the protected store
+(§15), the registration ledger (§16), anchoring (§17) and the version
+compatibility policy (§18) — infrastructure only, per the M3-R1
+architecture decision. The following still do not exist and MUST NOT be
+claimed: model adapters, benchmark execution, external model calls,
+scientific case generation, case registration as a scientific experiment,
+scoring, hidden benchmark publication, commercial features, and M3
+validation. Anything beyond the implemented foundation is a future gate,
+recorded explicitly — never silently implemented. In particular: the
+public ledger contains ZERO registrations, no case is registered, and no
+evaluation has been executed.
 
 ## 14. Change policy
 
@@ -271,3 +284,133 @@ version bump (`schema_version` and/or `protocol_version`) and updated
 tests. Canonicalization and hashing rules are stability-critical: any
 change to them invalidates every existing commitment by definition, and
 MUST be treated as a protocol major-version event.
+
+---
+
+## 15. Protected Evidence Store (0.2.0 / R1-I)
+
+The protected store is the **custody half** of the coupled seam: it holds
+sealed ground truth outside the public repository, in content-addressed,
+write-once storage, under an append-only operation log.
+
+1. **Location.** The store lives OUTSIDE the public Git repository (its
+   root is an operator parameter). Nothing in the store is ever committed
+   to the public repository or to the public ledger repository. A store
+   with `scope: development` holds only synthetic, clearly-marked
+   fixtures and MUST NOT be treated as scientific evidence (mirroring the
+   dev/public ledger separation, §16.6).
+2. **Content addressing.** Sealed ground truth is stored as exactly its
+   `ECP-CANONICAL-JSON-1.0` bytes at
+   `zones/sealed-gt/<sha256[:2]>/<sha256>.json`, where the path hash IS
+   the commitment (§6.3). The storage path is a function of content:
+   "modifying" a blob produces a different path, leaving the original
+   bytes in place.
+3. **Write-once.** There is exactly one seal per `(case_id, case_version)`.
+   Sealing identical content again is idempotent (and op-logged as such);
+   sealing different content for an existing target MUST be rejected, and
+   the rejected attempt MUST be recorded in the operation log.
+4. **Operation log.** Every store operation (init, seal, idempotent seal,
+   rejected seal) is appended to a hash-chained log
+   (`oplog/NNNNNNNN.json`): each entry carries the previous entry's hash,
+   and its own `oplog_hash` follows the self-referential rule of §7.4.
+   The oplog head MAY be checkpointed into the ledger anchoring (§17).
+5. **Manifest.** `store.json` (contract: `store-manifest`, 0.2.0) is a
+   deterministic, derived index of seals + oplog head with a
+   `manifest_hash` (§7.4 rule). For a fixed operation sequence and pinned
+   timestamps it is byte-identical across runs. It is a derived index,
+   never a trust anchor: integrity is established by recomputation
+   (`store-verify`).
+6. **Atomic writes.** All writes are two-phase (temp file + atomic
+   rename). A crashed operation leaves either no trace or a complete
+   record, never a partial write.
+7. **Verification.** `store-verify` recomputes: manifest schema + hash;
+   the oplog chain; the seal index rebuilt from the oplog; every blob's
+   file hash, canonical form, ground-truth contract validity and
+   `content_class: sealed`; zone layout (reserved zones README-only,
+   sealed-gt CAS-pattern only, no orphan blobs); and — when public cases
+   are supplied — the case↔seal commitment equality. A seal with no
+   public case document is legitimate (hidden cases).
+8. **No execution read path.** No store operation serves ground-truth
+   content to an execution context. The only readers are the registration
+   ceremony (opaque bytes, commitment recomputation) and — at a future
+   gate — adjudication-time audit under disclosure control.
+
+## 16. Registration Ledger (0.2.0 / R1-I)
+
+The ledger is the **authority half** of the coupled seam: an append-only,
+hash-chained, plain-file record of registration freezes. The Registration
+Authority is a procedure + tooling + public verification — NOT a service
+(cloud, daemon and database realizations were examined and rejected in
+the architecture decision record).
+
+1. **Structure.** A ledger repository contains `entries/NNNNNNNN.json`
+   (chained entries, contract `ledger-entry` 0.2.0),
+   `records/ECP-REG-….json` (full registration records, stored as
+   canonical bytes) and `ANCHOR.json` (the published chain checkpoint).
+2. **Chain.** `entry_hash` follows §7.4 and covers the entry including
+   `prev_entry_hash` (genesis: 64 zeros at index 1). Inserting, removing,
+   reordering or editing any historical entry breaks every subsequent
+   entry. Canonical order is the chain position; `claimed_at` is an
+   assertion, not evidence (§17).
+3. **Registration ceremony.** `register` MUST, before any append:
+   validate the public case (schema, versions, registrable status, sealed
+   commitment); verify the store seal exists for the exact
+   `(case_id, case_version)` and that its commitment equals the public
+   case's commitment (the seam check); validate the system identity;
+   reject duplicates (at most one LIVE registration per frozen tuple of
+   evaluation, case version, system version and condition hash); assign
+   the `registration_id` itself (registrar-controlled, monotone, never
+   author-chosen); copy the frozen fields from the case into the record
+   (frozen copies, not pointers); compute `registration_hash`; append the
+   chained entry with the frozen ground-truth commitments recorded ON the
+   entry. A rejection MUST leave the ledger untouched.
+4. **Append-only semantics.** Records and entries are never edited or
+   removed. A correction is a new record with `supersedes`. An
+   invalidation is an explicit entry of kind `invalidation` referencing
+   the invalidated record with a reason. A registration is LIVE until
+   superseded or invalidated; double invalidation and duplicate
+   supersession MUST be rejected.
+5. **Public verification.** `ledger-verify` recomputes, from public data
+   alone: the chain; every record's document hash and internal
+   `registration_hash`; the duplicate rules; the supersession graph; the
+   anchor consistency; and — when public cases are supplied — the frozen
+   commitments against the public case commitments. Protected content is
+   never required for public verification.
+6. **Clean state / dev separation.** The public ledger begins EMPTY
+   (genesis anchor, zero entries). Development ledgers are initialized
+   identically but MUST NOT be published, MUST NOT be confused with the
+   public ledger, and MUST NOT become scientific evidence.
+
+## 17. Anchoring (0.2.0 / R1-I)
+
+1. **Mechanism.** `anchor-publish` verifies the chain, then atomically
+   writes `ANCHOR.json` = `{ledger_id, entry_count, head_entry_hash,
+   anchored_at}`. The operator then commits and pushes the ledger
+   repository (one commit per anchor; historical anchors are never
+   rewritten — past anchor states are preserved by the Git history, and
+   force-push is forbidden). The public host's push event is the
+   independent time evidence backing the claimed timestamps.
+2. **Anchor verification.** `ledger-verify` checks that the anchored head
+   matches the chain at the recorded `entry_count`. Entries beyond the
+   anchor are an unanchored tail (reported, not failed); at current scale
+   the policy is per-registration anchoring to minimize the tail window.
+3. **Prohibitions.** No continuous cloud service, no blockchain/external
+   consensus, no over-engineering: a hash chain + public Git anchoring is
+   the approved mechanism (decision rule: no forced commercial provider).
+
+## 18. Version compatibility (0.1.x → 0.2.0)
+
+1. The 0.2.0 schema bundle is **additive**: the ten 0.1.0 contract files
+   are unchanged; two new contracts (`ledger-entry`, `store-manifest`)
+   are added. The protocol version advances because §15–§17 add
+   normative mechanisms.
+2. Compatibility is an explicit, machine-checkable matrix
+   (`ecp.versions`): every object type defined at 0.1.0 accepts
+   `schema_version` in {`0.1.0`, `0.2.0`} (the contract content is
+   identical); object types introduced at 0.2.0 accept only `0.2.0`;
+   `protocol_version` in {`0.1.0`, `0.2.0`} is valid for every artifact.
+3. 0.1.x artifacts MUST NOT be silently reinterpreted and MUST NOT be
+   invalidated by the bundle bump. The R0 examples (0.1.0 citations)
+   remain valid artifacts — this is pinned by tests.
+4. Anything outside the matrix is a compatibility violation reported as
+   an issue by the verification tooling.

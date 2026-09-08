@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ecp-protocol.org/0.2.0/store-manifest.schema.json",
+  "title": "ECP Protected Store Manifest",
+  "description": "Deterministic manifest and identity document of a protected evidence store (R1-I, Option C minimal coupled foundation). The store lives OUTSIDE the public repository and holds sealed ground-truth blobs in content-addressed, write-once storage. This manifest indexes the seals and checkpoints the store operation log (oplog) head. manifest_hash = SHA-256 over the ECP-CANONICAL-JSON-1.0 serialization of this document with the top-level manifest_hash field removed. The manifest is a derived, verifiable index: full integrity is established by recomputation (store-verify) of the oplog chain, the seal index and the blob hashes, not by trusting this file. scope 'development' marks a store holding only synthetic, clearly-marked fixtures - never scientific evidence (mirrors the dev/public ledger separation); 'operational' marks the real protected store.",
+  "type": "object",
+  "required": [
+    "ecp_object",
+    "store_id",
+    "scope",
+    "protocol_version",
+    "schema_version",
+    "created_at",
+    "hash_algorithm",
+    "canonicalization",
+    "zones",
+    "seals",
+    "oplog",
+    "manifest_hash"
+  ],
+  "properties": {
+    "ecp_object": { "const": "store-manifest" },
+    "store_id": {
+      "type": "string",
+      "pattern": "^ECP-STORE-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "scope": {
+      "enum": ["development", "operational"],
+      "description": "'development' = synthetic fixtures only, never scientific evidence, never published; 'operational' = the real protected store holding sealed ground truth."
+    },
+    "protocol_version": { "$ref": "#/$defs/semver" },
+    "schema_version": { "$ref": "#/$defs/semver" },
+    "created_at": {
+      "$ref": "#/$defs/iso8601_utc",
+      "description": "Claimed creation timestamp of the store (assertion, not evidence)."
+    },
+    "hash_algorithm": { "const": "sha256" },
+    "canonicalization": { "const": "ECP-CANONICAL-JSON-1.0" },
+    "zones": {
+      "type": "object",
+      "required": ["sealed-gt", "hidden-cases", "evidence", "exports"],
+      "properties": {
+        "sealed-gt": {
+          "type": "object",
+          "required": ["blob_count"],
+          "properties": {
+            "blob_count": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of sealed ground-truth blobs in the zone (equals the number of distinct commitments)."
+            }
+          },
+          "additionalProperties": false
+        },
+        "hidden-cases": {
+          "type": "object",
+          "required": ["state"],
+          "properties": {
+            "state": { "const": "reserved" }
+          },
+          "additionalProperties": false,
+          "description": "Reserved for non-public case documents; not implemented at R1-I."
+        },
+        "evidence": {
+          "type": "object",
+          "required": ["state"],
+          "properties": {
+            "state": { "const": "reserved" }
+          },
+          "additionalProperties": false,
+          "description": "Reserved for post-execution evidence bundles (append-only ingestion contract designed in M3-R1; implementation deferred to the execution gate)."
+        },
+        "exports": {
+          "type": "object",
+          "required": ["state"],
+          "properties": {
+            "state": { "const": "reserved" }
+          },
+          "additionalProperties": false,
+          "description": "Reserved for disclosure-governed export packages; not implemented at R1-I."
+        }
+      },
+      "additionalProperties": false
+    },
+    "seals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "case_id",
+          "case_version",
+          "commitment",
+          "blob_path",
+          "blob_hash",
+          "sealed_at",
+          "oplog_index"
+        ],
+        "properties": {
+          "case_id": {
+            "type": "string",
+            "pattern": "^ECP-CASE-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "case_version": { "$ref": "#/$defs/semver" },
+          "commitment": {
+            "$ref": "#/$defs/sha256_hex",
+            "description": "SHA-256 over the ECP-CANONICAL-JSON-1.0 serialization of the sealed ground-truth document."
+          },
+          "blob_path": {
+            "type": "string",
+            "pattern": "^zones/sealed-gt/[0-9a-f]{2}/[0-9a-f]{64}\\.json$",
+            "description": "Content-addressed storage path of the blob, relative to the store root. The path is a function of the content hash: 'modifying' a blob produces a different path, leaving the original bytes in place."
+          },
+          "blob_hash": {
+            "$ref": "#/$defs/sha256_hex",
+            "description": "SHA-256 over the raw bytes of the blob file. Invariant: the blob stores the canonical serialization, so blob_hash equals commitment; store-verify checks this equality explicitly."
+          },
+          "sealed_at": {
+            "$ref": "#/$defs/iso8601_utc",
+            "description": "Claimed seal timestamp (assertion, not evidence)."
+          },
+          "oplog_index": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Index of the oplog entry recording the seal."
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Seal index, sorted by (case_id, case_version) ascending. Exactly one seal per (case_id, case_version): write-once. Entries are derived from the oplog and re-derived on verification."
+    },
+    "oplog": {
+      "type": "object",
+      "required": ["entry_count", "head_oplog_hash"],
+      "properties": {
+        "entry_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "head_oplog_hash": {
+          "$ref": "#/$defs/sha256_hex",
+          "description": "oplog_hash of the last oplog entry (64 zeros when entry_count is 0). This is the digest that can be checkpointed into the ledger anchoring."
+        }
+      },
+      "additionalProperties": false
+    },
+    "manifest_hash": {
+      "$ref": "#/$defs/sha256_hex",
+      "description": "SHA-256 over the canonical serialization of this document with the top-level manifest_hash field removed."
+    },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Optional commentary (covered by manifest_hash)."
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "sha256_hex": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "iso8601_utc": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+    }
+  }
+}
