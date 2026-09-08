@@ -1,0 +1,35 @@
+{
+  "ecp_object": "registration",
+  "registration_id": "ECP-REG-DEMO-0001",
+  "protocol_version": "0.1.0",
+  "schema_version": "0.1.0",
+  "evaluation_id": "ECP-EVAL-DEMO-0001",
+  "system": {
+    "system_id": "ECP-SYSTEM-DEMO-AGENT",
+    "system_version": "1.1.0"
+  },
+  "case": {
+    "case_id": "ECP-CASE-DEV-0001",
+    "case_version": "0.1.0"
+  },
+  "condition": {
+    "constraints": [
+      "Reason from the given premises only.",
+      "No external lookup or tool use."
+    ],
+    "permitted_resources": []
+  },
+  "success_criterion": "The answer equals the unique value derivable from the premises (committed in the protected ground truth).",
+  "verification_rule": {
+    "rule_id": "dev-0001-int-diff",
+    "rule_type": "exact-match"
+  },
+  "registered_at": "2026-09-09T00:00:01Z",
+  "hash_algorithm": "sha256",
+  "canonicalization": "ECP-CANONICAL-JSON-1.0",
+  "registration_hash": "06257a5948517f1e3271552cb487b72af5a35038900f8e9aeba9899f1508d851",
+  "immutability": "append-only",
+  "notes": [
+    "FORMAT EXAMPLE - registration record structure. No evaluation is registered and no registration has occurred."
+  ]
+}

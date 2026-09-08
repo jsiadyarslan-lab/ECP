@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ecp-protocol.org/0.1.0/ground-truth.schema.json",
+  "title": "ECP Protected Ground Truth (FORMAT ONLY)",
+  "$comment": "PROTECTED BOUNDARY. This schema describes the structure of sealed ground-truth documents so that public commitments can be computed and verified. Real ground-truth values (content_class 'sealed') are NEVER committed to the public repository - they live in a protected store outside the public trust boundary. Only content_class 'format-illustration' documents (public dummy values) may appear publicly, and only under examples/. The boundary scanner and the test suite enforce this.",
+  "type": "object",
+  "required": [
+    "ecp_object",
+    "content_class",
+    "case_id",
+    "case_version",
+    "expected_answer",
+    "derivation",
+    "verification_rule",
+    "protocol_version",
+    "schema_version"
+  ],
+  "properties": {
+    "ecp_object": { "const": "ground-truth" },
+    "content_class": {
+      "enum": ["sealed", "format-illustration"],
+      "description": "'sealed' = real protected ground truth (must live OUTSIDE the public repository). 'format-illustration' = public dummy values demonstrating the format (examples/ only)."
+    },
+    "case_id": {
+      "type": "string",
+      "pattern": "^ECP-CASE-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "case_version": { "$ref": "#/$defs/semver" },
+    "expected_answer": {
+      "type": "object",
+      "required": ["answer_kind", "value"],
+      "properties": {
+        "answer_kind": {
+          "enum": ["single-value", "value-set", "derivation-only", "undecidable", "other"]
+        },
+        "value": {
+          "description": "The expected answer value (any JSON value) - PROTECTED CONTENT when content_class is 'sealed'."
+        }
+      },
+      "additionalProperties": false
+    },
+    "derivation": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["step", "statement"],
+        "properties": {
+          "step": { "type": "integer", "minimum": 1 },
+          "statement": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      },
+      "$comment": "Ordered derivation steps establishing the expected answer - PROTECTED CONTENT when content_class is 'sealed'. Authored-case policy recommends at least 2 inference steps."
+    },
+    "verification_rule": {
+      "type": "object",
+      "required": ["rule_id", "rule_type"],
+      "properties": {
+        "rule_id": { "type": "string", "minLength": 1 },
+        "rule_type": {
+          "enum": ["exact-match", "equivalence-class", "derivation-check", "procedural", "external-oracle", "other"]
+        },
+        "spec": {
+          "type": "object",
+          "description": "Full rule semantics - PROTECTED CONTENT when content_class is 'sealed' (the public case carries only rule_id/rule_type)."
+        }
+      },
+      "additionalProperties": false
+    },
+    "sealed_at": { "$ref": "#/$defs/iso8601_utc" },
+    "sealed_by": { "type": "string", "minLength": 1 },
+    "seal_note": { "type": "string" },
+    "protocol_version": {
+      "$ref": "#/$defs/semver",
+      "description": "Protocol version the ground truth was sealed under; the commitment covers this field, so a re-seal under a new protocol version is a new commitment."
+    },
+    "schema_version": { "$ref": "#/$defs/semver" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "iso8601_utc": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+    }
+  }
+}

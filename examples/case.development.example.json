@@ -1,0 +1,49 @@
+{
+  "ecp_object": "case",
+  "case_id": "ECP-CASE-DEV-0001",
+  "case_version": "0.1.0",
+  "case_status": "candidate",
+  "case_family": "deterministic-reasoning",
+  "case_definition": {
+    "statement": "DEVELOPMENT EXAMPLE (not a scientific case). A depot holds exactly 17 sealed crates. During one transfer window, 12 crates are moved out of the depot to a platform and no crates enter the depot. Nothing else changes the number of crates in the depot.",
+    "objective": "Compute the number of crates remaining in the depot."
+  },
+  "input": {
+    "prompt": "A depot holds exactly 17 sealed crates. During one transfer window, 12 crates are moved out of the depot to a platform and no crates enter the depot. Nothing else changes the number of crates in the depot. How many crates remain in the depot? Answer with the integer only."
+  },
+  "condition": {
+    "constraints": [
+      "Reason from the given premises only.",
+      "No external lookup or tool use."
+    ],
+    "permitted_resources": []
+  },
+  "success_criterion": "The answer equals the unique value derivable from the premises (committed in the protected ground truth).",
+  "verification_rule": {
+    "rule_id": "dev-0001-int-diff",
+    "rule_type": "exact-match",
+    "description": "Integer equality against the sealed expected answer.",
+    "binding": "protected"
+  },
+  "ground_truth_reference": {
+    "commitment": "7b5063955df6b0a70d889ef53e35f23b7139ee147c22fccbf27f388f072fef82",
+    "hash_algorithm": "sha256",
+    "canonicalization": "ECP-CANONICAL-JSON-1.0",
+    "committed_object": "ground-truth",
+    "sealing_status": "sealed",
+    "sealed_at": "2026-09-09T00:00:00Z",
+    "seal_holder": "format example: values are public dummies (examples/ground-truth.format-example.json)"
+  },
+  "authoring_provenance": {
+    "authored_at": "2026-09-09T00:00:00Z",
+    "author_role": "internal-author",
+    "information_boundary": "not-declared",
+    "authoring_environment": "authored inside the repository foundation solely to illustrate the public case format",
+    "authoring_reference": "M3-R0"
+  },
+  "difficulty": "SHALLOW",
+  "structural_signature": "single-step integer subtraction over stated premises",
+  "proposed_reasoning_family": "arithmetic-difference",
+  "protocol_version": "0.1.0",
+  "schema_version": "0.1.0"
+}

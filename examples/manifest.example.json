@@ -1,0 +1,31 @@
+{
+  "ecp_object": "manifest",
+  "manifest_type": "evidence-bundle",
+  "protocol_version": "0.1.0",
+  "schema_version": "0.1.0",
+  "canonicalization": "ECP-CANONICAL-JSON-1.0",
+  "hash_algorithm": "sha256",
+  "generated_at": "2026-09-09T00:00:04Z",
+  "entries": [
+    {
+      "role": "execution-trace",
+      "path": "examples/artifacts/execution-trace.demo.txt",
+      "algorithm": "sha256",
+      "hash": "65552b009378eae2bb8f90ff429edd047b8be302339bb741a18e768962a54ab7"
+    },
+    {
+      "role": "raw-output",
+      "path": "examples/artifacts/raw-output.demo.txt",
+      "algorithm": "sha256",
+      "hash": "f0b5c2c2211c8d67ed15e75e656c7862d086e9245420892a7de62cd9ec582a06"
+    },
+    {
+      "role": "system-identity",
+      "path": "examples/system.complete-system.example.json",
+      "algorithm": "sha256",
+      "hash": "f243a23abb042aecf67dfb573683034b217e02a82b0b9528f3df235b8220c34d"
+    }
+  ],
+  "manifest_hash": "28e7cc5779ea9d289329f2e463e7619757e9eb7d46adfe60c0356db64eeae60b",
+  "note": "FORMAT EXAMPLE - simulated evidence-bundle manifest. No real artifacts exist."
+}

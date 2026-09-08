@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ecp-protocol.org/0.1.0/protocol.schema.json",
+  "title": "ECP Protocol Identity",
+  "description": "Versioned identity of the Evidentiary Evaluation Protocol. A single normative identity document (ECP-IDENTITY.json at the repository root) pins protocol_name, protocol_version, schema_version and repository_version. Every evaluation artifact MUST cite the protocol version (and, where defined, the schema version) it was produced under; no implicit 'current version' semantics exist.",
+  "type": "object",
+  "required": [
+    "ecp_object",
+    "protocol_name",
+    "protocol_version",
+    "schema_version",
+    "repository_version",
+    "protocol_status"
+  ],
+  "properties": {
+    "ecp_object": { "const": "protocol" },
+    "protocol_name": { "const": "ECP" },
+    "protocol_title": { "const": "Evidentiary Evaluation Protocol" },
+    "protocol_version": { "$ref": "#/$defs/semver" },
+    "protocol_status": {
+      "enum": ["draft", "candidate", "stable", "deprecated"],
+      "description": "Maturity of the protocol semantics. R0 ships as 'draft'."
+    },
+    "schema_version": {
+      "$ref": "#/$defs/semver",
+      "description": "Version of the schema bundle in schemas/."
+    },
+    "repository_version": {
+      "$ref": "#/$defs/semver",
+      "description": "Version of the repository content release. Distinct from protocol semantics and from the git commit id."
+    },
+    "canonicalization": {
+      "const": "ECP-CANONICAL-JSON-1.0",
+      "description": "The canonical serialization scheme used for all commitments and hashes."
+    },
+    "hash_algorithm": {
+      "const": "sha256",
+      "description": "The hash algorithm used for all artifacts, manifests and commitments."
+    },
+    "documentation": {
+      "type": "string",
+      "description": "Pointer to the normative specification."
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    }
+  }
+}

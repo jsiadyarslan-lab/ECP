@@ -1,0 +1,43 @@
+{
+  "ecp_object": "system",
+  "system_id": "ECP-SYSTEM-DEMO-AGENT",
+  "system_version": "1.1.0",
+  "identity_mode": "complete-system",
+  "model": {
+    "name": "example-model-8x22b",
+    "provider": "ExampleProvider",
+    "model_version": "2026-01",
+    "api_version": "chat-completions-v1",
+    "endpoint_kind": "local"
+  },
+  "configuration": {
+    "system_prompt": "You are a careful reasoning assistant. Show your derivation before the final answer.",
+    "agent_framework": {
+      "name": "ExampleAgentFramework",
+      "version": "0.9.2"
+    },
+    "tools": [
+      {
+        "tool_id": "calculator",
+        "tool_version": "1.4.0",
+        "description": "Arithmetic evaluation tool."
+      }
+    ],
+    "retrieval": {
+      "enabled": false
+    },
+    "external_services": []
+  },
+  "adapter": {
+    "adapter_id": "ecp-example-adapter",
+    "adapter_version": "0.1.0"
+  },
+  "runtime": {
+    "environment": "example-runtime-linux",
+    "runtime_version": "0.3.0"
+  },
+  "protocol_version": "0.1.0",
+  "schema_version": "0.1.0",
+  "case_set_version": "0.1.0",
+  "description": "FORMAT EXAMPLE - complete-system target: model + system prompt + agent framework + tools + adapter + runtime, fully pinned."
+}

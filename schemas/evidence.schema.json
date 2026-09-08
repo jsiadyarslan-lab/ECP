@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ecp-protocol.org/0.1.0/evidence.schema.json",
+  "title": "ECP Evidence Bundle",
+  "description": "Evidence bundle contract for one execution: raw input, raw output, execution trace, tool log, model-path status, environment and system identity, each as a hashed artifact reference (or an explicit not-captured declaration with reason). Raw output is preserved without post-hoc correction. Integrity is anchored by a manifest hash; the bundle references (does not contain) classification and audit records.",
+  "type": "object",
+  "required": [
+    "ecp_object",
+    "evidence_id",
+    "execution_id",
+    "evaluation_id",
+    "protocol_version",
+    "schema_version",
+    "bundle",
+    "integrity",
+    "preservation",
+    "provenance"
+  ],
+  "properties": {
+    "ecp_object": { "const": "evidence" },
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^ECP-EVID-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "execution_id": {
+      "type": "string",
+      "pattern": "^ECP-EXEC-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "evaluation_id": {
+      "type": "string",
+      "pattern": "^ECP-EVAL-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "protocol_version": { "$ref": "#/$defs/semver" },
+    "schema_version": { "$ref": "#/$defs/semver" },
+    "bundle": {
+      "type": "object",
+      "required": [
+        "raw_input",
+        "raw_output",
+        "execution_trace",
+        "tool_log",
+        "model_path_status",
+        "environment",
+        "system_identity"
+      ],
+      "properties": {
+        "raw_input": { "$ref": "#/$defs/artifact_or_absent" },
+        "raw_output": { "$ref": "#/$defs/artifact_or_absent" },
+        "execution_trace": { "$ref": "#/$defs/artifact_or_absent" },
+        "tool_log": { "$ref": "#/$defs/artifact_or_absent" },
+        "model_path_status": {
+          "enum": ["native", "mediated", "unknown", "not-applicable"],
+          "description": "Whether the model path was exercised natively, mediated by an adapter/framework, unknown, or not applicable."
+        },
+        "environment": { "$ref": "#/$defs/artifact_or_absent" },
+        "system_identity": { "$ref": "#/$defs/artifact_or_absent" }
+      },
+      "additionalProperties": false
+    },
+    "integrity": {
+      "type": "object",
+      "required": ["manifest_hash", "hash_algorithm", "canonicalization"],
+      "properties": {
+        "manifest_hash": {
+          "$ref": "#/$defs/sha256_hex",
+          "description": "SHA-256 over the ECP-CANONICAL-JSON-1.0 serialization of the bundle manifest with its top-level manifest_hash field removed."
+        },
+        "hash_algorithm": { "const": "sha256" },
+        "canonicalization": { "const": "ECP-CANONICAL-JSON-1.0" },
+        "manifest_path": {
+          "type": "string",
+          "description": "Repository-root-relative path of the manifest document."
+        }
+      },
+      "additionalProperties": false
+    },
+    "preservation": {
+      "type": "object",
+      "required": ["raw_output_preserved", "post_hoc_correction"],
+      "properties": {
+        "raw_output_preserved": { "const": true },
+        "post_hoc_correction": { "const": false }
+      },
+      "additionalProperties": false,
+      "description": "Machine-checkable preservation declaration: raw output preserved, no post-hoc correction. Violations are contradictions, not schema variants."
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["created_at", "created_by"],
+      "properties": {
+        "created_at": { "$ref": "#/$defs/iso8601_utc" },
+        "created_by": {
+          "enum": ["executor", "adapter", "collector", "auditor"]
+        },
+        "notes": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "classification": {
+      "type": "object",
+      "required": ["label", "classified_by", "classified_at"],
+      "properties": {
+        "label": { "type": "string", "minLength": 1 },
+        "classified_by": { "type": "string", "minLength": 1 },
+        "classified_at": { "$ref": "#/$defs/iso8601_utc" }
+      },
+      "additionalProperties": false,
+      "description": "Optional reference copy of the current classification (the audit record is authoritative)."
+    },
+    "audit": {
+      "type": "object",
+      "required": ["audit_id"],
+      "properties": {
+        "audit_id": {
+          "type": "string",
+          "pattern": "^ECP-AUDIT-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Reference to the audit record covering this evidence (the audit holds the hash of this evidence document; this side holds only the id - no circular hashing)."
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "sha256_hex": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "iso8601_utc": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+    },
+    "artifact_or_absent": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["path", "sha256"],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Repository-root-relative (or bundle-root-relative, declared by the manifest) path of the artifact."
+            },
+            "sha256": {
+              "$ref": "#/$defs/sha256_hex",
+              "description": "SHA-256 over the raw bytes of the artifact file."
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["not_captured", "reason"],
+          "properties": {
+            "not_captured": { "const": true },
+            "reason": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

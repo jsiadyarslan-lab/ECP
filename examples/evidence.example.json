@@ -1,0 +1,60 @@
+{
+  "ecp_object": "evidence",
+  "evidence_id": "ECP-EVID-DEMO-0001",
+  "execution_id": "ECP-EXEC-DEMO-0001",
+  "evaluation_id": "ECP-EVAL-DEMO-0001",
+  "protocol_version": "0.1.0",
+  "schema_version": "0.1.0",
+  "bundle": {
+    "raw_input": {
+      "not_captured": true,
+      "reason": "format example: the submitted input is carried verbatim in the execution record"
+    },
+    "raw_output": {
+      "path": "examples/artifacts/raw-output.demo.txt",
+      "sha256": "f0b5c2c2211c8d67ed15e75e656c7862d086e9245420892a7de62cd9ec582a06"
+    },
+    "execution_trace": {
+      "path": "examples/artifacts/execution-trace.demo.txt",
+      "sha256": "65552b009378eae2bb8f90ff429edd047b8be302339bb741a18e768962a54ab7"
+    },
+    "tool_log": {
+      "not_captured": true,
+      "reason": "format example: no tools were enabled"
+    },
+    "model_path_status": "mediated",
+    "environment": {
+      "not_captured": true,
+      "reason": "format example: the environment is described in the execution record"
+    },
+    "system_identity": {
+      "path": "examples/system.complete-system.example.json",
+      "sha256": "f243a23abb042aecf67dfb573683034b217e02a82b0b9528f3df235b8220c34d"
+    }
+  },
+  "integrity": {
+    "manifest_hash": "28e7cc5779ea9d289329f2e463e7619757e9eb7d46adfe60c0356db64eeae60b",
+    "hash_algorithm": "sha256",
+    "canonicalization": "ECP-CANONICAL-JSON-1.0",
+    "manifest_path": "examples/manifest.example.json"
+  },
+  "preservation": {
+    "raw_output_preserved": true,
+    "post_hoc_correction": false
+  },
+  "provenance": {
+    "created_at": "2026-09-09T00:00:04Z",
+    "created_by": "executor",
+    "notes": [
+      "FORMAT EXAMPLE - simulated bundle. No real evidence exists and no model was executed."
+    ]
+  },
+  "classification": {
+    "label": "CORRECT",
+    "classified_by": "format-example",
+    "classified_at": "2026-09-09T00:00:05Z"
+  },
+  "audit": {
+    "audit_id": "ECP-AUDIT-DEMO-0001"
+  }
+}

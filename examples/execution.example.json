@@ -1,0 +1,50 @@
+{
+  "ecp_object": "execution",
+  "execution_id": "ECP-EXEC-DEMO-0001",
+  "evaluation_id": "ECP-EVAL-DEMO-0001",
+  "system": {
+    "system_id": "ECP-SYSTEM-DEMO-AGENT",
+    "system_version": "1.1.0"
+  },
+  "case": {
+    "case_id": "ECP-CASE-DEV-0001",
+    "case_version": "0.1.0"
+  },
+  "runtime": {
+    "runtime_id": "example-runtime",
+    "runtime_version": "0.3.0"
+  },
+  "environment": {
+    "environment_id": "example-env-01",
+    "isolation": "partial",
+    "network": "disabled"
+  },
+  "input": {
+    "prompt": "A depot holds exactly 17 sealed crates. During one transfer window, 12 crates are moved out of the depot to a platform and no crates enter the depot. Nothing else changes the number of crates in the depot. How many crates remain in the depot? Answer with the integer only."
+  },
+  "raw_output": {
+    "content": "5",
+    "truncated": false,
+    "finish_reason": "stop"
+  },
+  "model_access": {
+    "access_path": "agent-framework"
+  },
+  "tool_access": {
+    "tools_enabled": false,
+    "tool_ids": []
+  },
+  "timestamps": {
+    "submitted_at": "2026-09-09T00:00:02Z",
+    "completed_at": "2026-09-09T00:00:03Z"
+  },
+  "execution_status": {
+    "validity": "VALID",
+    "outcome": "SUCCESS"
+  },
+  "anomaly_notes": [
+    "FORMAT EXAMPLE - simulated record. No real execution occurred and no model was invoked; this document illustrates the execution contract only."
+  ],
+  "protocol_version": "0.1.0",
+  "schema_version": "0.1.0"
+}

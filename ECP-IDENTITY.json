@@ -1,0 +1,12 @@
+{
+  "ecp_object": "protocol",
+  "protocol_name": "ECP",
+  "protocol_title": "Evidentiary Evaluation Protocol",
+  "protocol_version": "0.1.0",
+  "protocol_status": "draft",
+  "schema_version": "0.1.0",
+  "repository_version": "0.1.0",
+  "canonicalization": "ECP-CANONICAL-JSON-1.0",
+  "hash_algorithm": "sha256",
+  "documentation": "spec/ECP-SPEC.md"
+}

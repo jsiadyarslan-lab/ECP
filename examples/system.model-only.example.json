@@ -1,0 +1,17 @@
+{
+  "ecp_object": "system",
+  "system_id": "ECP-SYSTEM-DEMO-RAWMODEL",
+  "system_version": "1.0.0",
+  "identity_mode": "model-only",
+  "model": {
+    "name": "example-model-70b",
+    "provider": "ExampleProvider",
+    "model_version": "2026-03",
+    "api_version": "chat-completions-v1",
+    "endpoint_kind": "cloud"
+  },
+  "protocol_version": "0.1.0",
+  "schema_version": "0.1.0",
+  "case_set_version": "0.1.0",
+  "description": "FORMAT EXAMPLE - model-only target: a bare model accessed directly (no system prompt, framework, tools, retrieval or adapter configuration; a configuration block is structurally disallowed for this mode)."
+}

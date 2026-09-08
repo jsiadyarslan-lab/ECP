@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ecp-protocol.org/0.1.0/case.schema.json",
+  "title": "ECP Case (public representation)",
+  "description": "Versioned public case contract. The public representation is strictly separable from protected ground truth: a case carries ONLY a cryptographic commitment to the sealed ground-truth document (expected answer, derivation, verification rule live in the protected store, outside the public repository). Inline ground-truth content is structurally impossible here - the schema admits no expected-answer or derivation fields, and unknown keys are rejected.",
+  "type": "object",
+  "required": [
+    "ecp_object",
+    "case_id",
+    "case_version",
+    "case_status",
+    "case_family",
+    "case_definition",
+    "input",
+    "condition",
+    "success_criterion",
+    "verification_rule",
+    "ground_truth_reference",
+    "authoring_provenance",
+    "protocol_version",
+    "schema_version"
+  ],
+  "properties": {
+    "ecp_object": { "const": "case" },
+    "case_id": {
+      "type": "string",
+      "pattern": "^ECP-CASE-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "case_version": { "$ref": "#/$defs/semver" },
+    "case_status": {
+      "enum": ["candidate", "registered", "active", "retired", "quarantined"],
+      "description": "Lifecycle: authored candidates become 'registered' only through the registration contract; 'quarantined' removes a case from use without deleting history."
+    },
+    "case_family": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Free-form family label (no predefined taxonomy is imposed at the contract level; authors self-report families)."
+    },
+    "case_definition": {
+      "type": "object",
+      "required": ["statement"],
+      "properties": {
+        "statement": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Fully self-contained problem statement."
+        },
+        "objective": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "input": {
+      "type": "object",
+      "required": ["prompt"],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The exact self-contained prompt submitted to the evaluated system."
+        },
+        "attachments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "content"],
+            "properties": {
+              "name": { "type": "string", "minLength": 1 },
+              "content": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "condition": {
+      "type": "object",
+      "required": ["constraints"],
+      "properties": {
+        "constraints": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Conditions under which the system must operate (e.g. premises-only reasoning, no external lookup)."
+        },
+        "permitted_resources": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "success_criterion": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-verifiable statement of what counts as success, frozen at registration time."
+    },
+    "verification_rule": {
+      "type": "object",
+      "required": ["rule_id", "rule_type", "description"],
+      "properties": {
+        "rule_id": { "type": "string", "minLength": 1 },
+        "rule_type": {
+          "enum": ["exact-match", "equivalence-class", "derivation-check", "procedural", "external-oracle", "other"]
+        },
+        "description": { "type": "string", "minLength": 1 },
+        "binding": {
+          "enum": ["public", "protected"],
+          "description": "Where the full rule implementation lives. The rule semantics detail belongs to the protected ground truth; the public rule is an identifier and type."
+        }
+      },
+      "additionalProperties": false
+    },
+    "ground_truth_reference": {
+      "type": "object",
+      "required": ["commitment", "hash_algorithm", "canonicalization", "committed_object", "sealing_status"],
+      "properties": {
+        "commitment": {
+          "$ref": "#/$defs/sha256_hex",
+          "description": "SHA-256 over the ECP-CANONICAL-JSON-1.0 serialization of the protected ground-truth document."
+        },
+        "hash_algorithm": { "const": "sha256" },
+        "canonicalization": { "const": "ECP-CANONICAL-JSON-1.0" },
+        "committed_object": { "const": "ground-truth" },
+        "sealing_status": {
+          "enum": ["sealed", "pending"],
+          "description": "A case MUST be 'sealed' before registration; 'pending' marks commitment not yet published."
+        },
+        "sealed_at": { "$ref": "#/$defs/iso8601_utc" },
+        "seal_holder": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Who holds the protected ground-truth document (outside the public repository)."
+        }
+      },
+      "additionalProperties": false
+    },
+    "authoring_provenance": {
+      "type": "object",
+      "required": ["authored_at", "author_role", "information_boundary"],
+      "properties": {
+        "authored_at": { "$ref": "#/$defs/iso8601_utc" },
+        "author_role": {
+          "enum": ["external-author", "internal-author", "mixed"]
+        },
+        "information_boundary": {
+          "enum": ["isolated", "partial", "not-declared"],
+          "description": "Declared information boundary of the authoring environment ('isolated': author had no access to project knowledge; see the authoring order of the relevant phase)."
+        },
+        "authoring_model": {
+          "type": "object",
+          "required": ["name", "provider"],
+          "properties": {
+            "name": { "type": "string", "minLength": 1 },
+            "provider": { "type": "string", "minLength": 1 },
+            "version": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "authoring_environment": {
+          "type": "string",
+          "description": "Provenance of the authoring environment (tools, access, isolation)."
+        },
+        "authoring_reference": {
+          "type": "string",
+          "description": "Reference to the authoring order/protocol under which the case was produced."
+        }
+      },
+      "additionalProperties": false
+    },
+    "difficulty": {
+      "enum": ["SHALLOW", "MEDIUM", "DEEP"],
+      "description": "Optional authored difficulty annotation (authoring-phase semantics; not adjudicated here)."
+    },
+    "structural_signature": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional authoring-phase annotation describing what structurally distinguishes this case (entity/number/wording swaps do not count as structural difference)."
+    },
+    "proposed_reasoning_family": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional author-self-reported reasoning family (no predefined taxonomy is imposed)."
+    },
+    "protocol_version": { "$ref": "#/$defs/semver" },
+    "schema_version": { "$ref": "#/$defs/semver" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "sha256_hex": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "iso8601_utc": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+    }
+  }
+}

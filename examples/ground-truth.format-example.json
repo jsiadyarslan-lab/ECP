@@ -1,0 +1,35 @@
+{
+  "ecp_object": "ground-truth",
+  "content_class": "format-illustration",
+  "case_id": "ECP-CASE-DEV-0001",
+  "case_version": "0.1.0",
+  "expected_answer": {
+    "answer_kind": "single-value",
+    "value": 5
+  },
+  "derivation": [
+    {
+      "step": 1,
+      "statement": "Initial state: the depot holds 17 crates."
+    },
+    {
+      "step": 2,
+      "statement": "Transfer window: 12 crates leave; 0 crates enter; nothing else changes the count."
+    },
+    {
+      "step": 3,
+      "statement": "17 - 12 = 5 crates remain."
+    }
+  ],
+  "verification_rule": {
+    "rule_id": "dev-0001-int-diff",
+    "rule_type": "exact-match",
+    "spec": {
+      "match": "integer",
+      "value_ref": "expected_answer.value"
+    }
+  },
+  "seal_note": "FORMAT ILLUSTRATION ONLY - public dummy values demonstrating the protected format. Real sealed ground truth (content_class 'sealed') never enters the public repository; public cases bind to it via the sha256 commitment over this document's ECP-CANONICAL-JSON-1.0 serialization.",
+  "protocol_version": "0.1.0",
+  "schema_version": "0.1.0"
+}

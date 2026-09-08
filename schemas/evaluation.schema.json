@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ecp-protocol.org/0.1.0/evaluation.schema.json",
+  "title": "ECP Evaluation",
+  "description": "Root of the ECP object hierarchy: Evaluation > System > Case > Execution > Evidence. An evaluation binds one versioned system to one versioned case set under a lifecycle status. It is a distinct object from its registrations, executions and evidence, which reference it by identifier.",
+  "type": "object",
+  "required": [
+    "ecp_object",
+    "evaluation_id",
+    "protocol_version",
+    "schema_version",
+    "evaluation_status",
+    "system",
+    "case_set"
+  ],
+  "properties": {
+    "ecp_object": { "const": "evaluation" },
+    "evaluation_id": {
+      "type": "string",
+      "pattern": "^ECP-EVAL-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "protocol_version": { "$ref": "#/$defs/semver" },
+    "schema_version": { "$ref": "#/$defs/semver" },
+    "evaluation_status": {
+      "enum": ["defined", "registered", "in-progress", "complete", "sealed", "invalidated"],
+      "description": "Lifecycle of the evaluation record. 'defined' means the tuple exists on paper only - nothing has been registered or executed."
+    },
+    "system": {
+      "type": "object",
+      "required": ["system_id", "system_version"],
+      "properties": {
+        "system_id": {
+          "type": "string",
+          "pattern": "^ECP-SYSTEM-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "system_version": { "$ref": "#/$defs/semver" }
+      },
+      "additionalProperties": false
+    },
+    "case_set": {
+      "type": "object",
+      "required": ["case_set_id", "case_set_version"],
+      "properties": {
+        "case_set_id": {
+          "type": "string",
+          "pattern": "^ECP-CASESET-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "case_set_version": { "$ref": "#/$defs/semver" },
+        "case_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^ECP-CASE-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "description": "Optional enumeration of the member cases."
+        }
+      },
+      "additionalProperties": false
+    },
+    "registration": {
+      "type": "object",
+      "required": ["registration_id"],
+      "properties": {
+        "registration_id": {
+          "type": "string",
+          "pattern": "^ECP-REG-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "registration_hash": { "$ref": "#/$defs/sha256_hex" }
+      },
+      "additionalProperties": false
+    },
+    "created_at": { "$ref": "#/$defs/iso8601_utc" },
+    "description": { "type": "string" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "sha256_hex": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "iso8601_utc": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+    }
+  }
+}

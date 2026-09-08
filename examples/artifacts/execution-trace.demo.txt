@@ -1,0 +1,3 @@
+FORMAT EXAMPLE - simulated execution trace. No real execution occurred.
+step 1: prompt submitted (simulated)
+step 2: response completed (simulated)

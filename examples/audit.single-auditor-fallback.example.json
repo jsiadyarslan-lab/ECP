@@ -1,0 +1,50 @@
+{
+  "ecp_object": "audit",
+  "audit_id": "ECP-AUDIT-DEMO-0002",
+  "protocol_version": "0.1.0",
+  "schema_version": "0.1.0",
+  "audit_version": "1.0.0",
+  "audit_mode": "single-auditor-fallback",
+  "auditors": [
+    {
+      "auditor_id": "auditor-demo-a",
+      "role": "primary",
+      "independence": {
+        "procedural": true,
+        "personal": false,
+        "organizational": false
+      }
+    }
+  ],
+  "fallback_declaration": {
+    "personal_independence_maintained": false,
+    "justification": "FORMAT EXAMPLE - single-auditor fallback: procedural independence (access rules, review order, tooling) is retained, but personal and organizational independence are NOT maintained and MUST NOT be claimed for this record."
+  },
+  "evidence_reviewed": [
+    {
+      "evidence_id": "ECP-EVID-DEMO-0001",
+      "evidence_hash": "0a2678d311c6be4e236cfab1d4c01692aa27f16b0cb6e6beb4e258fc25baa0b2"
+    }
+  ],
+  "classification": {
+    "final_label": "CORRECT",
+    "per_auditor": [
+      {
+        "auditor_id": "auditor-demo-a",
+        "label": "CORRECT"
+      }
+    ]
+  },
+  "disagreement": {
+    "present": false
+  },
+  "adjudication": {
+    "method": "single-judgment",
+    "decided_by": "auditor-demo-a",
+    "final_label": "CORRECT"
+  },
+  "audited_at": "2026-09-09T00:00:06Z",
+  "notes": [
+    "FORMAT EXAMPLE - simulated single-auditor fallback record. No real evidence was reviewed and no real audit occurred."
+  ]
+}
