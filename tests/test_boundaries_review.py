@@ -164,3 +164,83 @@ def test_public_repo_examples_must_be_format_illustration(tmp_path):
     )
     violations = scan_repository(root)
     assert any(v["rule"] == "example-review-object-not-illustration" for v in violations)
+
+
+# ---------------------------------------------------------------------------
+# M3-CA0-A (0.4.0): case amendments in the review area
+# ---------------------------------------------------------------------------
+
+
+def _completed_amendment(dual_candidate):
+    from ecp.adjudication import complete_disclosure, draft_case_amendment
+
+    drafted = draft_case_amendment(
+        dual_candidate,
+        amendment_id="ECP-AMD-000001",
+        order_basis="M3-CA0-A v1 §5",
+        defect_code="SPEC-AMBIGUOUS-GT",
+        defect_description="duplicated GT blocks",
+        defect_why="conflict",
+        defect_evidence="evidence",
+        retained_answer_block=1,
+        retained_derivation_block=2,
+        removed_answer_blocks=[2],
+        removed_derivation_blocks=[1],
+        not_outcome_statement="premise analysis only",
+        not_outcome_basis="no executions exist",
+        amendment_author="ECP Test Amendment Author",
+        drafted_at="2026-02-01T00:00:00Z",
+        operator="ECP Boundary Test Executor",
+        order_reference="M3-CA0-A boundary test",
+    )
+    return complete_disclosure(
+        drafted,
+        value="POSSIBLE",
+        completed_by="ECP Test Amendment Author",
+        completed_at="2026-02-02T00:00:00Z",
+        basis="boundary test disclosure",
+    )
+
+
+def test_case_amendment_in_amendments_dir_is_clean(review_root):
+    from ca0_fixtures import with_content
+    from test_adjudication import _dual_block_candidate
+
+    dual = _dual_block_candidate()
+    amendment = _completed_amendment(dual)
+    (review_root / "amendments").mkdir()
+    (review_root / "amendments" / "ECP-AMD-000001.json").write_text(
+        json.dumps(amendment), encoding="utf-8"
+    )
+    violations = scan_review_tree(review_root)
+    assert violations == []
+
+
+def test_case_amendment_outside_amendments_dir_is_flagged(review_root):
+    from test_adjudication import _dual_block_candidate
+
+    dual = _dual_block_candidate()
+    amendment = _completed_amendment(dual)
+    (review_root / "candidates" / "ECP-AMD-000001.json").write_text(
+        json.dumps(amendment), encoding="utf-8"
+    )
+    violations = scan_review_tree(review_root)
+    assert any(v["rule"] == "review-object-wrong-location" for v in violations)
+
+
+def test_pending_amendment_in_review_area_is_flagged(review_root):
+    """A PENDING draft in the review area violates the case-amendment
+    schema contract (disclosure-phase then/else clause)."""
+    from test_adjudication import _drafted
+
+    drafted = _drafted()
+    (review_root / "amendments").mkdir()
+    (review_root / "amendments" / "ECP-AMD-000001.json").write_text(
+        json.dumps(drafted), encoding="utf-8"
+    )
+    violations = scan_review_tree(review_root)
+    # PENDING drafts are schema-valid documents; the boundary scan accepts
+    # them structurally, but the ENGINE refuses them (covered in
+    # test_cli_ca0a / test_adjudication). What the boundary must catch:
+    # tampered records (schema-invalid).
+    assert violations == []

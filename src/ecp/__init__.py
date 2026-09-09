@@ -24,7 +24,7 @@ It deliberately contains NO model adapters, NO execution machinery, NO scoring
 logic and NO provider-specific code (see spec/ECP-SPEC.md, "Provider neutrality").
 """
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 from .canonical import CANONICALIZATION_ID, canonical_bytes, canonical_dumps
 from .hashing import (

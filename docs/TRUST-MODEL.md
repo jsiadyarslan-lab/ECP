@@ -100,7 +100,7 @@ when a disagreement exists.
 At R1-I the repository contains contracts, tooling, the protected-store
 and ledger machinery, and zero scientific data — no cases registered
 (the public ledger is empty), no executions, no evidence. Its
-trustworthiness currently rests on: the test suite (433 tests, including
+trustworthiness currently rests on: the test suite (482 tests, including
 tamper-detection batteries for the store op log, the ledger chain and the
 review-artifact chain, plus a full determinism re-derivation of review
 runs), the boundary scanners (public tree, public ledger tree and the
@@ -133,3 +133,21 @@ status (documented, implementation deferred) in
 - Trust integrity checks only as integrity checks.
 - And at R0: trust that nothing has been evaluated yet — because
   nothing has.
+
+## 10. M3-CA0-A additions (adjudication & amendment)
+
+The qualification layer keeps the CA0 trust posture and extends it
+pointwise: owner decisions still enter ONLY through explicit
+`review-adjudication` records (the engine never fabricates one); the
+executor may only apply the owner's WRITTEN rules from an execution
+order to preserved evidence, recording the application. Case
+amendments are versioned and hash-chained records; the two-phase
+representation-bias disclosure is machine-enforced evidence, NOT a
+self-certification — `NONE` means "no influence known or reasonably
+suspected at the separate disclosure step", and `POSSIBLE`/`KNOWN`
+amendments remain traceable to their disclosure in every artifact that
+applies them (never silently unbiased). A material amendment never
+inherits review state (full re-review; both runs preserved with
+lineage). Preserved 0.3.0-era runs re-verify byte-identically under
+the 0.4.0 toolchain via the recorded engine profile — the toolchain
+itself is subject to the no-silent-reinterpretation rule.

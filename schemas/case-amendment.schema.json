@@ -1,0 +1,232 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ecp-protocol.org/0.4.0/case-amendment.schema.json",
+  "title": "ECP Case Amendment (versioned case correction, M3-CA0-A)",
+  "description": "The case versioning / repair record (M3-CA0-A §7). A case amendment is a VERSIONED, hash-chained correction of a documented authoring defect in a candidate case. The original candidate version is immutable; the amendment record is the only legitimate representation of the change. The record is built in TWO SEPARATE STEPS: (1) DRAFTING (the amendment content is authored; the representation-bias disclosure MUST NOT be completed concurrently) and (2) DISCLOSURE (completed afterwards, in a separate step, against the fully-formed draft — machine-evidenced by draft_hash, which covers the disclosure-free draft, and amendment_hash, which covers the completed record). representation_bias_disclosure is an AUDIT/PROVENANCE field, never an eligibility decision by itself; a value of POSSIBLE or KNOWN must never be silently treated as unbiased (it remains traceable in every review artifact that applies the amendment). draft_hash = SHA-256 over ECP-CANONICAL-JSON-1.0 of this document with draft_hash removed, representation_bias_disclosure removed and disclosure_phase.status set to 'PENDING' (the exact draft the disclosure step completed against). amendment_hash = SHA-256 over ECP-CANONICAL-JSON-1.0 of this document with amendment_hash removed. An amendment whose disclosure phase is PENDING is NOT usable by the review engine (material amendments require the completed disclosure).",
+  "type": "object",
+  "required": [
+    "ecp_object",
+    "amendment_id",
+    "candidate_id",
+    "order_basis",
+    "prior",
+    "new",
+    "defect",
+    "change",
+    "not_outcome_dependent",
+    "provenance",
+    "disclosure_phase",
+    "re_review",
+    "protocol_version",
+    "schema_version",
+    "draft_hash"
+  ],
+  "properties": {
+    "ecp_object": { "const": "case-amendment" },
+    "amendment_id": {
+      "type": "string",
+      "pattern": "^ECP-AMD-[0-9]{6,}$"
+    },
+    "candidate_id": {
+      "type": "string",
+      "pattern": "^ECP-CAND-[A-Za-z0-9][A-Za-z0-9._:-]*$",
+      "description": "The candidate being amended (candidate identity is stable; case_version advances)."
+    },
+    "order_basis": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The owner adjudication order clause that authorizes this amendment (e.g. 'M3-CA0-A v1 §5: uniquely correct answer establishable without outcome-dependent reasoning')."
+    },
+    "prior": {
+      "type": "object",
+      "description": "The immutable prior version this amendment transforms.",
+      "required": ["case_version", "content_hash"],
+      "properties": {
+        "case_version": { "type": "integer", "minimum": 1 },
+        "content_hash": { "$ref": "#/$defs/sha256_hex" }
+      },
+      "additionalProperties": false
+    },
+    "new": {
+      "type": "object",
+      "description": "The resulting version (deterministically derived, never hand-composed).",
+      "required": ["case_version", "content_hash"],
+      "properties": {
+        "case_version": { "type": "integer", "minimum": 2 },
+        "content_hash": { "$ref": "#/$defs/sha256_hex" }
+      },
+      "additionalProperties": false
+    },
+    "defect": {
+      "type": "object",
+      "description": "§7: the exact defect, why it is a defect, and the preserved evidence.",
+      "required": ["code", "description", "why_defect", "evidence"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 },
+        "why_defect": { "type": "string", "minLength": 1 },
+        "evidence": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "change": {
+      "type": "object",
+      "description": "The exact, mechanically applicable change (GT document consolidation).",
+      "required": [
+        "kind",
+        "retained_answer_block",
+        "retained_derivation_block",
+        "removed_answer_blocks",
+        "removed_derivation_blocks"
+      ],
+      "properties": {
+        "kind": { "const": "GT-DOCUMENT-CONSOLIDATION" },
+        "retained_answer_block": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "1-based source_block index of the INTENDED_CORRECT_ANSWER block retained."
+        },
+        "retained_derivation_block": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "1-based source_block index of the DERIVATION block retained."
+        },
+        "removed_answer_blocks": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "integer", "minimum": 1 },
+          "description": "source_block indices of the defective answer blocks removed."
+        },
+        "removed_derivation_blocks": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "integer", "minimum": 1 },
+          "description": "source_block indices of the defective derivation blocks removed."
+        }
+      },
+      "additionalProperties": false
+    },
+    "not_outcome_dependent": {
+      "type": "object",
+      "description": "§7: the stated reason the change is not outcome-dependent.",
+      "required": ["statement", "basis"],
+      "properties": {
+        "statement": { "type": "string", "minLength": 1 },
+        "basis": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "provenance": {
+      "type": "object",
+      "description": "§7: new provenance of the amendment act itself.",
+      "required": ["amendment_author", "drafted_at", "operator", "order_reference"],
+      "properties": {
+        "amendment_author": { "type": "string", "minLength": 1 },
+        "drafted_at": { "$ref": "#/$defs/iso8601_utc" },
+        "operator": { "type": "string", "minLength": 1 },
+        "order_reference": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "disclosure_phase": {
+      "type": "object",
+      "description": "Machine evidence of the SEPARATE two-step process (draft first, disclosure afterwards — never concurrent).",
+      "required": ["status"],
+      "properties": {
+        "status": { "enum": ["PENDING", "COMPLETED"] }
+      },
+      "additionalProperties": false
+    },
+    "representation_bias_disclosure": {
+      "type": "object",
+      "description": "The M3-CA0-A §7 (amended) REPRESENTATION-BIAS DISCLOSURE, completed in a separate step AFTER drafting. Audit/provenance field, never an eligibility decision; NONE/POSSIBLE/KNOWN per the T1-pilot timing semantics (NONE = no representation-related influence known or reasonably suspected at the separate disclosure step; it is NOT a self-certification of bias absence).",
+      "required": ["value", "completed_by", "completed_at", "disclosed_against_draft_hash", "basis"],
+      "properties": {
+        "value": { "enum": ["NONE", "POSSIBLE", "KNOWN"] },
+        "completed_by": { "type": "string", "minLength": 1 },
+        "completed_at": { "$ref": "#/$defs/iso8601_utc" },
+        "disclosed_against_draft_hash": {
+          "$ref": "#/$defs/sha256_hex",
+          "description": "Must equal draft_hash: the disclosure was completed against exactly this fully-formed draft."
+        },
+        "basis": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The honest disclosure basis (knowledge state, influence surface, why the value was chosen)."
+        }
+      },
+      "additionalProperties": false
+    },
+    "re_review": {
+      "type": "object",
+      "description": "§8: material amendments never inherit review state; full re-review required.",
+      "required": ["required", "dimensions", "novelty_leakage_recheck"],
+      "properties": {
+        "required": { "const": true },
+        "dimensions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": [
+              "identity",
+              "provenance",
+              "specification-completeness",
+              "novelty",
+              "leakage",
+              "duplication",
+              "reproducibility"
+            ]
+          }
+        },
+        "novelty_leakage_recheck": { "enum": ["REQUIRED", "NOT-REQUIRED"] }
+      },
+      "additionalProperties": false
+    },
+    "protocol_version": { "$ref": "#/$defs/semver" },
+    "schema_version": { "$ref": "#/$defs/semver" },
+    "draft_hash": {
+      "$ref": "#/$defs/sha256_hex",
+      "description": "Hash of the disclosure-free draft (see description). Present in every record: the disclosure step is provably post-draft."
+    },
+    "amendment_hash": {
+      "$ref": "#/$defs/sha256_hex",
+      "description": "Hash of the completed record (present iff disclosure_phase.status = COMPLETED)."
+    }
+  },
+  "additionalProperties": false,
+  "if": {
+    "properties": { "disclosure_phase": { "properties": { "status": { "const": "COMPLETED" } }, "required": ["status"] } },
+    "required": ["disclosure_phase"]
+  },
+  "then": {
+    "required": ["representation_bias_disclosure", "amendment_hash"],
+    "properties": {
+      "representation_bias_disclosure": {
+        "properties": {
+          "disclosed_against_draft_hash": { "$ref": "#/$defs/draft_hash_match" }
+        }
+      }
+    }
+  },
+  "else": {
+    "not": { "required": ["representation_bias_disclosure", "amendment_hash"] }
+  },
+  "$defs": {
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "sha256_hex": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "draft_hash_match": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "iso8601_utc": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+    }
+  }
+}

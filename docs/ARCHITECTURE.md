@@ -1,6 +1,6 @@
 # ECP Architecture
 
-Version 0.3.0-draft (M3-CA0 case review pipeline, additive over R1-I).
+Version 0.4.0-draft (M3-CA0-A case qualification & amendment, additive over M3-CA0).
 Normative contract details live in
 [spec/ECP-SPEC.md](../spec/ECP-SPEC.md); this document explains the
 *shape* of the system.
@@ -126,7 +126,7 @@ The public/protected boundary is not a convention — it is executable:
 | `spec/` | normative specification | complete for foundation |
 | `schemas/` | 10 versioned JSON Schemas | complete, tested |
 | `src/ecp/` | reference core | complete, tested |
-| `tests/` | foundation tests | 433 tests, all passing |
+| `tests/` | foundation tests | 482 tests, all passing |
 | `tools/` | CLI | complete |
 | `examples/` | format illustrations | valid, hashes real |
 | `docs/` | architecture/trust/repro/security/open-core/contributing | complete |
@@ -165,3 +165,26 @@ Model adapters, execution machinery, scoring, leaderboards, case data,
 ground-truth data, commercial features, and any claim of scientific
 validation. The repository is a protocol foundation, and its README
 states this in the strongest terms at the top.
+
+## 9. M3-CA0-A extension (adjudication & amendment layer)
+
+Bundle 0.4.0 adds a fifth layer above the review pipeline: the
+qualification layer (`src/ecp/adjudication.py`, the `case-amendment`
+contract, `amendment-draft`/`amendment-disclose` CLI commands, and the
+amendment-aware review engine under the `0.4.0` profile). Data flow:
+
+```
+source case-set (immutable) → case-candidate v1 (immutable intake)
+        ↓ owner adjudication records (review-adjudication, the seam)
+        ↓ case-amendment (STEP 1 draft → STEP 2 separate disclosure)
+        ↓ deterministic v2 derivation (pure function, never persisted)
+review-run (0.4.0 profile: amendments + lineage; v1 runs preserved)
+```
+
+The four-state separation (mechanical review ≠ owner adjudication ≠
+case repair/versioning ≠ registration eligibility) is structural: the
+amendment layer has no import path to the ledger or the store, and
+engine profiles guarantee preserved-run re-verification. Extension
+point status: adjudication/amendment IMPLEMENTED (0.4.0); registration
+of real cases, GT verification, execution, evidence ingest remain
+FUTURE gates.

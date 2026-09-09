@@ -1,8 +1,8 @@
 # ECP Specification
 
-**Version 0.3.0-draft — M3-CA0 Case Review Pipeline (additive over R1-I)**
+**Version 0.4.0-draft — M3-CA0-A Case Qualification & Amendment (additive over M3-CA0)**
 
-Status: normative for the repository foundation at schema bundle 0.3.0.
+Status: normative for the repository foundation at schema bundle 0.4.0.
 This document uses RFC 2119-style language (MUST / MUST NOT / SHOULD /
 MAY). The repository root `ECP-IDENTITY.json` pins the versions this
 specification is normative for:
@@ -10,10 +10,10 @@ specification is normative for:
 ```
 protocol_name      ECP
 protocol_title     Evidentiary Evaluation Protocol
-protocol_version   0.3.0
+protocol_version   0.4.0
 protocol_status    draft
-schema_version     0.3.0
-repository_version 0.3.0
+schema_version     0.4.0
+repository_version 0.4.0
 canonicalization   ECP-CANONICAL-JSON-1.0
 hash_algorithm     sha256
 ```
@@ -272,13 +272,17 @@ API, agent framework, cloud, or specific evaluated system. Integrations
 with concrete systems live outside the core and are future work under
 separate authorization.
 
-## 13. Scope boundary (R0 → R1-I → M3-CA0)
+## 13. Scope boundary (R0 → R1-I → M3-CA0 → M3-CA0-A)
 
 R0 provided the foundation only. R1-I (0.2.0) added the protected store
 (§15), the registration ledger (§16), anchoring (§17) and the version
 compatibility policy (§18) — infrastructure only, per the M3-R1
 architecture decision. M3-CA0 (0.3.0) added the case review pipeline
-(§19) — the deterministic review/eligibility gate for candidate cases. The following still do not exist and MUST NOT be
+(§19) — the deterministic review/eligibility gate for candidate cases.
+M3-CA0-A (0.4.0) added the owner-adjudication and case-amendment layer
+(§20): explicit owner decision records, versioned case amendments with
+the two-phase representation-bias disclosure, and amendment re-review —
+the qualification seam between mechanical review and registration. The following still do not exist and MUST NOT be
 claimed: model adapters, benchmark execution, external model calls,
 scientific case generation, case registration as a scientific experiment,
 scoring, hidden benchmark publication, commercial features, and M3
@@ -408,25 +412,33 @@ the architecture decision record).
    consensus, no over-engineering: a hash chain + public Git anchoring is
    the approved mechanism (decision rule: no forced commercial provider).
 
-## 18. Version compatibility (0.1.x → 0.2.0 → 0.3.0)
+## 18. Version compatibility (0.1.x → 0.2.0 → 0.3.0 → 0.4.0)
 
-1. The 0.2.0 and 0.3.0 schema bundles are **additive**: the ten 0.1.0
-   contract files are unchanged; 0.2.0 added two contracts
-   (`ledger-entry`, `store-manifest`); 0.3.0 adds four review-layer
+1. The 0.2.0, 0.3.0 and 0.4.0 schema bundles are **additive**: the ten
+   0.1.0 contract files are unchanged; 0.2.0 added two contracts
+   (`ledger-entry`, `store-manifest`); 0.3.0 added four review-layer
    contracts (`case-candidate`, `case-review`, `review-run`,
-   `review-adjudication`). The protocol version advances because each
-   revision adds normative mechanisms.
+   `review-adjudication`); 0.4.0 adds one adjudication-layer contract
+   (`case-amendment`) and extends the 0.3.0 review contracts with
+   OPTIONAL fields only (`case_version`/`amendment` on case-candidate,
+   `amendment` linkage on case-review, `amendments`/`lineage` on
+   review-run). The protocol version advances because each revision
+   adds normative mechanisms.
 2. Compatibility is an explicit, machine-checkable matrix
    (`ecp.versions`): every object type defined at 0.1.0 accepts
-   `schema_version` in {`0.1.0`, `0.2.0`, `0.3.0`} (the contract content
-   is identical); object types introduced at 0.2.0 accept {`0.2.0`,
-   `0.3.0`}; object types introduced at 0.3.0 accept only `0.3.0`;
-   `protocol_version` in {`0.1.0`, `0.2.0`, `0.3.0`} is valid for every
-   artifact.
-3. 0.1.x and 0.2.x artifacts MUST NOT be silently reinterpreted and MUST
-   NOT be invalidated by a bundle bump. The R0 examples (0.1.0
-   citations) and R1-I examples (0.2.0 citations) remain valid
-   artifacts — this is pinned by tests.
+   `schema_version` in {`0.1.0`, `0.2.0`, `0.3.0`, `0.4.0`} (the
+   contract content is identical); object types introduced at 0.2.0
+   accept {`0.2.0`, `0.3.0`, `0.4.0`}; object types introduced at
+   0.3.0 accept {`0.3.0`, `0.4.0`} (0.4.0 extensions are optional
+   fields); object types introduced at 0.4.0 accept only `0.4.0`;
+   `protocol_version` in {`0.1.0`, `0.2.0`, `0.3.0`, `0.4.0`} is valid
+   for every artifact.
+3. 0.1.x, 0.2.x and 0.3.x artifacts MUST NOT be silently reinterpreted
+   and MUST NOT be invalidated by a bundle bump. The R0 examples (0.1.0
+   citations), R1-I examples (0.2.0 citations) and CA0 review artifacts
+   (0.3.0 citations) remain valid artifacts — this is pinned by tests,
+   including byte-identical re-derivation of 0.3.0-era review runs under
+   the 0.4.0 engine via the recorded engine profile.
 4. Anything outside the matrix is a compatibility violation reported as
    an issue by the verification tooling.
 
@@ -573,3 +585,107 @@ For ELIGIBLE candidates the pipeline MAY produce a
 registration: no ECP-CASE id is assigned, no ground truth is sealed, no
 ledger append occurs. Crossing into registration, execution or results
 requires separate owner authorization — the review layer ends here.
+
+---
+
+## 20. Case Qualification: Adjudication & Amendment (0.4.0 / M3-CA0-A)
+
+M3-CA0-A adds the layer between mechanical review and registration:
+**owner adjudication of open questions** and **versioned case
+amendment** of documented authoring defects. Four concepts remain
+strictly separate: CA0 mechanical review ≠ owner adjudication ≠ case
+repair/versioning ≠ registration eligibility. An owner decision is
+never directly converted into a registration.
+
+### 20.1 Owner adjudication records
+
+Open questions surfaced by CA0 are resolved only by explicit
+`review-adjudication` records (§19.5) carrying the decision basis, the
+rationale and (when scoped) the target candidate. The executor applies
+the owner's WRITTEN rules from an execution order to preserved evidence
+and records the application — never an invented decision. Questions
+that cannot be resolved from preserved evidence stay open
+(`owner_decision: null`); guessing is forbidden. The 0.4.0 engine
+surfaces two additional adjudicable question classes with observed
+triggers from the CA0 real run: `OQ-SPEC-GT-CONFLICT` (the authored GT
+document carries multiple/conflicting blocks — emitted when
+SPEC-AMBIGUOUS-GT / SPEC-DUPLICATE-GT findings exist) and
+`OQ-SPEC-AUTHORING` (registration-contract fields not authored —
+emitted when SPEC-REG-AUTHORING-MISSING findings exist). A
+`CONFIRM-DEFECT` disposition on `OQ-SPEC-GT-CONFLICT` produces a
+mechanical REJECTED with the adjudication cited in the artifact: the
+"REJECT — SPECIFICATION DEFECT" path flows through the engine, never
+by hand.
+
+### 20.2 Case versioning and the amendment record
+
+A legitimate correction of a documented authoring defect is a
+**versioned case amendment** (`case-amendment` contract): the prior
+candidate version is immutable; the amendment record is the only
+representation of the change; the derived v2 view exists only inside a
+review run that applies the amendment. The record MUST carry: the
+exact defect and why it is a defect; the exact, mechanically applicable
+change (GT-document consolidation: retained/removed source blocks);
+the reason the change is not outcome-dependent; the new canonical
+content hash; new provenance (amendment author, drafted-at, order
+reference); and whether novelty/leakage review must be repeated.
+Outcome-dependent selection is forbidden: no expected performance,
+anticipated difficulty, expected statistical effect, or any future
+execution result may influence qualification.
+
+### 20.3 Two-phase representation-bias disclosure (amendment level)
+
+Every case amendment MUST record a representation-bias disclosure
+(`NONE` / `POSSIBLE` / `KNOWN`) that is completed **AFTER the amendment
+has been drafted, in a separate step**, never concurrently with
+authoring. This is enforced mechanically: the drafting step has no
+disclosure parameter at all; the disclosure step operates only on an
+existing PENDING draft; and the record carries TWO hashes —
+`draft_hash` (over the disclosure-free draft) and `amendment_hash`
+(over the completed record) — so a one-step forgery cannot reproduce
+the structure. The disclosure addresses whether the amendment author
+had knowledge of the evaluated system's internal representation,
+architecture, reasoning behavior, implementation constraints or other
+system-specific characteristics that could have influenced the
+amendment's constraints, success criteria, verification rules, wording,
+difficulty, expected outcome, or acceptance boundary. The disclosure is
+an audit/provenance field, NEVER an eligibility decision: `NONE` is not
+a self-certification of bias absence; `POSSIBLE`/`KNOWN` amendments
+remain fully usable but MUST remain traceable to the disclosure — every
+review artifact applying the amendment carries the disclosure value,
+and it is never silently treated as unbiased.
+
+### 20.4 Amendment application and re-review
+
+Applying an amendment is a deterministic, pure derivation: v2 content
+= consolidation of v1 content per the record's change; the v1 record
+and the source document are never modified; the v2 candidate carries
+`case_version` and an `amendment` linkage block; the provenance
+transformation history gains the amendment event. A material amendment
+MUST NOT inherit review state: the amended candidate re-enters the
+FULL review (identity, provenance, specification completeness,
+novelty, leakage, duplication, reproducibility) in a new run, and both
+the original review and the post-amendment review are preserved (the
+run manifest records the prior run via the `lineage` block). A PENDING
+amendment (disclosure not yet completed) is refused loudly by the
+review pipeline; a stale, mis-targeted or tampered amendment aborts the
+run.
+
+### 20.5 Engine profiles and preserved-run re-verification
+
+The review engine records its version on every artifact and manifest.
+A run produced by an earlier engine version MUST remain byte-identically
+re-derivable by the current toolchain: `review-verify` re-derives under
+the engine profile the stored run cites. Profile `0.3.0` reproduces the
+exact M3-CA0 question set and refuses amendments; profile `0.4.0` adds
+the adjudication-layer questions and the amendment machinery. There is
+no silent reinterpretation of preserved runs.
+
+### 20.6 Qualification output boundary (STOP)
+
+The qualification layer establishes which candidates, if any, are
+registration-ready. It MUST STOP before: ECP registration, public
+ledger append, ground-truth publication, model execution, evidence
+collection, scoring, and statistics — even for candidates that become
+ELIGIBLE. Registration remains a separately authorized stage with its
+own ceremony (§16).

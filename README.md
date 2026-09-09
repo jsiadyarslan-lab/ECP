@@ -8,15 +8,20 @@ registration, preserved execution evidence, two-auditor audit, and cryptographic
 provenance — with a strict separation between **verification** (integrity) and
 **scientific adjudication** (validity).
 
-> **STATUS: M3-CA0 — CASE REVIEW PIPELINE (infrastructure only).**
+> **STATUS: M3-CA0-A — CASE QUALIFICATION: ADJUDICATION & AMENDMENT
+> (infrastructure only).**
 > This repository contains protocol contracts, versioned schemas,
 > canonicalization/hashing, verification tooling, boundary enforcement,
 > foundation tests, the **protected evidence store** and **registration
 > ledger** machinery decided in
 > [docs/M3-R1-ARCHITECTURE-DECISION.md](docs/M3-R1-ARCHITECTURE-DECISION.md)
-> (Option C — minimal coupled foundation, R1-I / bundle 0.2.0), and — as of
-> M3-CA0 (bundle 0.3.0) — the **deterministic case review pipeline**: the
-> pre-registration eligibility gate for candidate cases (spec §19).
+> (Option C — minimal coupled foundation, R1-I / bundle 0.2.0), the
+> **deterministic case review pipeline** (M3-CA0 / bundle 0.3.0, spec
+> §19), and — as of M3-CA0-A (bundle 0.4.0) — the **owner adjudication
+> and case-amendment layer** (spec §20): explicit owner decision
+> records, versioned case amendments with the machine-enforced
+> two-phase representation-bias disclosure, and full amendment
+> re-review with preserved prior runs.
 >
 > - No evaluation case is registered (the public ledger starts **empty**).
 > - No candidate case has been registered, published or executed.
@@ -196,6 +201,24 @@ python tools/ecp_cli.py register --ledger /path/to/ecp-ledger \
 python tools/ecp_cli.py ledger-verify --ledger /path/to/ecp-ledger
 python tools/ecp_cli.py anchor-publish --ledger /path/to/ecp-ledger
 
+# --- M3-CA0-A: case qualification (adjudication & amendment layer) ---
+# STEP 1: draft a versioned case amendment (the disclosure is NEVER set here)
+python tools/ecp_cli.py amendment-draft --candidate cand.json \
+    --amendment-id ECP-AMD-000001 --order-basis "M3-CA0-A v1 §5" ... \
+    --retained-answer-block 2 --retained-derivation-block 2 \
+    --removed-answer-blocks 1 --removed-derivation-blocks 1 \
+    --review-root /path/to/review-area
+# STEP 2: complete the SEPARATE representation-bias disclosure (post-draft)
+python tools/ecp_cli.py amendment-disclose \
+    --amendment /path/to/review-area/amendments/ECP-AMD-000001.json \
+    --value POSSIBLE --completed-by "ECP Amendment Author" \
+    --completed-at 2026-01-02T00:00:00Z --basis "..."
+# re-review: amended v2 views + lineage to the preserved prior run
+python tools/ecp_cli.py review-run --review-root /path/to/review-area \
+    --run-id ECP-REVRUN-0002 --reviewer "ECP Review Executor" \
+    --at 2026-01-03T00:00:00Z \
+    --prior-run-id ECP-REVRUN-0001 --prior-run-hash <sha256>
+
 # --- M3-CA0: case review pipeline (review/eligibility gate ONLY) ---
 # extract candidates from a source case-set document (private review area)
 python tools/ecp_cli.py review-extract --source candidate-set.md \
@@ -253,13 +276,22 @@ digest  = hash_document(doc)
   invalidation, duplicate control), external Git anchoring, public verification
   tooling, explicit 0.1.x→0.2.0 compatibility. The public ledger exists and is
   EMPTY; no case is registered.
-- **M3-CA0 (this state)** — the case review pipeline (spec §19): faithful
+- **M3-CA0 (closed)** — the case review pipeline (spec §19): faithful
   candidate extraction with full coverage checking, deterministic review
   engine with the three-state decision model (ELIGIBLE / REJECTED /
   REQUIRES_REVIEW — no fourth state), hash-chained review artifacts, run
   manifests with determinism re-derivation, the owner-adjudication seam,
   and review-area boundary enforcement. The pipeline reviews and decides
   eligibility ONLY: no execution, no registration, no ledger writes.
+- **M3-CA0-A (this state)** — the case qualification layer (spec §20):
+  owner adjudication of open questions (rule-application records with
+  evidence basis; never fabricated), versioned case amendments with the
+  machine-enforced two-phase representation-bias disclosure (draft_hash +
+  amendment_hash prove the disclosure completed AFTER drafting), full
+  amendment re-review with lineage-preserved prior runs, and
+  engine-profile versioning so preserved CA0 runs re-verify byte-identically
+  under the current toolchain. STILL no execution, no registration, no
+  ledger writes.
 - **Registration of real cases / execution / analysis (future, separately
   gated)** — none of these exist yet. In particular: no model execution, no
   evidence ingestion, no audit workflow, no isolation enforcement, no CI, no

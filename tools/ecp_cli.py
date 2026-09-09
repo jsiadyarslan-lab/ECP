@@ -42,6 +42,16 @@ no registration, no ledger writes):
   review-adjudicate --review-root D --adjudication F
                                                  install an owner decision (the seam)
 
+Case qualification (M3-CA0-A — owner adjudication & case amendment layer;
+STRICTLY before registration; still no execution, no ledger writes):
+
+  amendment-draft ...                            STEP 1: draft a versioned case
+                                                 amendment (no disclosure here)
+  amendment-disclose --amendment F --value V ...  STEP 2: complete the separate
+                                                 representation-bias disclosure
+  review-run --review-root D ... [--prior-run-id ID --prior-run-hash H]
+                                                 re-review incl. amended v2 views
+
 Run from the repository root:  python tools/ecp_cli.py <command> ...
 """
 
@@ -254,9 +264,11 @@ def cmd_review_extract(args: argparse.Namespace) -> int:
     return 0
 
 
-def _load_review_root(review_root: Path) -> "tuple[list[dict], str | None, str | None, list[dict]]":
-    """Load (candidates, source_text, source_label, adjudications) from a
-    review root layout."""
+def _load_review_root(
+    review_root: Path,
+) -> "tuple[list[dict], str | None, str | None, list[dict], list[dict]]":
+    """Load (candidates, source_text, source_label, adjudications,
+    amendments) from a review root layout."""
     candidates_dir = review_root / "candidates"
     candidates = [
         canonical.load_json(path)
@@ -277,14 +289,25 @@ def _load_review_root(review_root: Path) -> "tuple[list[dict], str | None, str |
         canonical.load_json(path)
         for path in sorted((review_root / "adjudications").glob("*.json"))
     ]
-    return candidates, source_text, source_label, adjudications
+    amendments = [
+        canonical.load_json(path)
+        for path in sorted((review_root / "amendments").glob("*.json"))
+    ]
+    return candidates, source_text, source_label, adjudications, amendments
+
+
+def _adjudication_error():
+    """Lazily import AdjudicationError (used only in exception clauses)."""
+    from ecp.adjudication import AdjudicationError
+
+    return AdjudicationError
 
 
 def cmd_review_run(args: argparse.Namespace) -> int:
     from ecp import review as review_mod
 
     review_root = Path(args.review_root).resolve()
-    candidates, source_text, source_label, adjudications = _load_review_root(review_root)
+    candidates, source_text, source_label, adjudications, amendments = _load_review_root(review_root)
     if args.source:
         source_path = Path(args.source).resolve()
         source_text = source_path.read_text(encoding="utf-8")
@@ -292,6 +315,21 @@ def cmd_review_run(args: argparse.Namespace) -> int:
     if not candidates:
         print("error: no candidates found in review root (candidates/*.json)", file=sys.stderr)
         return 2
+
+    lineage = None
+    if getattr(args, "prior_run_id", None) or getattr(args, "prior_run_hash", None):
+        if not (args.prior_run_id and args.prior_run_hash):
+            print(
+                "error: --prior-run-id and --prior-run-hash must be supplied together",
+                file=sys.stderr,
+            )
+            return 2
+        lineage = {
+            "prior_run_id": args.prior_run_id,
+            "prior_run_hash": args.prior_run_hash,
+            "basis": args.lineage_basis
+            or "M3-CA0-A re-review of a preserved prior run (§8: both runs retained)",
+        }
 
     try:
         result = review_mod.run_review(
@@ -302,8 +340,10 @@ def cmd_review_run(args: argparse.Namespace) -> int:
             source_text=source_text,
             source_label=source_label,
             adjudications=adjudications,
+            amendments=amendments,
+            lineage=lineage,
         )
-    except review_mod.ReviewError as exc:
+    except (review_mod.ReviewError, _adjudication_error()) as exc:
         print(f"REVIEW RUN FAILED: {exc}", file=sys.stderr)
         return 1
 
@@ -323,12 +363,31 @@ def cmd_review_run(args: argparse.Namespace) -> int:
         f"requires_review: {decisions['requires_review']}"
     )
     print(f"adjudications applied: {result['run']['adjudications']['applied']}")
+    if "amendments" in result["run"]:
+        applied = result["run"]["amendments"]
+        print(
+            f"amendments applied: {applied['applied']} "
+            + (
+                "(" + ", ".join(r["amendment_id"] for r in applied["records"]) + ")"
+                if applied["records"]
+                else ""
+            )
+        )
+    if "lineage" in result["run"]:
+        print(
+            "lineage: "
+            + result["run"]["lineage"]["prior_run_id"]
+            + " ("
+            + result["run"]["lineage"]["prior_run_hash"][:16]
+            + "...)"
+        )
     print(f"chain_head: {result['run']['chain_head']}")
     print(f"artifacts: {reviews_dir}")
     return 0
 
 
 def cmd_review_verify(args: argparse.Namespace) -> int:
+    from ecp import adjudication as adjudication_mod
     from ecp import review as review_mod
 
     review_root = Path(args.review_root).resolve()
@@ -348,30 +407,49 @@ def cmd_review_verify(args: argparse.Namespace) -> int:
     issues.extend(review_mod.verify_run(run, artifacts))
     for path in sorted((review_root / "adjudications").glob("*.json")):
         issues.extend(review_mod.verify_adjudication(canonical.load_json(path)))
+    for path in sorted((review_root / "amendments").glob("*.json")):
+        issues.extend(adjudication_mod.verify_amendment(canonical.load_json(path)))
 
-    # determinism re-derivation: re-run from retained inputs and compare
-    candidates, source_text, source_label, adjudications = _load_review_root(review_root)
+    # determinism re-derivation: re-run from retained inputs (under the
+    # engine profile the stored run was produced with) and compare
+    candidates, source_text, source_label, adjudications, amendments = _load_review_root(review_root)
     if candidates:
-        rederived = review_mod.run_review(
-            candidates,
-            run_id=run["run_id"],
-            reviewed_at=run["reviewed_at"],
-            operator=run["reviewer"]["operator"],
-            source_text=source_text,
-            source_label=source_label,
-            adjudications=adjudications,
-        )
-        for stored, fresh in zip(artifacts, rederived["artifacts"]):
-            if stored.get("artifact_hash") != fresh.get("artifact_hash"):
-                issues.append(
-                    f"{stored.get('review_id', '?')}: DETERMINISM VIOLATION — "
-                    "re-derivation from retained inputs produced a different "
-                    "artifact hash"
+        stored_profile = run.get("reviewer", {}).get("engine_version")
+        if stored_profile not in review_mod.ENGINE_PROFILES:
+            issues.append(
+                f"stored run cites unknown engine version {stored_profile!r} "
+                f"(known profiles: {list(review_mod.ENGINE_PROFILES)})"
+            )
+        else:
+            lineage = run.get("lineage")
+            try:
+                rederived = review_mod.run_review(
+                    candidates,
+                    run_id=run["run_id"],
+                    reviewed_at=run["reviewed_at"],
+                    operator=run["reviewer"]["operator"],
+                    source_text=source_text,
+                    source_label=source_label,
+                    adjudications=adjudications,
+                    amendments=amendments,
+                    engine_profile=stored_profile,
+                    lineage=lineage,
                 )
-        if len(artifacts) != len(rederived["artifacts"]):
-            issues.append("DETERMINISM VIOLATION — artifact count differs on re-derivation")
-        if run.get("run_hash") != rederived["run"].get("run_hash"):
-            issues.append("DETERMINISM VIOLATION — run manifest hash differs on re-derivation")
+            except (review_mod.ReviewError, _adjudication_error()) as exc:
+                issues.append(f"re-derivation failed: {exc}")
+                rederived = None
+            if rederived is not None:
+                for stored, fresh in zip(artifacts, rederived["artifacts"]):
+                    if stored.get("artifact_hash") != fresh.get("artifact_hash"):
+                        issues.append(
+                            f"{stored.get('review_id', '?')}: DETERMINISM VIOLATION — "
+                            "re-derivation from retained inputs produced a different "
+                            "artifact hash"
+                        )
+                if len(artifacts) != len(rederived["artifacts"]):
+                    issues.append("DETERMINISM VIOLATION — artifact count differs on re-derivation")
+                if run.get("run_hash") != rederived["run"].get("run_hash"):
+                    issues.append("DETERMINISM VIOLATION — run manifest hash differs on re-derivation")
 
     if issues:
         print(f"REVIEW VERIFICATION ISSUES ({len(issues)}):")
@@ -407,6 +485,109 @@ def cmd_review_adjudicate(args: argparse.Namespace) -> int:
         "owner decision installed; re-run 'review-run' to apply it "
         "(the engine never fabricates owner decisions)"
     )
+    return 0
+
+
+# ---------------------------------------------------------------------------
+# Case amendment (M3-CA0-A §7 — versioned case correction, two-step
+# draft-then-disclose; the disclosure is NEVER completed at drafting time)
+# ---------------------------------------------------------------------------
+
+def cmd_amendment_draft(args: argparse.Namespace) -> int:
+    from ecp import adjudication as adjudication_mod
+
+    candidate = canonical.load_json(args.candidate)
+    if getattr(args, "disclosure_value", None):
+        print(
+            "error: the representation-bias disclosure is completed in a "
+            "SEPARATE later step ('amendment-disclose'), never at drafting "
+            "time (M3-CA0-A §7 amended)",
+            file=sys.stderr,
+        )
+        return 2
+    try:
+        drafted = adjudication_mod.draft_case_amendment(
+            candidate,
+            amendment_id=args.amendment_id,
+            order_basis=args.order_basis,
+            defect_code=args.defect_code,
+            defect_description=args.defect_description,
+            defect_why=args.defect_why,
+            defect_evidence=args.defect_evidence,
+            retained_answer_block=args.retained_answer_block,
+            retained_derivation_block=args.retained_derivation_block,
+            removed_answer_blocks=[
+                int(v) for v in str(args.removed_answer_blocks).split(",") if v.strip()
+            ],
+            removed_derivation_blocks=[
+                int(v)
+                for v in str(args.removed_derivation_blocks).split(",")
+                if v.strip()
+            ],
+            not_outcome_statement=args.not_outcome_statement,
+            not_outcome_basis=args.not_outcome_basis,
+            amendment_author=args.amendment_author,
+            drafted_at=args.drafted_at,
+            operator=args.operator,
+            order_reference=args.order_reference,
+        )
+    except adjudication_mod.AdjudicationError as exc:
+        print(f"AMENDMENT DRAFT FAILED: {exc}", file=sys.stderr)
+        return 1
+
+    out_dir = Path(args.out).resolve() if args.out else Path(args.review_root).resolve() / "amendments"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    target = out_dir / f"{drafted['amendment_id']}.json"
+    if target.exists():
+        print(
+            f"error: amendment {drafted['amendment_id']} already exists "
+            "(append-only; never rewritten)",
+            file=sys.stderr,
+        )
+        return 1
+    _atomic_write_bytes(target, canonical.canonical_bytes(drafted))
+    print(f"AMENDMENT DRAFTED (STEP 1 — disclosure PENDING): {drafted['amendment_id']} -> {target}")
+    print(f"prior content: {drafted['prior']['content_hash'][:16]}...")
+    print(f"new content:   {drafted['new']['content_hash'][:16]}... (case_version 2)")
+    print(
+        "NEXT (separate step): complete the representation-bias disclosure "
+        "with 'amendment-disclose' — only then can the amendment be applied "
+        "in a review run"
+    )
+    return 0
+
+
+def cmd_amendment_disclose(args: argparse.Namespace) -> int:
+    from ecp import adjudication as adjudication_mod
+
+    drafted = canonical.load_json(args.amendment)
+    try:
+        completed = adjudication_mod.complete_disclosure(
+            drafted,
+            value=args.value,
+            completed_by=args.completed_by,
+            completed_at=args.completed_at,
+            basis=args.basis,
+        )
+    except adjudication_mod.AdjudicationError as exc:
+        print(f"AMENDMENT DISCLOSURE FAILED: {exc}", file=sys.stderr)
+        return 1
+
+    target = Path(args.amendment).resolve()
+    _atomic_write_bytes(target, canonical.canonical_bytes(completed))
+    print(f"AMENDMENT DISCLOSURE COMPLETED (STEP 2): {completed['amendment_id']} -> {target}")
+    print(f"disclosure value: {completed['representation_bias_disclosure']['value']}")
+    print(
+        "disclosed against draft_hash "
+        + completed["representation_bias_disclosure"]["disclosed_against_draft_hash"][:16]
+        + "... (machine evidence: disclosure completed AFTER drafting)"
+    )
+    if completed["representation_bias_disclosure"]["value"] in ("POSSIBLE", "KNOWN"):
+        print(
+            "note: this amendment is and remains traceable to a "
+            f"{completed['representation_bias_disclosure']['value']} "
+            "disclosure — it is never silently treated as unbiased"
+        )
     return 0
 
 
@@ -687,6 +868,9 @@ def main(argv: "list[str] | None" = None) -> int:
     p_review_run.add_argument("--at", required=True, help="explicit UTC review timestamp (determinism: no wall clock)")
     p_review_run.add_argument("--source", default=None, help="override source document path")
     p_review_run.add_argument("--source-label", default=None, help="override source label")
+    p_review_run.add_argument("--prior-run-id", default=None, help="prior preserved run id (lineage, M3-CA0-A §8)")
+    p_review_run.add_argument("--prior-run-hash", default=None, help="prior preserved run_hash (lineage, M3-CA0-A §8)")
+    p_review_run.add_argument("--lineage-basis", default=None, help="basis recorded in the lineage block")
     p_review_run.set_defaults(func=cmd_review_run)
 
     p_review_verify = sub.add_parser("review-verify", help="verify review artifacts, chain, manifest and determinism")
@@ -697,6 +881,42 @@ def main(argv: "list[str] | None" = None) -> int:
     p_adj.add_argument("--review-root", required=True, help="review root directory")
     p_adj.add_argument("--adjudication", required=True, help="review-adjudication JSON document")
     p_adj.set_defaults(func=cmd_review_adjudicate)
+
+    p_amd_draft = sub.add_parser(
+        "amendment-draft",
+        help="STEP 1: draft a versioned case amendment (representation-bias disclosure NOT completed here)",
+    )
+    p_amd_draft.add_argument("--candidate", required=True, help="case-candidate JSON document (the v1 record)")
+    p_amd_draft.add_argument("--amendment-id", required=True, help="ECP-AMD-NNNNNN identifier")
+    p_amd_draft.add_argument("--order-basis", required=True, help="the owner order clause authorizing this amendment")
+    p_amd_draft.add_argument("--defect-code", required=True, help="defect code (e.g. SPEC-DUPLICATE-GT)")
+    p_amd_draft.add_argument("--defect-description", required=True, help="exact defect description")
+    p_amd_draft.add_argument("--defect-why", required=True, help="why this is a defect")
+    p_amd_draft.add_argument("--defect-evidence", required=True, help="preserved evidence for the defect")
+    p_amd_draft.add_argument("--retained-answer-block", required=True, type=int, help="1-based source_block index of the retained answer block")
+    p_amd_draft.add_argument("--retained-derivation-block", required=True, type=int, help="1-based source_block index of the retained derivation block")
+    p_amd_draft.add_argument("--removed-answer-blocks", required=True, help="comma-separated defective answer block indices")
+    p_amd_draft.add_argument("--removed-derivation-blocks", required=True, help="comma-separated defective derivation block indices")
+    p_amd_draft.add_argument("--not-outcome-statement", required=True, help="stated reason the change is not outcome-dependent")
+    p_amd_draft.add_argument("--not-outcome-basis", required=True, help="basis for the not-outcome-dependent statement")
+    p_amd_draft.add_argument("--amendment-author", required=True, help="identity of the amendment author")
+    p_amd_draft.add_argument("--drafted-at", required=True, help="explicit UTC draft timestamp (determinism)")
+    p_amd_draft.add_argument("--operator", required=True, help="operator identity recording the amendment")
+    p_amd_draft.add_argument("--order-reference", required=True, help="the authorizing execution order reference")
+    p_amd_draft.add_argument("--review-root", default=None, help="review root (amendments/ created inside; default)")
+    p_amd_draft.add_argument("--out", default=None, help="explicit output directory for the amendment record")
+    p_amd_draft.set_defaults(func=cmd_amendment_draft)
+
+    p_amd_disclose = sub.add_parser(
+        "amendment-disclose",
+        help="STEP 2: complete the SEPARATE representation-bias disclosure on an existing draft",
+    )
+    p_amd_disclose.add_argument("--amendment", required=True, help="drafted case-amendment JSON (disclosure PENDING)")
+    p_amd_disclose.add_argument("--value", required=True, choices=["NONE", "POSSIBLE", "KNOWN"], help="disclosure value (audit field, never an eligibility decision)")
+    p_amd_disclose.add_argument("--completed-by", required=True, help="identity completing the disclosure")
+    p_amd_disclose.add_argument("--completed-at", required=True, help="explicit UTC disclosure timestamp (after drafting)")
+    p_amd_disclose.add_argument("--basis", required=True, help="honest disclosure basis (knowledge state, influence surface)")
+    p_amd_disclose.set_defaults(func=cmd_amendment_disclose)
 
     args = parser.parse_args(argv)
     return args.func(args)

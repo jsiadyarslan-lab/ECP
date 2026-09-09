@@ -35,10 +35,17 @@ GROUND_TRUTH_CONTENT_KEYS = (
 )
 COMMITMENT_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 
-#: Review-layer object types (M3-CA0): they belong ONLY in a private review
-#: area, never in the public repository (public illustrations under
-#: examples/ must be content_class 'format-illustration').
-REVIEW_OBJECTS = ("case-candidate", "case-review", "review-run", "review-adjudiction")
+#: Review-layer object types (M3-CA0 + M3-CA0-A): they belong ONLY in a
+#: private review area, never in the public repository (public
+#: illustrations under examples/ must be content_class
+#: 'format-illustration').
+REVIEW_OBJECTS = (
+    "case-candidate",
+    "case-review",
+    "review-run",
+    "review-adjudication",
+    "case-amendment",
+)
 #: Review-layer types that carry ground-truth-class content.
 REVIEW_GT_CARRYING = ("case-candidate", "case-review")
 
@@ -283,6 +290,7 @@ REVIEW_OBJECT_DIRS = {
     "case-review": ("reviews",),
     "review-run": (),  # only at the root, as review-run.json
     "review-adjudication": ("adjudications",),
+    "case-amendment": ("amendments",),
 }
 #: Identity strings the review layer must NEVER assign (registration- and
 #: case-layer identities are later, separately authorized acts).
@@ -292,6 +300,7 @@ REVIEW_ALLOWED_OPS_FILES = {
     "README.md",
     "extraction-report.json",
     "adjudications/README.md",
+    "amendments/README.md",
     "candidates/README.md",
     "reviews/README.md",
     "source/README.md",
@@ -304,12 +313,12 @@ def scan_review_tree(review_root: "str | Path") -> "list[dict]":
     Rules:
 
     - RV1  the review area contains only expected locations
-      (``candidates/``, ``reviews/``, ``adjudications/``, ``source/`` and
-      root files);
+      (``candidates/``, ``reviews/``, ``adjudications/``,
+      ``amendments/``, ``source/`` and root files);
     - RV2  every ECP object sits in its designated directory
       (case-candidate in candidates/, case-review in reviews/,
-      review-adjudication in adjudications/, review-run only as the root
-      ``review-run.json``);
+      review-adjudication in adjudications/, case-amendment in
+      amendments/, review-run only as the root ``review-run.json``);
     - RV3  no foreign ECP object type appears (ledger, registration, case,
       system, execution, evaluation, evidence, audit, ground-truth, store
       objects do not belong in a review area);
@@ -331,7 +340,7 @@ def scan_review_tree(review_root: "str | Path") -> "list[dict]":
         ]
 
     allowed_top_entries = {
-        "candidates", "reviews", "adjudications", "source",
+        "candidates", "reviews", "adjudications", "amendments", "source",
         "review-run.json", "README.md", "extraction-report.json",
     }
     for entry in sorted(root.iterdir()):

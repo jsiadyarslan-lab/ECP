@@ -32,6 +32,8 @@ SCHEMA_FILES = {
     "case-review": "case-review.schema.json",
     "review-run": "review-run.schema.json",
     "review-adjudication": "review-adjudication.schema.json",
+    # 0.4.0 additive contract (M3-CA0-A case amendment / adjudication layer):
+    "case-amendment": "case-amendment.schema.json",
 }
 
 _CACHE: dict = {}

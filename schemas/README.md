@@ -21,17 +21,18 @@ for the ECP foundation objects:
 | `case-review.schema.json` | `case-review` | **0.3.0 (new, M3-CA0)** | review layer — deterministic three-state review artifact |
 | `review-run.schema.json` | `review-run` | **0.3.0 (new, M3-CA0)** | review layer — run manifest (determinism re-derivable) |
 | `review-adjudication.schema.json` | `review-adjudication` | **0.3.0 (new, M3-CA0)** | review layer — owner decision record (the human seam) |
+| `case-amendment.schema.json` | `case-amendment` | **0.4.0 (new, M3-CA0-A)** | adjudication layer — versioned case amendment with the two-phase representation-bias disclosure (draft_hash + amendment_hash) |
 
 Notes:
 
 - The `$id` values are **stable identifiers**, not fetchable URLs.
 - The schema bundle version is pinned in the repository-root `ECP-IDENTITY.json`
   (`schema_version`). Every schema change requires a schema-version bump.
-- The 0.2.0 and 0.3.0 bundles are **additive**: the ten 0.1.0 contract
+- The 0.2.0, 0.3.0 and 0.4.0 bundles are **additive**: the ten 0.1.0 contract
   files are unchanged; the two 0.2.0 contracts (ledger-entry,
   store-manifest) implement the R1-I minimal coupled foundation (protected
   store + registration ledger, see `spec/ECP-SPEC.md` §15–§18 and
-  `docs/M3-R1-ARCHITECTURE-DECISION.md`); the four 0.3.0 contracts
+  `docs/M3-R1-ARCHITECTURE-DECISION.md`); the four 0.3.0 contracts; the 0.4.0 bundle adds `case-amendment` and extends the 0.3.0 review contracts with optional fields only (case_version/amendment linkage, amendments/lineage manifest blocks)
   (case-candidate, case-review, review-run, review-adjudication)
   implement the M3-CA0 case review pipeline (see `spec/ECP-SPEC.md` §19).
   0.1.x and 0.2.x artifacts remain valid — the explicit compatibility

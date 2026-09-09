@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.ecp-protocol.org/0.3.0/case-review.schema.json",
   "title": "ECP Case Review Artifact",
-  "description": "Deterministic review artifact for one candidate case (M3-CA0, 0.3.0). The artifact records the review dimensions R1-R7, the duplicate finding, open questions (the human/owner review seam), forwarded flags, the explicit three-state decision (ELIGIBLE / REJECTED / REQUIRES_REVIEW — no fourth state exists), and reason codes. artifact_hash = SHA-256 over the ECP-CANONICAL-JSON-1.0 serialization of this document with the top-level artifact_hash field removed; prev_artifact_hash chains artifacts within a review run (64 zeros for index 1). The artifact embeds the candidate content snapshot so another operator can reconstruct the candidate definition from retained review artifacts alone (R7). Review artifacts are review-layer material: real artifacts (content_class 'review') live only in the private review area and are never published to the public ledger; public illustrations under examples/ use content_class 'format-illustration'.",
+  "description": "Deterministic review artifact for one candidate case (M3-CA0, 0.3.0; extended additively in 0.4.0 with the optional amendment linkage block for amended-case re-review). The artifact records the review dimensions R1-R7, the duplicate finding, open questions (the human/owner review seam), forwarded flags, the explicit three-state decision (ELIGIBLE / REJECTED / REQUIRES_REVIEW — no fourth state exists), and reason codes. artifact_hash = SHA-256 over the ECP-CANONICAL-JSON-1.0 serialization of this document with the top-level artifact_hash field removed; prev_artifact_hash chains artifacts within a review run (64 zeros for index 1). The artifact embeds the candidate content snapshot so another operator can reconstruct the candidate definition from retained review artifacts alone (R7). Review artifacts are review-layer material: real artifacts (content_class 'review') live only in the private review area and are never published to the public ledger; public illustrations under examples/ use content_class 'format-illustration'.",
   "type": "object",
   "required": [
     "ecp_object",
@@ -29,9 +29,14 @@
     "artifact_hash"
   ],
   "properties": {
-    "ecp_object": { "const": "case-review" },
+    "ecp_object": {
+      "const": "case-review"
+    },
     "content_class": {
-      "enum": ["review", "format-illustration"]
+      "enum": [
+        "review",
+        "format-illustration"
+      ]
     },
     "review_id": {
       "type": "string",
@@ -78,32 +83,78 @@
       "properties": {
         "identity": {
           "type": "object",
-          "required": ["status", "content_hash_verified", "canonicalization"],
+          "required": [
+            "status",
+            "content_hash_verified",
+            "canonicalization"
+          ],
           "properties": {
-            "status": { "enum": ["PASS", "FAIL"] },
-            "content_hash_verified": { "type": "boolean" },
-            "canonicalization": { "const": "ECP-CANONICAL-JSON-1.0" }
+            "status": {
+              "enum": [
+                "PASS",
+                "FAIL"
+              ]
+            },
+            "content_hash_verified": {
+              "type": "boolean"
+            },
+            "canonicalization": {
+              "const": "ECP-CANONICAL-JSON-1.0"
+            }
           },
           "additionalProperties": false
         },
         "provenance": {
           "type": "object",
-          "required": ["status", "not_available", "source_report_flags"],
+          "required": [
+            "status",
+            "not_available",
+            "source_report_flags"
+          ],
           "properties": {
-            "status": { "enum": ["COMPLETE", "PARTIAL", "MISSING", "BROKEN"] },
-            "not_available": { "type": "array", "items": { "type": "string" } },
-            "source_report_flags": { "type": "array", "items": { "type": "string" } }
+            "status": {
+              "enum": [
+                "COMPLETE",
+                "PARTIAL",
+                "MISSING",
+                "BROKEN"
+              ]
+            },
+            "not_available": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "source_report_flags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           },
           "additionalProperties": false
         },
         "specification": {
           "type": "object",
-          "required": ["status", "findings"],
+          "required": [
+            "status",
+            "findings"
+          ],
           "properties": {
-            "status": { "enum": ["SATISFIED", "AMBIGUOUS", "MISSING", "INCOMPLETE"] },
+            "status": {
+              "enum": [
+                "SATISFIED",
+                "AMBIGUOUS",
+                "MISSING",
+                "INCOMPLETE"
+              ]
+            },
             "findings": {
               "type": "array",
-              "items": { "type": "string" },
+              "items": {
+                "type": "string"
+              },
               "description": "Machine-checkable specification findings (reason-code level detail)."
             }
           },
@@ -111,14 +162,25 @@
         },
         "novelty": {
           "type": "object",
-          "required": ["status", "within_set", "external"],
+          "required": [
+            "status",
+            "within_set",
+            "external"
+          ],
           "properties": {
             "status": {
-              "enum": ["NOVEL_WITHIN_SET", "DUPLICATE", "OVERLAP_SUSPECTED", "UNRESOLVED"]
+              "enum": [
+                "NOVEL_WITHIN_SET",
+                "DUPLICATE",
+                "OVERLAP_SUSPECTED",
+                "UNRESOLVED"
+              ]
             },
             "within_set": {
               "type": "object",
-              "required": ["distinct_from_prior"],
+              "required": [
+                "distinct_from_prior"
+              ],
               "properties": {
                 "distinct_from_prior": {
                   "type": "boolean",
@@ -126,13 +188,17 @@
                 },
                 "overlap_evidence": {
                   "type": "array",
-                  "items": { "type": "string" }
+                  "items": {
+                    "type": "string"
+                  }
                 }
               },
               "additionalProperties": false
             },
             "external": {
-              "enum": ["NOT_ESTABLISHABLE_MECHANICALLY"],
+              "enum": [
+                "NOT_ESTABLISHABLE_MECHANICALLY"
+              ],
               "description": "Honest fixed status: external-corpus novelty cannot be established without model invocation or retrieval (both forbidden at CA0). It is recorded as an open question for owner adjudication, never guessed."
             }
           },
@@ -140,18 +206,40 @@
         },
         "leakage": {
           "type": "object",
-          "required": ["status", "detectors"],
+          "required": [
+            "status",
+            "detectors"
+          ],
           "properties": {
-            "status": { "enum": ["CLEAN", "CONFIRMED", "UNRESOLVED"] },
+            "status": {
+              "enum": [
+                "CLEAN",
+                "CONFIRMED",
+                "UNRESOLVED"
+              ]
+            },
             "detectors": {
               "type": "array",
               "items": {
                 "type": "object",
-                "required": ["detector", "result"],
+                "required": [
+                  "detector",
+                  "result"
+                ],
                 "properties": {
-                  "detector": { "type": "string", "minLength": 1 },
-                  "result": { "enum": ["CLEAN", "FLAGGED"] },
-                  "evidence": { "type": "string" }
+                  "detector": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "result": {
+                    "enum": [
+                      "CLEAN",
+                      "FLAGGED"
+                    ]
+                  },
+                  "evidence": {
+                    "type": "string"
+                  }
                 },
                 "additionalProperties": false
               }
@@ -161,22 +249,44 @@
         },
         "provenance_integrity": {
           "type": "object",
-          "required": ["status", "chain_verified"],
+          "required": [
+            "status",
+            "chain_verified"
+          ],
           "properties": {
-            "status": { "enum": ["INTACT", "BROKEN", "UNVERIFIED"] },
+            "status": {
+              "enum": [
+                "INTACT",
+                "BROKEN",
+                "UNVERIFIED"
+              ]
+            },
             "chain_verified": {
               "type": "boolean",
               "description": "True iff candidate → source → transformation → canonical artifact was recomputed and matched byte-exactly."
             },
-            "chain_findings": { "type": "array", "items": { "type": "string" } }
+            "chain_findings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           },
           "additionalProperties": false
         },
         "reproducibility": {
           "type": "object",
-          "required": ["status", "reconstruction_hash"],
+          "required": [
+            "status",
+            "reconstruction_hash"
+          ],
           "properties": {
-            "status": { "enum": ["RECONSTRUCTIBLE", "FAILED"] },
+            "status": {
+              "enum": [
+                "RECONSTRUCTIBLE",
+                "FAILED"
+              ]
+            },
             "reconstruction_hash": {
               "$ref": "#/$defs/sha256_hex",
               "description": "Recomputed content hash of the embedded candidate_content snapshot; equals content_hash iff reconstructible."
@@ -189,17 +299,27 @@
     },
     "duplicate": {
       "type": "object",
-      "required": ["status"],
+      "required": [
+        "status"
+      ],
       "properties": {
         "status": {
-          "enum": ["UNIQUE", "EXACT_DUPLICATE", "CANONICAL_DUPLICATE", "SOURCE_DUPLICATE", "OVERLAP_SUSPECTED"],
+          "enum": [
+            "UNIQUE",
+            "EXACT_DUPLICATE",
+            "CANONICAL_DUPLICATE",
+            "SOURCE_DUPLICATE",
+            "OVERLAP_SUSPECTED"
+          ],
           "description": "Duplicates are detected deterministically and never deleted; the evidence is retained here."
         },
         "of_candidate_id": {
           "type": "string",
           "pattern": "^ECP-CAND-[A-Za-z0-9][A-Za-z0-9._:-]*$"
         },
-        "evidence": { "type": "string" }
+        "evidence": {
+          "type": "string"
+        }
       },
       "additionalProperties": false
     },
@@ -224,14 +344,27 @@
             "minLength": 1,
             "description": "Stable per-candidate question id (e.g. 'OQ-1')."
           },
-          "category": { "enum": ["NOVELTY", "LEAKAGE", "SPECIFICATION", "PROVENANCE"] },
+          "category": {
+            "enum": [
+              "NOVELTY",
+              "LEAKAGE",
+              "SPECIFICATION",
+              "PROVENANCE"
+            ]
+          },
           "code": {
             "type": "string",
             "minLength": 1,
             "description": "Stable question code shared across candidates (e.g. 'OQ-NOV-EXTERNAL'); adjudications reference this code."
           },
-          "question": { "type": "string", "minLength": 1 },
-          "evidence": { "type": "string", "minLength": 1 },
+          "question": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence": {
+            "type": "string",
+            "minLength": 1
+          },
           "critical": {
             "type": "boolean",
             "description": "Critical unresolved questions block ELIGIBLE."
@@ -244,21 +377,42 @@
           "owner_decision": {
             "description": "null until an explicit adjudication record resolves this question; never fabricated.",
             "oneOf": [
-              { "type": "null" },
+              {
+                "type": "null"
+              },
               {
                 "type": "object",
-                "required": ["adjudication_id", "disposition", "recorded_by", "at", "rationale"],
+                "required": [
+                  "adjudication_id",
+                  "disposition",
+                  "recorded_by",
+                  "at",
+                  "rationale"
+                ],
                 "properties": {
                   "adjudication_id": {
                     "type": "string",
                     "pattern": "^ECP-ADJ-[0-9]{6,}$"
                   },
                   "disposition": {
-                    "enum": ["RESOLVE-CLEAN", "ACCEPT-RISK", "CONFIRM-DEFECT", "UPHOLD-OPEN"]
+                    "enum": [
+                      "RESOLVE-CLEAN",
+                      "ACCEPT-RISK",
+                      "CONFIRM-DEFECT",
+                      "UPHOLD-OPEN"
+                    ]
                   },
-                  "recorded_by": { "type": "string", "minLength": 1 },
-                  "at": { "$ref": "#/$defs/iso8601_utc" },
-                  "rationale": { "type": "string", "minLength": 1 }
+                  "recorded_by": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "at": {
+                    "$ref": "#/$defs/iso8601_utc"
+                  },
+                  "rationale": {
+                    "type": "string",
+                    "minLength": 1
+                  }
                 },
                 "additionalProperties": false
               }
@@ -273,12 +427,26 @@
       "description": "Findings deferred to LATER pipeline stages (ground-truth verification, registration authoring). Forwarded, never silently dropped and never resolved here.",
       "items": {
         "type": "object",
-        "required": ["code", "note", "target_stage"],
+        "required": [
+          "code",
+          "note",
+          "target_stage"
+        ],
         "properties": {
-          "code": { "type": "string", "minLength": 1 },
-          "note": { "type": "string", "minLength": 1 },
+          "code": {
+            "type": "string",
+            "minLength": 1
+          },
+          "note": {
+            "type": "string",
+            "minLength": 1
+          },
           "target_stage": {
-            "enum": ["ground-truth-verification", "registration-authoring", "registration-ceremony"]
+            "enum": [
+              "ground-truth-verification",
+              "registration-authoring",
+              "registration-ceremony"
+            ]
           }
         },
         "additionalProperties": false
@@ -292,13 +460,64 @@
       },
       "description": "Adjudication records applied to this candidate in this run (possibly empty)."
     },
+    "amendment": {
+      "type": "object",
+      "description": "Present (0.4.0, optional) when this artifact reviews a case AMENDMENT (v2+ view): the amendment linkage and its representation-bias disclosure value travel with the artifact — a POSSIBLE/KNOWN disclosure is never silently treated as unbiased (M3-CA0-A §7 amended).",
+      "required": [
+        "amendment_id",
+        "amendment_hash",
+        "case_version",
+        "prior_case_version",
+        "prior_content_hash",
+        "representation_bias_disclosure"
+      ],
+      "properties": {
+        "amendment_id": {
+          "type": "string",
+          "pattern": "^ECP-AMD-[0-9]{6,}$"
+        },
+        "amendment_hash": {
+          "$ref": "#/$defs/sha256_hex"
+        },
+        "case_version": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "prior_case_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "prior_content_hash": {
+          "$ref": "#/$defs/sha256_hex"
+        },
+        "representation_bias_disclosure": {
+          "enum": [
+            "NONE",
+            "POSSIBLE",
+            "KNOWN"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
     "reviewer": {
       "type": "object",
-      "required": ["kind", "pipeline", "engine_version", "operator"],
+      "required": [
+        "kind",
+        "pipeline",
+        "engine_version",
+        "operator"
+      ],
       "properties": {
-        "kind": { "const": "deterministic-pipeline" },
-        "pipeline": { "const": "ECP-REVIEW-ENGINE-1" },
-        "engine_version": { "$ref": "#/$defs/semver" },
+        "kind": {
+          "const": "deterministic-pipeline"
+        },
+        "pipeline": {
+          "const": "ECP-REVIEW-ENGINE-1"
+        },
+        "engine_version": {
+          "$ref": "#/$defs/semver"
+        },
         "operator": {
           "type": "string",
           "minLength": 1,
@@ -312,54 +531,105 @@
       "description": "Explicit run input timestamp (never ambient wall-clock; determinism is over explicit inputs)."
     },
     "decision": {
-      "enum": ["ELIGIBLE", "REJECTED", "REQUIRES_REVIEW"],
+      "enum": [
+        "ELIGIBLE",
+        "REJECTED",
+        "REQUIRES_REVIEW"
+      ],
       "description": "The ONLY three states. 'probably eligible', 'looks fine', 'pending' etc. do not exist; ambiguous decision inputs abort the run loudly instead."
     },
     "reason_codes": {
       "type": "array",
       "minItems": 1,
-      "items": { "type": "string", "minLength": 1 }
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
     },
     "registration_ready": {
       "description": "Present only for ELIGIBLE candidates (§10 output boundary): a registration-READY representation — NOT a registration. No ECP-CASE id is assigned, no ground truth is sealed, no ledger append occurs; those are registration-phase acts requiring separate authorization.",
       "oneOf": [
-        { "type": "null" },
+        {
+          "type": "null"
+        },
         {
           "type": "object",
-          "required": ["status", "candidate_id", "content_hash", "field_mapping", "requirements_outstanding", "boundary"],
+          "required": [
+            "status",
+            "candidate_id",
+            "content_hash",
+            "field_mapping",
+            "requirements_outstanding",
+            "boundary"
+          ],
           "properties": {
-            "status": { "const": "READY-FOR-REGISTRATION-CEREMONY" },
+            "status": {
+              "const": "READY-FOR-REGISTRATION-CEREMONY"
+            },
             "candidate_id": {
               "type": "string",
               "pattern": "^ECP-CAND-[A-Za-z0-9][A-Za-z0-9._:-]*$"
             },
-            "content_hash": { "$ref": "#/$defs/sha256_hex" },
+            "content_hash": {
+              "$ref": "#/$defs/sha256_hex"
+            },
             "field_mapping": {
               "type": "object",
-              "required": ["premises", "question", "intended_answer", "derivation", "difficulty", "family", "structural_signature"],
+              "required": [
+                "premises",
+                "question",
+                "intended_answer",
+                "derivation",
+                "difficulty",
+                "family",
+                "structural_signature"
+              ],
               "properties": {
-                "premises": { "const": "case.input.prompt (composed at the registration ceremony)" },
-                "question": { "const": "case.input.prompt (composed at the registration ceremony)" },
-                "intended_answer": { "const": "ground-truth.expected_answer.value (sealed in the protected store at the registration ceremony)" },
-                "derivation": { "const": "ground-truth.derivation (sealed in the protected store at the registration ceremony)" },
-                "difficulty": { "const": "case.difficulty" },
-                "family": { "const": "case.proposed_reasoning_family" },
-                "structural_signature": { "const": "case.structural_signature" }
+                "premises": {
+                  "const": "case.input.prompt (composed at the registration ceremony)"
+                },
+                "question": {
+                  "const": "case.input.prompt (composed at the registration ceremony)"
+                },
+                "intended_answer": {
+                  "const": "ground-truth.expected_answer.value (sealed in the protected store at the registration ceremony)"
+                },
+                "derivation": {
+                  "const": "ground-truth.derivation (sealed in the protected store at the registration ceremony)"
+                },
+                "difficulty": {
+                  "const": "case.difficulty"
+                },
+                "family": {
+                  "const": "case.proposed_reasoning_family"
+                },
+                "structural_signature": {
+                  "const": "case.structural_signature"
+                }
               },
               "additionalProperties": false
             },
             "requirements_outstanding": {
               "type": "array",
-              "items": { "type": "string", "minLength": 1 }
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
             },
-            "boundary": { "const": "STOP-BEFORE-REGISTRATION" }
+            "boundary": {
+              "const": "STOP-BEFORE-REGISTRATION"
+            }
           },
           "additionalProperties": false
         }
       ]
     },
-    "protocol_version": { "$ref": "#/$defs/semver" },
-    "schema_version": { "$ref": "#/$defs/semver" },
+    "protocol_version": {
+      "$ref": "#/$defs/semver"
+    },
+    "schema_version": {
+      "$ref": "#/$defs/semver"
+    },
     "prev_artifact_hash": {
       "$ref": "#/$defs/sha256_hex",
       "description": "artifact_hash of the previous artifact in this run (64 zeros for entry_index 1)."

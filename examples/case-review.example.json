@@ -149,7 +149,7 @@
   "reviewer": {
     "kind": "deterministic-pipeline",
     "pipeline": "ECP-REVIEW-ENGINE-1",
-    "engine_version": "0.3.0",
+    "engine_version": "0.4.0",
     "operator": "ECP Review Example Executor"
   },
   "reviewed_at": "2026-01-03T00:00:00Z",
@@ -180,8 +180,8 @@
     ],
     "boundary": "STOP-BEFORE-REGISTRATION"
   },
-  "protocol_version": "0.3.0",
-  "schema_version": "0.3.0",
+  "protocol_version": "0.4.0",
+  "schema_version": "0.4.0",
   "prev_artifact_hash": "0000000000000000000000000000000000000000000000000000000000000000",
-  "artifact_hash": "a069c756d187c2fe287cb7cc15336acc15c71273ddd44fc6744699e382aa8b48"
+  "artifact_hash": "10952662e4d74e8a2d7e1c277ee2b5e0b3c6ffa2930f1dfca366d57b9c3ad9ee"
 }

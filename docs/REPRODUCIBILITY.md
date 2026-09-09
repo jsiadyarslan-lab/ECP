@@ -1,6 +1,6 @@
 # ECP Reproducibility Model
 
-Version 0.3.0-draft (M3-CA0 case review pipeline, additive
+Version 0.4.0-draft (M3-CA0-A case qualification & amendment, additive
 over R1-I).
 
 ## 1. The four classes are NOT synonyms
@@ -104,3 +104,17 @@ registration, no execution, no results.
 - Float-exact cross-language canonicalization beyond the shortest
   round-trip convention — spec §5 recommends integers/strings for
   stability-critical fields.
+
+## 6. M3-CA0-A additions (for the record)
+
+The qualification layer preserves the CA0 determinism guarantees and
+extends them: amendment drafting/application is deterministic (pure
+functions of the v1 candidate + the amendment record; examples built
+byte-identically across runs); the two-phase disclosure hashes
+(draft_hash over the disclosure-free draft, amendment_hash over the
+completed record) recompute from the record alone; re-review runs
+(including amended v2 derivation) are re-derived byte-identically by
+`review-verify` under the engine profile the stored run cites —
+including 0.3.0-profile runs produced before the 0.4.0 bump. The real
+qualification run lives in a private review area (never published);
+its inputs are sha256-pinned and its outputs are hash-chained.

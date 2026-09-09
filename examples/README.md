@@ -36,11 +36,12 @@ all embedded hashes/commitments are real (recomputed and verified by the test su
 | `case-review.example.json` | `case-review` (0.3.0) | a real engine-produced ELIGIBLE review artifact (synthetic inputs + fixture adjudications) with the §10 STOP-BEFORE-REGISTRATION boundary visible |
 | `review-run.example.json` | `review-run` (0.3.0) | the matching one-candidate run manifest (real chain head, real run_hash) |
 | `review-adjudication.example.json` | `review-adjudication` (0.3.0) | an owner decision record for the OQ-NOV-EXTERNAL open question (the §9 human seam) |
+| `case-amendment.example.json` | `case-amendment` (0.4.0) | a TWO-PHASE case amendment (draft then separate disclosure; both hashes real) on a synthetic dual-block candidate |
 | `artifacts/raw-output.demo.txt` | — | simulated raw output artifact (hashed) |
 | `artifacts/execution-trace.demo.txt` | — | simulated execution trace artifact (hashed) |
 
 The two 0.2.0 examples (R1-I) are format illustrations of the registration
-ledger and the protected store. The four 0.3.0 examples (M3-CA0) are
+ledger and the protected store. The four 0.3.0 examples (M3-CA0) and the 0.4.0 case-amendment example (M3-CA0-A) are
 format illustrations of the case review pipeline; their candidate material
 is fully SYNTHETIC (invented abstract entities — nothing derives from any
 real candidate set), and the review example was produced by the real

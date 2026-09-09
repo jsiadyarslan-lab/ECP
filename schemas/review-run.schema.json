@@ -21,22 +21,34 @@
     "run_hash"
   ],
   "properties": {
-    "ecp_object": { "const": "review-run" },
+    "ecp_object": {
+      "const": "review-run"
+    },
     "run_id": {
       "type": "string",
       "pattern": "^ECP-REVRUN-[A-Za-z0-9][A-Za-z0-9._:-]*$"
     },
-    "run_kind": { "const": "case-review" },
+    "run_kind": {
+      "const": "case-review"
+    },
     "input": {
       "type": "object",
-      "required": ["candidates_inspected"],
+      "required": [
+        "candidates_inspected"
+      ],
       "properties": {
         "source_document": {
           "type": "object",
-          "required": ["label", "sha256"],
+          "required": [
+            "label",
+            "sha256"
+          ],
           "description": "Present iff the run reviewed against the retained source document (the normal, chain-verifiable mode).",
           "properties": {
-            "label": { "type": "string", "minLength": 1 },
+            "label": {
+              "type": "string",
+              "minLength": 1
+            },
             "sha256": {
               "$ref": "#/$defs/sha256_hex",
               "description": "SHA-256 over the raw bytes of the source candidate-set document the run reviewed."
@@ -46,10 +58,18 @@
         },
         "provenance_sidecar": {
           "type": "object",
-          "required": ["label", "sha256"],
+          "required": [
+            "label",
+            "sha256"
+          ],
           "properties": {
-            "label": { "type": "string", "minLength": 1 },
-            "sha256": { "$ref": "#/$defs/sha256_hex" }
+            "label": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha256": {
+              "$ref": "#/$defs/sha256_hex"
+            }
           },
           "additionalProperties": false
         },
@@ -59,14 +79,25 @@
         },
         "extraction": {
           "type": "object",
-          "required": ["extractor", "coverage"],
+          "required": [
+            "extractor",
+            "coverage"
+          ],
           "properties": {
-            "extractor": { "type": "string", "minLength": 1 },
+            "extractor": {
+              "type": "string",
+              "minLength": 1
+            },
             "coverage": {
-              "enum": ["PASS", "FAIL"],
+              "enum": [
+                "PASS",
+                "FAIL"
+              ],
               "description": "PASS iff every line of the source document was accounted for during extraction (no silently dropped content)."
             },
-            "coverage_detail": { "type": "string" }
+            "coverage_detail": {
+              "type": "string"
+            }
           },
           "additionalProperties": false
         }
@@ -83,8 +114,12 @@
         "known_pattern_registry_size"
       ],
       "properties": {
-        "engine": { "const": "ECP-REVIEW-ENGINE-1" },
-        "engine_version": { "$ref": "#/$defs/semver" },
+        "engine": {
+          "const": "ECP-REVIEW-ENGINE-1"
+        },
+        "engine_version": {
+          "$ref": "#/$defs/semver"
+        },
         "jaccard_overlap_threshold": {
           "type": "number",
           "description": "Token-set Jaccard similarity at or above which a within-set overlap suspicion is raised (0 < t < 1)."
@@ -104,12 +139,26 @@
     },
     "reviewer": {
       "type": "object",
-      "required": ["kind", "pipeline", "engine_version", "operator"],
+      "required": [
+        "kind",
+        "pipeline",
+        "engine_version",
+        "operator"
+      ],
       "properties": {
-        "kind": { "const": "deterministic-pipeline" },
-        "pipeline": { "const": "ECP-REVIEW-ENGINE-1" },
-        "engine_version": { "$ref": "#/$defs/semver" },
-        "operator": { "type": "string", "minLength": 1 }
+        "kind": {
+          "const": "deterministic-pipeline"
+        },
+        "pipeline": {
+          "const": "ECP-REVIEW-ENGINE-1"
+        },
+        "engine_version": {
+          "$ref": "#/$defs/semver"
+        },
+        "operator": {
+          "type": "string",
+          "minLength": 1
+        }
       },
       "additionalProperties": false
     },
@@ -119,7 +168,10 @@
     },
     "adjudications": {
       "type": "object",
-      "required": ["applied", "ids"],
+      "required": [
+        "applied",
+        "ids"
+      ],
       "properties": {
         "applied": {
           "type": "integer",
@@ -136,13 +188,97 @@
       },
       "additionalProperties": false
     },
+    "amendments": {
+      "type": "object",
+      "description": "Case amendments applied in this run (0.4.0, optional): each material amendment entered full re-review; the prior review run is preserved untouched (M3-CA0-A §8).",
+      "required": [
+        "applied",
+        "records"
+      ],
+      "properties": {
+        "applied": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "records": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "amendment_id",
+              "amendment_hash",
+              "candidate_id",
+              "disclosure"
+            ],
+            "properties": {
+              "amendment_id": {
+                "type": "string",
+                "pattern": "^ECP-AMD-[0-9]{6,}$"
+              },
+              "amendment_hash": {
+                "$ref": "#/$defs/sha256_hex"
+              },
+              "candidate_id": {
+                "type": "string",
+                "pattern": "^ECP-CAND-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "disclosure": {
+                "enum": [
+                  "NONE",
+                  "POSSIBLE",
+                  "KNOWN"
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "lineage": {
+      "type": "object",
+      "description": "Prior-run linkage (0.4.0, optional): this run re-reviews/amends the retained inputs of a prior preserved run (M3-CA0-A §8: both runs are preserved).",
+      "required": [
+        "prior_run_id",
+        "prior_run_hash",
+        "basis"
+      ],
+      "properties": {
+        "prior_run_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "prior_run_hash": {
+          "$ref": "#/$defs/sha256_hex"
+        },
+        "basis": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
     "decisions": {
       "type": "object",
-      "required": ["eligible", "rejected", "requires_review"],
+      "required": [
+        "eligible",
+        "rejected",
+        "requires_review"
+      ],
       "properties": {
-        "eligible": { "type": "integer", "minimum": 0 },
-        "rejected": { "type": "integer", "minimum": 0 },
-        "requires_review": { "type": "integer", "minimum": 0 }
+        "eligible": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "rejected": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "requires_review": {
+          "type": "integer",
+          "minimum": 0
+        }
       },
       "additionalProperties": false
     },
@@ -152,17 +288,40 @@
       "description": "One row per reviewed candidate, in chain order (intake order).",
       "items": {
         "type": "object",
-        "required": ["review_id", "candidate_id", "source_case_id", "content_hash", "decision", "artifact_hash"],
+        "required": [
+          "review_id",
+          "candidate_id",
+          "source_case_id",
+          "content_hash",
+          "decision",
+          "artifact_hash"
+        ],
         "properties": {
-          "review_id": { "type": "string", "pattern": "^ECP-REVIEW-[0-9]{6,}$" },
+          "review_id": {
+            "type": "string",
+            "pattern": "^ECP-REVIEW-[0-9]{6,}$"
+          },
           "candidate_id": {
             "type": "string",
             "pattern": "^ECP-CAND-[A-Za-z0-9][A-Za-z0-9._:-]*$"
           },
-          "source_case_id": { "type": "string", "minLength": 1 },
-          "content_hash": { "$ref": "#/$defs/sha256_hex" },
-          "decision": { "enum": ["ELIGIBLE", "REJECTED", "REQUIRES_REVIEW"] },
-          "artifact_hash": { "$ref": "#/$defs/sha256_hex" }
+          "source_case_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "content_hash": {
+            "$ref": "#/$defs/sha256_hex"
+          },
+          "decision": {
+            "enum": [
+              "ELIGIBLE",
+              "REJECTED",
+              "REQUIRES_REVIEW"
+            ]
+          },
+          "artifact_hash": {
+            "$ref": "#/$defs/sha256_hex"
+          }
         },
         "additionalProperties": false
       }
@@ -173,10 +332,16 @@
     },
     "notes": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": {
+        "type": "string"
+      }
     },
-    "protocol_version": { "$ref": "#/$defs/semver" },
-    "schema_version": { "$ref": "#/$defs/semver" },
+    "protocol_version": {
+      "$ref": "#/$defs/semver"
+    },
+    "schema_version": {
+      "$ref": "#/$defs/semver"
+    },
     "run_hash": {
       "$ref": "#/$defs/sha256_hex",
       "description": "SHA-256 over the ECP-CANONICAL-JSON-1.0 serialization of this document with run_hash removed."

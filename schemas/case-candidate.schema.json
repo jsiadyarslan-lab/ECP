@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.ecp-protocol.org/0.3.0/case-candidate.schema.json",
   "title": "ECP Case Candidate (review-layer intake)",
-  "description": "Canonical intake representation of an UNREGISTERED, UNEXECUTED candidate case (M3-CA0, 0.3.0). Candidates are pre-registration review material: they carry no ECP-CASE id, no ECP-REG id, and are never published to the public ledger or the public repository. Real review material (content_class 'review') lives only in a private/local review area; public illustrations under examples/ must use content_class 'format-illustration'. content_hash is SHA-256 over the ECP-CANONICAL-JSON-1.0 serialization of the content object (R1 identity). Multiple intended_correct_answers/derivations blocks are represented faithfully (all blocks retained) — the review engine flags such anomalies; the parser never silently drops or reconciles them.",
+  "description": "Canonical intake representation of an UNREGISTERED, UNEXECUTED candidate case (M3-CA0, 0.3.0; extended additively in 0.4.0 with optional case_version and amendment linkage for M3-CA0-A case versioning). Candidates are pre-registration review material: they carry no ECP-CASE id, no ECP-REG id, and are never published to the public ledger or the public repository. Real review material (content_class 'review') lives only in a private/local review area; public illustrations under examples/ must use content_class 'format-illustration'. content_hash is SHA-256 over the ECP-CANONICAL-JSON-1.0 serialization of the content object (R1 identity). Multiple intended_correct_answers/derivations blocks are represented faithfully (all blocks retained) — the review engine flags such anomalies; the parser never silently drops or reconciles them.",
   "type": "object",
   "required": [
     "ecp_object",
@@ -17,9 +17,14 @@
     "schema_version"
   ],
   "properties": {
-    "ecp_object": { "const": "case-candidate" },
+    "ecp_object": {
+      "const": "case-candidate"
+    },
     "content_class": {
-      "enum": ["review", "format-illustration"],
+      "enum": [
+        "review",
+        "format-illustration"
+      ],
       "description": "'review' = real candidate material (private review area only). 'format-illustration' = public dummy values (examples/ only). The review engine refuses 'format-illustration' inputs."
     },
     "candidate_id": {
@@ -27,9 +32,45 @@
       "pattern": "^ECP-CAND-[A-Za-z0-9][A-Za-z0-9._:-]*$",
       "description": "Review-layer candidate identity (NOT an ECP-CASE id, NOT an ECP-REG id; neither is ever assigned at the review layer)."
     },
+    "case_version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Version of the case within the candidate lifecycle (0.4.0, optional; default 1 = the original extracted version). An amended candidate carries case_version 2+ and an amendment linkage; the prior version is immutable and remains in its own intake record."
+    },
+    "amendment": {
+      "type": "object",
+      "description": "Amendment linkage (0.4.0, optional; present iff this record is a review-time derived v2+ view of an amended candidate).",
+      "required": [
+        "amendment_id",
+        "amendment_hash",
+        "prior_case_version",
+        "prior_content_hash"
+      ],
+      "properties": {
+        "amendment_id": {
+          "type": "string",
+          "pattern": "^ECP-AMD-[0-9]{6,}$"
+        },
+        "amendment_hash": {
+          "$ref": "#/$defs/sha256_hex"
+        },
+        "prior_case_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "prior_content_hash": {
+          "$ref": "#/$defs/sha256_hex"
+        }
+      },
+      "additionalProperties": false
+    },
     "source": {
       "type": "object",
-      "required": ["case_id", "source_position", "source_document"],
+      "required": [
+        "case_id",
+        "source_position",
+        "source_document"
+      ],
       "properties": {
         "case_id": {
           "type": "string",
@@ -43,7 +84,11 @@
         },
         "source_document": {
           "type": "object",
-          "required": ["label", "sha256", "format"],
+          "required": [
+            "label",
+            "sha256",
+            "format"
+          ],
           "properties": {
             "label": {
               "type": "string",
@@ -70,35 +115,70 @@
       "minLength": 1,
       "description": "Verbatim source text of this candidate's block, retained for byte-level provenance-integrity verification (candidate → source → canonical artifact)."
     },
-    "provenance": { "$ref": "#/$defs/provenance" },
+    "provenance": {
+      "$ref": "#/$defs/provenance"
+    },
     "registration_authoring": {
       "type": "object",
       "description": "Optional registration-contract fields AUTHORED at intake time. The review engine checks their presence (R3); it never infers or authors them. Absent fields are recorded as outstanding authoring requirements, not filled in.",
       "properties": {
-        "case_version": { "$ref": "#/$defs/semver" },
+        "case_version": {
+          "$ref": "#/$defs/semver"
+        },
         "constraints": {
           "type": "array",
           "minItems": 1,
-          "items": { "type": "string", "minLength": 1 }
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
         },
-        "success_criterion": { "type": "string", "minLength": 1 },
+        "success_criterion": {
+          "type": "string",
+          "minLength": 1
+        },
         "verification_rule": {
           "type": "object",
-          "required": ["rule_id", "rule_type", "description"],
+          "required": [
+            "rule_id",
+            "rule_type",
+            "description"
+          ],
           "properties": {
-            "rule_id": { "type": "string", "minLength": 1 },
-            "rule_type": {
-              "enum": ["exact-match", "equivalence-class", "derivation-check", "procedural", "external-oracle", "other"]
+            "rule_id": {
+              "type": "string",
+              "minLength": 1
             },
-            "description": { "type": "string", "minLength": 1 },
-            "binding": { "enum": ["public", "protected"] }
+            "rule_type": {
+              "enum": [
+                "exact-match",
+                "equivalence-class",
+                "derivation-check",
+                "procedural",
+                "external-oracle",
+                "other"
+              ]
+            },
+            "description": {
+              "type": "string",
+              "minLength": 1
+            },
+            "binding": {
+              "enum": [
+                "public",
+                "protected"
+              ]
+            }
           },
           "additionalProperties": false
         },
         "required_artifacts": {
           "type": "array",
           "minItems": 1,
-          "items": { "type": "string", "minLength": 1 }
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
         }
       },
       "additionalProperties": false
@@ -119,22 +199,37 @@
         "self_review"
       ],
       "properties": {
-        "proposed_reasoning_family": { "type": "string", "minLength": 1 },
-        "structural_signature": { "type": "string", "minLength": 1 },
+        "proposed_reasoning_family": {
+          "type": "string",
+          "minLength": 1
+        },
+        "structural_signature": {
+          "type": "string",
+          "minLength": 1
+        },
         "premises": {
           "type": "array",
           "minItems": 1,
-          "items": { "type": "string", "minLength": 1 },
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
           "description": "Authored premise statements (numbering stripped; text verbatim)."
         },
-        "question": { "type": "string", "minLength": 1 },
+        "question": {
+          "type": "string",
+          "minLength": 1
+        },
         "intended_correct_answers": {
           "type": "array",
           "minItems": 1,
           "description": "ALL authored answer blocks, faithfully retained (multiple blocks = authored anomaly, flagged by the engine, never reconciled silently).",
           "items": {
             "type": "object",
-            "required": ["value", "source_block"],
+            "required": [
+              "value",
+              "source_block"
+            ],
             "properties": {
               "value": {
                 "type": "string",
@@ -156,7 +251,10 @@
           "description": "ALL authored derivation blocks, verbatim (multiple blocks = authored anomaly).",
           "items": {
             "type": "object",
-            "required": ["raw", "source_block"],
+            "required": [
+              "raw",
+              "source_block"
+            ],
             "properties": {
               "raw": {
                 "type": "string",
@@ -171,10 +269,25 @@
             "additionalProperties": false
           }
         },
-        "difficulty": { "enum": ["SHALLOW", "MEDIUM", "DEEP"] },
-        "retrieval_risk": { "type": "string", "minLength": 1 },
-        "ambiguity_risk": { "type": "string", "minLength": 1 },
-        "structural_uniqueness_rationale": { "type": "string", "minLength": 1 },
+        "difficulty": {
+          "enum": [
+            "SHALLOW",
+            "MEDIUM",
+            "DEEP"
+          ]
+        },
+        "retrieval_risk": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ambiguity_risk": {
+          "type": "string",
+          "minLength": 1
+        },
+        "structural_uniqueness_rationale": {
+          "type": "string",
+          "minLength": 1
+        },
         "self_review": {
           "type": "object",
           "required": [
@@ -186,12 +299,24 @@
             "structurally_distinct"
           ],
           "properties": {
-            "derivable": { "$ref": "#/$defs/self_review_value" },
-            "unique": { "$ref": "#/$defs/self_review_value" },
-            "self_contained": { "$ref": "#/$defs/self_review_value" },
-            "no_external_knowledge": { "$ref": "#/$defs/self_review_value" },
-            "no_real_world_dependency": { "$ref": "#/$defs/self_review_value" },
-            "structurally_distinct": { "$ref": "#/$defs/self_review_value" }
+            "derivable": {
+              "$ref": "#/$defs/self_review_value"
+            },
+            "unique": {
+              "$ref": "#/$defs/self_review_value"
+            },
+            "self_contained": {
+              "$ref": "#/$defs/self_review_value"
+            },
+            "no_external_knowledge": {
+              "$ref": "#/$defs/self_review_value"
+            },
+            "no_real_world_dependency": {
+              "$ref": "#/$defs/self_review_value"
+            },
+            "structurally_distinct": {
+              "$ref": "#/$defs/self_review_value"
+            }
           },
           "additionalProperties": false
         }
@@ -202,8 +327,12 @@
       "$ref": "#/$defs/sha256_hex",
       "description": "SHA-256 over the ECP-CANONICAL-JSON-1.0 serialization of the content object. Deterministic identity of the reviewed material; the engine recomputes and compares (R1)."
     },
-    "protocol_version": { "$ref": "#/$defs/semver" },
-    "schema_version": { "$ref": "#/$defs/semver" }
+    "protocol_version": {
+      "$ref": "#/$defs/semver"
+    },
+    "schema_version": {
+      "$ref": "#/$defs/semver"
+    }
   },
   "additionalProperties": false,
   "$defs": {
@@ -216,7 +345,10 @@
       "pattern": "^[0-9a-f]{64}$"
     },
     "self_review_value": {
-      "enum": ["Yes", "No"],
+      "enum": [
+        "Yes",
+        "No"
+      ],
       "description": "Author self-report values, transcribed verbatim (a self-report, not a verified property)."
     },
     "provenance": {
@@ -232,12 +364,25 @@
       "properties": {
         "authored_by": {
           "type": "object",
-          "required": ["model", "provider"],
+          "required": [
+            "model",
+            "provider"
+          ],
           "properties": {
-            "model": { "type": "string", "minLength": 1 },
-            "provider": { "type": "string", "minLength": 1 },
-            "model_version": { "type": "string" },
-            "api_version": { "type": "string" }
+            "model": {
+              "type": "string",
+              "minLength": 1
+            },
+            "provider": {
+              "type": "string",
+              "minLength": 1
+            },
+            "model_version": {
+              "type": "string"
+            },
+            "api_version": {
+              "type": "string"
+            }
           },
           "additionalProperties": false
         },
@@ -245,15 +390,30 @@
           "$ref": "#/$defs/iso8601_utc"
         },
         "information_boundary": {
-          "enum": ["isolated", "partial", "not-declared"]
+          "enum": [
+            "isolated",
+            "partial",
+            "not-declared"
+          ]
         },
         "acquisition": {
           "type": "object",
-          "required": ["label", "sha256", "acquired_at"],
+          "required": [
+            "label",
+            "sha256",
+            "acquired_at"
+          ],
           "properties": {
-            "label": { "type": "string", "minLength": 1 },
-            "sha256": { "$ref": "#/$defs/sha256_hex" },
-            "acquired_at": { "$ref": "#/$defs/iso8601_utc" }
+            "label": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha256": {
+              "$ref": "#/$defs/sha256_hex"
+            },
+            "acquired_at": {
+              "$ref": "#/$defs/iso8601_utc"
+            }
           },
           "additionalProperties": false
         },
@@ -263,11 +423,23 @@
           "description": "Ordered events from authoring to delivery (generation, repairs, mechanical splice), each with evidence reference. Timestamps must be non-decreasing (engine-verified).",
           "items": {
             "type": "object",
-            "required": ["event", "at", "evidence"],
+            "required": [
+              "event",
+              "at",
+              "evidence"
+            ],
             "properties": {
-              "event": { "type": "string", "minLength": 1 },
-              "at": { "$ref": "#/$defs/iso8601_utc" },
-              "evidence": { "type": "string", "minLength": 1 }
+              "event": {
+                "type": "string",
+                "minLength": 1
+              },
+              "at": {
+                "$ref": "#/$defs/iso8601_utc"
+              },
+              "evidence": {
+                "type": "string",
+                "minLength": 1
+              }
             },
             "additionalProperties": false
           }
@@ -276,26 +448,48 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["name", "label"],
+            "required": [
+              "name",
+              "label"
+            ],
             "properties": {
-              "name": { "type": "string", "minLength": 1 },
-              "label": { "type": "string", "minLength": 1 },
-              "sha256": { "$ref": "#/$defs/sha256_hex" }
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sha256": {
+                "$ref": "#/$defs/sha256_hex"
+              }
             },
             "additionalProperties": false
           }
         },
         "provenance_completeness": {
           "type": "object",
-          "required": ["status", "not_available"],
+          "required": [
+            "status",
+            "not_available"
+          ],
           "properties": {
             "status": {
-              "enum": ["COMPLETE", "PARTIAL", "MISSING", "BROKEN"],
+              "enum": [
+                "COMPLETE",
+                "PARTIAL",
+                "MISSING",
+                "BROKEN"
+              ],
               "description": "'COMPLETE' = all provenance fields available; 'PARTIAL' = some fields honestly recorded NOT AVAILABLE; 'MISSING' = provenance substance absent (declared); 'BROKEN' = provenance declared or detected as internally inconsistent."
             },
             "not_available": {
               "type": "array",
-              "items": { "type": "string", "minLength": 1 },
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
               "description": "Provenance fields honestly recorded as NOT AVAILABLE (never invented)."
             }
           },
@@ -303,12 +497,18 @@
         },
         "source_report_flags": {
           "type": "array",
-          "items": { "type": "string", "minLength": 1 },
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
           "description": "Honest limitations recorded by the delivery/source report (e.g. 'model-family-overlap', 'sampling-non-reproducible'). Recorded, never adjudicated, by the review layer."
         },
         "candidate_flags": {
           "type": "array",
-          "items": { "type": "string", "minLength": 1 },
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
           "description": "Candidate-specific flags recorded by the source report (e.g. 'nondeterminate-answer-design')."
         }
       },

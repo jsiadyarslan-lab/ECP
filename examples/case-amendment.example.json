@@ -1,0 +1,68 @@
+{
+  "ecp_object": "case-amendment",
+  "amendment_id": "ECP-AMD-000001",
+  "candidate_id": "ECP-CAND-000001",
+  "order_basis": "M3-CA0-A v1 §5 (FORMAT ILLUSTRATION: synthetic material; the retained answer is establishable from the premises without outcome-dependent reasoning)",
+  "prior": {
+    "case_version": 1,
+    "content_hash": "933e3d4fa6c225b7bdeeab63781d85445446b4bf97496870d0e3a411c77ee346"
+  },
+  "new": {
+    "case_version": 2,
+    "content_hash": "d93ee1810e1a63a07e6a6446b988e5289a85beda959b83b589a9b0cf918d0004"
+  },
+  "defect": {
+    "code": "SPEC-AMBIGUOUS-GT",
+    "description": "duplicated GT blocks with conflicting answers (FORMAT ILLUSTRATION: synthetic dual-block anomaly)",
+    "why_defect": "the second answer block is contradicted by the premises; the first is premise-consistent (synthetic fixture)",
+    "evidence": "the premises entail the first answer directly (synthetic fixture evidence: two-premise exclusion chain)"
+  },
+  "change": {
+    "kind": "GT-DOCUMENT-CONSOLIDATION",
+    "retained_answer_block": 1,
+    "retained_derivation_block": 1,
+    "removed_answer_blocks": [
+      2
+    ],
+    "removed_derivation_blocks": [
+      2
+    ]
+  },
+  "not_outcome_dependent": {
+    "statement": "the block selection uses case-internal premise analysis only (synthetic fixture; no evaluated-system knowledge exists)",
+    "basis": "zero evaluated-system executions exist for this synthetic set"
+  },
+  "provenance": {
+    "amendment_author": "ECP Review Example Executor",
+    "drafted_at": "2026-01-04T00:00:00Z",
+    "operator": "ECP Review Example Executor",
+    "order_reference": "M3-CA0-A example builder (format illustration)"
+  },
+  "disclosure_phase": {
+    "status": "COMPLETED"
+  },
+  "re_review": {
+    "required": true,
+    "dimensions": [
+      "identity",
+      "provenance",
+      "specification-completeness",
+      "novelty",
+      "leakage",
+      "duplication",
+      "reproducibility"
+    ],
+    "novelty_leakage_recheck": "REQUIRED"
+  },
+  "protocol_version": "0.4.0",
+  "schema_version": "0.4.0",
+  "draft_hash": "08f18e5d092dda68ca19e067cd86c228b20f33858edaaa4035620bc885eecd06",
+  "representation_bias_disclosure": {
+    "value": "NONE",
+    "completed_by": "ECP Review Example Executor",
+    "completed_at": "2026-01-05T00:00:00Z",
+    "disclosed_against_draft_hash": "08f18e5d092dda68ca19e067cd86c228b20f33858edaaa4035620bc885eecd06",
+    "basis": "synthetic fixture author has no knowledge of any evaluated system's internal representation (FORMAT ILLUSTRATION: public dummy values)"
+  },
+  "amendment_hash": "6a597db488f42f3a495e2c72a3dceb99827a33754fd038f2faf4eb25bd74fb44"
+}

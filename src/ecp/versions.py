@@ -1,28 +1,36 @@
-"""Explicit protocol/schema version compatibility (0.2.0 → 0.3.0 additive).
+"""Explicit protocol/schema version compatibility (0.3.0 → 0.4.0 additive).
 
 O8 (M3-R1 architecture decision, owner-approved) advanced the schema bundle
 to 0.2.0 by ADDING two new object contracts (``ledger-entry``,
-``store-manifest``). M3-CA0 advances it to 0.3.0 by ADDING four review-layer
+``store-manifest``). M3-CA0 advanced it to 0.3.0 by ADDING four review-layer
 contracts (``case-candidate``, ``case-review``, ``review-run``,
-``review-adjudication``). The ten 0.1.0 contracts and the two 0.2.0
-contracts are unchanged, and 0.1.x/0.2.x artifacts are NOT silently
-reinterpreted: they remain exactly as valid as they were. This module is
-the single place where that compatibility policy is stated
-machine-checkably.
+``review-adjudication``). M3-CA0-A advances it to 0.4.0 by ADDING one
+adjudication-layer contract (``case-amendment``) and EXTENDING the three
+0.3.0 review contracts additively (optional ``case_version``/``amendment``
+fields on case-candidate, optional ``amendment`` linkage on case-review,
+optional ``amendments``/``lineage`` blocks on review-run). The ten 0.1.0
+contracts and the two 0.2.0 contracts are unchanged, and 0.1.x/0.2.x/0.3.x
+artifacts are NOT silently reinterpreted: they remain exactly as valid as
+they were. This module is the single place where that compatibility policy
+is stated machine-checkably.
 
-Rules (normative, see spec §18–§19):
+Rules (normative, see spec §18–§20):
 
 - The *protocol* axis is backward compatible: documents citing
-  ``0.1.0`` or ``0.2.0`` remain valid under a ``0.3.0`` toolchain (the
-  protocol only gained mechanisms; no earlier semantics changed).
+  ``0.1.0``, ``0.2.0`` or ``0.3.0`` remain valid under a ``0.4.0``
+  toolchain (the protocol only gained mechanisms; no earlier semantics
+  changed).
 - The *schema* axis is per-object-type:
   - object types whose contract file is unchanged since 0.1.0 accept
-    ``0.1.0``, ``0.2.0`` and ``0.3.0`` (the contract content is
-    identical; new artifacts may equally cite the current bundle
+    ``0.1.0``, ``0.2.0``, ``0.3.0`` and ``0.4.0`` (the contract content
+    is identical; new artifacts may equally cite the current bundle
     version);
-  - object types introduced at 0.2.0 (unchanged in the 0.3.0 bundle)
-    accept ``0.2.0`` and ``0.3.0``;
-  - object types introduced at 0.3.0 accept only ``0.3.0``.
+  - object types introduced at 0.2.0 (unchanged in later bundles)
+    accept ``0.2.0``, ``0.3.0`` and ``0.4.0``;
+  - object types introduced at 0.3.0 (case-candidate/case-review/
+    review-run/review-adjudication) accept ``0.3.0`` and ``0.4.0``
+    (the 0.4.0 extensions are additive optional fields);
+  - object types introduced at 0.4.0 accept only ``0.4.0``.
 
 Anything outside these sets is a compatibility violation (an issue, not an
 exception — the caller decides severity). There is still no implicit
@@ -50,7 +58,8 @@ V020_CONTRACTS = (
     "store-manifest",
 )
 
-# Object types introduced by the 0.3.0 schema bundle (M3-CA0 case review):
+# Object types introduced by the 0.3.0 schema bundle (M3-CA0 case review;
+# extended additively in 0.4.0):
 V030_CONTRACTS = (
     "case-candidate",
     "case-review",
@@ -58,17 +67,24 @@ V030_CONTRACTS = (
     "review-adjudication",
 )
 
+# Object types introduced by the 0.4.0 schema bundle (M3-CA0-A case
+# amendment / adjudication layer):
+V040_CONTRACTS = (
+    "case-amendment",
+)
+
 #: Per-object-type accepted ``schema_version`` values.
 SCHEMA_VERSIONS: dict = {
-    **{name: ("0.1.0", "0.2.0", "0.3.0") for name in V010_CONTRACTS},
-    **{name: ("0.2.0", "0.3.0") for name in V020_CONTRACTS},
-    **{name: ("0.3.0",) for name in V030_CONTRACTS},
+    **{name: ("0.1.0", "0.2.0", "0.3.0", "0.4.0") for name in V010_CONTRACTS},
+    **{name: ("0.2.0", "0.3.0", "0.4.0") for name in V020_CONTRACTS},
+    **{name: ("0.3.0", "0.4.0") for name in V030_CONTRACTS},
+    **{name: ("0.4.0",) for name in V040_CONTRACTS},
 }
 
 #: Accepted ``protocol_version`` values for every artifact (protocol axis is
 #: backward compatible; all versions share identical semantics for all
-#: pre-0.3.0 mechanisms).
-PROTOCOL_VERSIONS = ("0.1.0", "0.2.0", "0.3.0")
+#: pre-0.4.0 mechanisms).
+PROTOCOL_VERSIONS = ("0.1.0", "0.2.0", "0.3.0", "0.4.0")
 
 
 def allowed_schema_versions(object_type: "str | None") -> tuple:

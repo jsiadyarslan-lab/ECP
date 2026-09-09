@@ -15,7 +15,7 @@
   },
   "review_parameters": {
     "engine": "ECP-REVIEW-ENGINE-1",
-    "engine_version": "0.3.0",
+    "engine_version": "0.4.0",
     "jaccard_overlap_threshold": 0.75,
     "real_world_registry_size": 79,
     "known_pattern_registry_size": 27
@@ -23,7 +23,7 @@
   "reviewer": {
     "kind": "deterministic-pipeline",
     "pipeline": "ECP-REVIEW-ENGINE-1",
-    "engine_version": "0.3.0",
+    "engine_version": "0.4.0",
     "operator": "ECP Review Example Executor"
   },
   "reviewed_at": "2026-01-03T00:00:00Z",
@@ -46,15 +46,19 @@
       "source_case_id": "S-001",
       "content_hash": "d93ee1810e1a63a07e6a6446b988e5289a85beda959b83b589a9b0cf918d0004",
       "decision": "ELIGIBLE",
-      "artifact_hash": "a069c756d187c2fe287cb7cc15336acc15c71273ddd44fc6744699e382aa8b48"
+      "artifact_hash": "10952662e4d74e8a2d7e1c277ee2b5e0b3c6ffa2930f1dfca366d57b9c3ad9ee"
     }
   ],
-  "chain_head": "a069c756d187c2fe287cb7cc15336acc15c71273ddd44fc6744699e382aa8b48",
+  "chain_head": "10952662e4d74e8a2d7e1c277ee2b5e0b3c6ffa2930f1dfca366d57b9c3ad9ee",
   "notes": [
     "review-layer run: no registration, no execution, no scoring; the public ledger is untouched by design (no code path to it)",
     "FORMAT ILLUSTRATION: public dummy values; no real review run is implied"
   ],
-  "protocol_version": "0.3.0",
-  "schema_version": "0.3.0",
-  "run_hash": "c558f65d3b3abb084ca7ad6502761f1d185e0fa96d8d7e797fa6d62ee8884d85"
+  "protocol_version": "0.4.0",
+  "schema_version": "0.4.0",
+  "amendments": {
+    "applied": 0,
+    "records": []
+  },
+  "run_hash": "20532fc79921f0a1a1132205b02fdecf003eb79b0de7913ab4cf584c542df88a"
 }

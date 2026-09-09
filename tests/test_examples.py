@@ -30,6 +30,7 @@ EXAMPLE_FILES = [
     "case-review.example.json",
     "review-run.example.json",
     "review-adjudication.example.json",
+    "case-amendment.example.json",
 ]
 
 
@@ -222,3 +223,36 @@ def test_review_adjudication_example_hash_is_real(examples):
         adjudication, "adjudication_hash"
     )
     assert adjudication["applies_to"]["question_code"] == "OQ-NOV-EXTERNAL"
+
+
+def test_case_amendment_example_two_phase_hashes_are_real(examples):
+    """M3-CA0-A: the amendment example carries BOTH hashes — draft_hash
+    over the disclosure-free draft and amendment_hash over the completed
+    record — machine evidence that the disclosure was completed in a
+    separate step AFTER drafting (never concurrently)."""
+    amendment = examples["case-amendment.example.json"]
+    import copy as _copy
+
+    from ecp.hashing import hash_document_excluding
+
+    assert amendment["ecp_object"] == "case-amendment"
+    assert amendment["disclosure_phase"]["status"] == "COMPLETED"
+    disclosure = amendment["representation_bias_disclosure"]
+    assert disclosure["value"] in ("NONE", "POSSIBLE", "KNOWN")
+    assert disclosure["disclosed_against_draft_hash"] == amendment["draft_hash"]
+
+    # the full record hashes to amendment_hash
+    assert amendment["amendment_hash"] == hash_document_excluding(
+        amendment, "amendment_hash"
+    )
+    # the disclosure-free draft view hashes to draft_hash
+    draft_view = _copy.deepcopy(amendment)
+    draft_view.pop("amendment_hash", None)
+    draft_view.pop("representation_bias_disclosure", None)
+    draft_view["disclosure_phase"] = {"status": "PENDING"}
+    assert amendment["draft_hash"] == hash_document_excluding(
+        draft_view, "draft_hash"
+    )
+    assert amendment["draft_hash"] != amendment["amendment_hash"]
+    # §7: material amendments never inherit review state
+    assert amendment["re_review"]["required"] is True

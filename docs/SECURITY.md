@@ -1,6 +1,6 @@
 # ECP Security Foundation — Threat Boundary
 
-Version 0.3.0-draft (M3-CA0 case review pipeline, additive over R1-I).
+Version 0.4.0-draft (M3-CA0-A case qualification & amendment, additive over M3-CA0).
 
 ## 1. Status
 
@@ -135,3 +135,21 @@ Security-relevant defects in the foundation (canonicalization
 ambiguity, schema bypass, boundary-scanner evasion) should be treated
 as protocol-level issues and reported per
 [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## 6c. Implemented at M3-CA0-A (for the record)
+
+Bundle 0.4.0 adds the adjudication/amendment layer: the `case-amendment`
+contract with the machine-enforced two-phase representation-bias
+disclosure (draft_hash + amendment_hash — a one-step forgery cannot
+reproduce the structure; the disclosure step operates only on an
+existing PENDING draft), loud refusal of PENDING/stale/tampered
+amendments at review time, engine-profile versioning so preserved
+0.3.0-era runs re-verify byte-identically (no silent reinterpretation),
+and `amendments/` as a boundary-scanned review-area location. The
+amendment derivation is a pure function: the v1 candidate record and
+the source document are never modified. Still deferred (unchanged):
+all §5 items (encryption at rest, multi-party ceremony hardware,
+external anchoring automation, federation). Threat model T1–T14 in
+docs/M3-R1-ARCHITECTURE-DECISION.md remains the normative threat
+analysis; the amendment layer adds no new trust surface (no network,
+no ledger, no store, no execution path — import-graph-tested).
