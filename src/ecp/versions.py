@@ -1,23 +1,28 @@
-"""Explicit protocol/schema version compatibility (0.2.0 additive).
+"""Explicit protocol/schema version compatibility (0.2.0 → 0.3.0 additive).
 
-O8 (M3-R1 architecture decision, owner-approved) advances the schema bundle
+O8 (M3-R1 architecture decision, owner-approved) advanced the schema bundle
 to 0.2.0 by ADDING two new object contracts (``ledger-entry``,
-``store-manifest``). The ten 0.1.0 contracts are unchanged, and 0.1.x
-artifacts are NOT silently reinterpreted: they remain exactly as valid as
-they were. This module is the single place where that compatibility policy
-is stated machine-checkably.
+``store-manifest``). M3-CA0 advances it to 0.3.0 by ADDING four review-layer
+contracts (``case-candidate``, ``case-review``, ``review-run``,
+``review-adjudication``). The ten 0.1.0 contracts and the two 0.2.0
+contracts are unchanged, and 0.1.x/0.2.x artifacts are NOT silently
+reinterpreted: they remain exactly as valid as they were. This module is
+the single place where that compatibility policy is stated
+machine-checkably.
 
-Rules (normative, see spec §18):
+Rules (normative, see spec §18–§19):
 
 - The *protocol* axis is backward compatible: documents citing
-  ``0.1.0`` remain valid under a ``0.2.0`` toolchain (the protocol only
-  gained mechanisms; no 0.1.0 semantics changed).
+  ``0.1.0`` or ``0.2.0`` remain valid under a ``0.3.0`` toolchain (the
+  protocol only gained mechanisms; no earlier semantics changed).
 - The *schema* axis is per-object-type:
   - object types whose contract file is unchanged since 0.1.0 accept
-    BOTH ``0.1.0`` (the original contract version) and ``0.2.0`` (the
-    current bundle version, under which new artifacts may equally cite
-    them, since the contract content is identical);
-  - object types introduced at 0.2.0 accept only ``0.2.0``.
+    ``0.1.0``, ``0.2.0`` and ``0.3.0`` (the contract content is
+    identical; new artifacts may equally cite the current bundle
+    version);
+  - object types introduced at 0.2.0 (unchanged in the 0.3.0 bundle)
+    accept ``0.2.0`` and ``0.3.0``;
+  - object types introduced at 0.3.0 accept only ``0.3.0``.
 
 Anything outside these sets is a compatibility violation (an issue, not an
 exception — the caller decides severity). There is still no implicit
@@ -25,7 +30,7 @@ exception — the caller decides severity). There is still no implicit
 """
 
 # Object types defined by the 0.1.0 schema bundle (contract files unchanged
-# in the 0.2.0 bundle):
+# in the 0.2.0 and 0.3.0 bundles):
 V010_CONTRACTS = (
     "protocol",
     "system",
@@ -39,22 +44,31 @@ V010_CONTRACTS = (
     "manifest",
 )
 
-# Object types introduced by the 0.2.0 schema bundle:
+# Object types introduced by the 0.2.0 schema bundle (unchanged in 0.3.0):
 V020_CONTRACTS = (
     "ledger-entry",
     "store-manifest",
 )
 
+# Object types introduced by the 0.3.0 schema bundle (M3-CA0 case review):
+V030_CONTRACTS = (
+    "case-candidate",
+    "case-review",
+    "review-run",
+    "review-adjudication",
+)
+
 #: Per-object-type accepted ``schema_version`` values.
 SCHEMA_VERSIONS: dict = {
-    **{name: ("0.1.0", "0.2.0") for name in V010_CONTRACTS},
-    **{name: ("0.2.0",) for name in V020_CONTRACTS},
+    **{name: ("0.1.0", "0.2.0", "0.3.0") for name in V010_CONTRACTS},
+    **{name: ("0.2.0", "0.3.0") for name in V020_CONTRACTS},
+    **{name: ("0.3.0",) for name in V030_CONTRACTS},
 }
 
 #: Accepted ``protocol_version`` values for every artifact (protocol axis is
-#: backward compatible; both versions share identical semantics for all
-#: pre-0.2.0 mechanisms).
-PROTOCOL_VERSIONS = ("0.1.0", "0.2.0")
+#: backward compatible; all versions share identical semantics for all
+#: pre-0.3.0 mechanisms).
+PROTOCOL_VERSIONS = ("0.1.0", "0.2.0", "0.3.0")
 
 
 def allowed_schema_versions(object_type: "str | None") -> tuple:
@@ -65,7 +79,7 @@ def allowed_schema_versions(object_type: "str | None") -> tuple:
     types; this fallback keeps the version check from masking the real
     error).
     """
-    return SCHEMA_VERSIONS.get(object_type, ("0.1.0", "0.2.0"))
+    return SCHEMA_VERSIONS.get(object_type, PROTOCOL_VERSIONS)
 
 
 def version_issues(document: dict) -> "list[str]":

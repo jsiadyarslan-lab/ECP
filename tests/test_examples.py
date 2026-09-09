@@ -26,6 +26,10 @@ EXAMPLE_FILES = [
     "audit.single-auditor-fallback.example.json",
     "ledger-entry.example.json",
     "store-manifest.example.json",
+    "case-candidate.example.json",
+    "case-review.example.json",
+    "review-run.example.json",
+    "review-adjudication.example.json",
 ]
 
 
@@ -173,3 +177,48 @@ def test_store_manifest_example_oplog_head_is_real(tmp_path):
     entry = json.loads((root / "oplog" / "00000001.json").read_text())
     shipped = json.load(open("examples/store-manifest.example.json"))
     assert shipped["oplog"]["head_oplog_hash"] == entry["oplog_hash"]
+
+
+# --- M3-CA0 review-layer examples: real, recomputable hashes ------------------
+
+
+def test_case_candidate_example_hash_is_real(examples):
+    candidate = examples["case-candidate.example.json"]
+    assert candidate["content_class"] == "format-illustration"
+    assert candidate["content_hash"] == hash_document(candidate["content"])
+
+
+def test_case_review_example_hashes_are_real(examples):
+    artifact = examples["case-review.example.json"]
+    assert artifact["content_class"] == "format-illustration"
+    assert artifact["artifact_hash"] == hash_document_excluding(
+        artifact, "artifact_hash"
+    )
+    # R7: the embedded candidate snapshot reconstructs to the content hash
+    assert hash_document(artifact["candidate_content"]) == artifact["content_hash"]
+    # §10 boundary: ELIGIBLE example carries an explicit STOP marker
+    assert artifact["decision"] == "ELIGIBLE"
+    assert artifact["registration_ready"]["boundary"] == "STOP-BEFORE-REGISTRATION"
+    assert artifact["prev_artifact_hash"] == "0" * 64
+
+
+def test_review_run_example_is_consistent(examples):
+    run = examples["review-run.example.json"]
+    artifact = examples["case-review.example.json"]
+    candidate = examples["case-candidate.example.json"]
+    assert run["run_hash"] == hash_document_excluding(run, "run_hash")
+    entry = run["entries"][0]
+    assert entry["artifact_hash"] == artifact["artifact_hash"]
+    assert entry["content_hash"] == candidate["content_hash"]
+    assert entry["candidate_id"] == candidate["candidate_id"]
+    assert run["chain_head"] == artifact["artifact_hash"]
+    assert run["decisions"] == {"eligible": 1, "rejected": 0, "requires_review": 0}
+    assert run["adjudications"]["applied"] == 2
+
+
+def test_review_adjudication_example_hash_is_real(examples):
+    adjudication = examples["review-adjudication.example.json"]
+    assert adjudication["adjudication_hash"] == hash_document_excluding(
+        adjudication, "adjudication_hash"
+    )
+    assert adjudication["applies_to"]["question_code"] == "OQ-NOV-EXTERNAL"

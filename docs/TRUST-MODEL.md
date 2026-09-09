@@ -100,11 +100,16 @@ when a disagreement exists.
 At R1-I the repository contains contracts, tooling, the protected-store
 and ledger machinery, and zero scientific data — no cases registered
 (the public ledger is empty), no executions, no evidence. Its
-trustworthiness currently rests on: the test suite (319 tests, including
-tamper-detection batteries for the store op log and the ledger chain),
-the boundary scanners (public tree + public ledger tree), the determinism
-of the core, and the write-once/append-only semantics now enforced in
-code. It claims nothing else. In particular it does not claim that the
+trustworthiness currently rests on: the test suite (433 tests, including
+tamper-detection batteries for the store op log, the ledger chain and the
+review-artifact chain, plus a full determinism re-derivation of review
+runs), the boundary scanners (public tree, public ledger tree and the
+private review area), the determinism of the core, and the
+write-once/append-only semantics now enforced in code. The M3-CA0 case
+review layer adds an explicit honesty rule: mechanical novelty and
+contamination checks are recorded as NOT_ESTABLISHABLE_MECHANICALLY and
+escalated to owner adjudication rather than guessed. It claims nothing
+else. In particular it does not claim that the
 protocol itself has been scientifically validated (see README status
 banner). The M3-R1 threat model (T1–T14, with residual risks stated
 honestly) is recorded in

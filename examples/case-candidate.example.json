@@ -1,0 +1,103 @@
+{
+  "ecp_object": "case-candidate",
+  "content_class": "format-illustration",
+  "candidate_id": "ECP-CAND-000001",
+  "source": {
+    "case_id": "S-001",
+    "source_position": 1,
+    "source_document": {
+      "label": "synthetic-example-source.md",
+      "sha256": "118d64861dadf1129085c5e59b88d3e3ab5fb34efc6a8622cefcd0d5c87d6a74",
+      "format": "M3-CA0-case-set-md-1"
+    }
+  },
+  "raw_block": "CASE ID: S-001\n\nPROPOSED_REASONING_FAMILY: Synthetic Categorical Logic\nSTRUCTURAL_SIGNATURE: synthetic two-premise exclusion chain\nPREMISES:\n1. All Zibs are Zobs.\n2. No Zob is a Zump.\n\nQUESTION:\n\nIf a Zib is selected, what can be concluded about its relationship to Zumps?\n\nINTENDED_CORRECT_ANSWER:\n\nIt is not a Zump.\n\nDERIVATION:\n1. A Zib is a Zob by premise one.\n2. No Zob is a Zump by premise two.\n3. Therefore a Zib is not a Zump.\n\nDIFFICULTY:\n\nSHALLOW\n\nRETRIEVAL_RISK:\n\nSynthetic fixture with invented abstract entities.\n\nAMBIGUITY_RISK:\n\nLow. Synthetic test fixture; abstract entities only.\n\nSTRUCTURAL_UNIQUENESS_RATIONALE:\n\nSynthetic fixture rationale: simple exclusion chain.\n\nSELF_REVIEW:\n- Derivable: Yes\n- Unique: Yes\n- Self-contained: Yes\n- No external knowledge: Yes\n- No real-world entity dependency: Yes\n- Structurally distinct: Yes\n",
+  "provenance": {
+    "authored_by": {
+      "model": "synthetic-example-author",
+      "provider": "example-fixture"
+    },
+    "authored_at": "2026-01-01T00:00:00Z",
+    "information_boundary": "isolated",
+    "acquisition": {
+      "label": "synthetic-example-source.md",
+      "sha256": "118d64861dadf1129085c5e59b88d3e3ab5fb34efc6a8622cefcd0d5c87d6a74",
+      "acquired_at": "2026-01-02T00:00:00Z"
+    },
+    "transformation_history": [
+      {
+        "event": "synthetic generation (example fixture)",
+        "at": "2026-01-01T00:00:00Z",
+        "evidence": "this script (FORMAT ILLUSTRATION: public dummy values)"
+      },
+      {
+        "event": "synthetic delivery (example fixture)",
+        "at": "2026-01-02T00:00:00Z",
+        "evidence": "this script (FORMAT ILLUSTRATION: public dummy values)"
+      }
+    ],
+    "originating_artifacts": [
+      {
+        "name": "synthetic-prompt",
+        "label": "example fixture"
+      }
+    ],
+    "provenance_completeness": {
+      "status": "COMPLETE",
+      "not_available": []
+    }
+  },
+  "content": {
+    "proposed_reasoning_family": "Synthetic Categorical Logic",
+    "structural_signature": "synthetic two-premise exclusion chain",
+    "premises": [
+      "All Zibs are Zobs.",
+      "No Zob is a Zump."
+    ],
+    "question": "If a Zib is selected, what can be concluded about its relationship to Zumps?",
+    "intended_correct_answers": [
+      {
+        "value": "It is not a Zump.",
+        "source_block": 1
+      }
+    ],
+    "derivations": [
+      {
+        "raw": "1. A Zib is a Zob by premise one.\n2. No Zob is a Zump by premise two.\n3. Therefore a Zib is not a Zump.",
+        "source_block": 1
+      }
+    ],
+    "difficulty": "SHALLOW",
+    "retrieval_risk": "Synthetic fixture with invented abstract entities.",
+    "ambiguity_risk": "Low. Synthetic test fixture; abstract entities only.",
+    "structural_uniqueness_rationale": "Synthetic fixture rationale: simple exclusion chain.",
+    "self_review": {
+      "derivable": "Yes",
+      "unique": "Yes",
+      "self_contained": "Yes",
+      "no_external_knowledge": "Yes",
+      "no_real_world_dependency": "Yes",
+      "structurally_distinct": "Yes"
+    }
+  },
+  "content_hash": "d93ee1810e1a63a07e6a6446b988e5289a85beda959b83b589a9b0cf918d0004",
+  "protocol_version": "0.3.0",
+  "schema_version": "0.3.0",
+  "registration_authoring": {
+    "case_version": "1.0.0",
+    "constraints": [
+      "premises-only reasoning",
+      "no external lookup"
+    ],
+    "success_criterion": "The evaluated system states the correct conclusion.",
+    "verification_rule": {
+      "rule_id": "SYN-EXACT-1",
+      "rule_type": "exact-match",
+      "description": "Synthetic fixture rule: exact answer match.",
+      "binding": "public"
+    },
+    "required_artifacts": [
+      "raw-output"
+    ]
+  }
+}

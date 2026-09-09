@@ -32,11 +32,21 @@ all embedded hashes/commitments are real (recomputed and verified by the test su
 | `audit.single-auditor-fallback.example.json` | `audit` | the honest single-auditor fallback declaration |
 | `ledger-entry.example.json` | `ledger-entry` (0.2.0) | a genesis chained ledger entry wrapping the registration example (real record_hash, real frozen commitment) |
 | `store-manifest.example.json` | `store-manifest` (0.2.0) | the manifest of an empty development store (byte-identical to a fresh `store-init` with pinned arguments) |
+| `case-candidate.example.json` | `case-candidate` (0.3.0) | a canonical candidate intake record (synthetic abstract entities, format illustration) |
+| `case-review.example.json` | `case-review` (0.3.0) | a real engine-produced ELIGIBLE review artifact (synthetic inputs + fixture adjudications) with the §10 STOP-BEFORE-REGISTRATION boundary visible |
+| `review-run.example.json` | `review-run` (0.3.0) | the matching one-candidate run manifest (real chain head, real run_hash) |
+| `review-adjudication.example.json` | `review-adjudication` (0.3.0) | an owner decision record for the OQ-NOV-EXTERNAL open question (the §9 human seam) |
 | `artifacts/raw-output.demo.txt` | — | simulated raw output artifact (hashed) |
 | `artifacts/execution-trace.demo.txt` | — | simulated execution trace artifact (hashed) |
 
 The two 0.2.0 examples (R1-I) are format illustrations of the registration
-ledger and the protected store. No ledger exists in this repository and no
+ledger and the protected store. The four 0.3.0 examples (M3-CA0) are
+format illustrations of the case review pipeline; their candidate material
+is fully SYNTHETIC (invented abstract entities — nothing derives from any
+real candidate set), and the review example was produced by the real
+engine from those synthetic inputs plus synthetic fixture adjudications,
+then marked `content_class: "format-illustration"` for public
+distribution (all hashes recompute). No ledger exists in this repository and no
 store exists here either: the public ledger lives in its own repository
 (starting empty, per the R1-I decision), and real protected stores live
 outside any public repository. Their hashes are real and recompute via the

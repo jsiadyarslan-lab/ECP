@@ -31,6 +31,17 @@ Registration ledger (R1-I, Option C — authority half of the seam):
   ledger-verify --ledger D [--cases D]           public verification
   anchor-publish --ledger D                      publish the chain HEAD anchor
 
+Case review pipeline (M3-CA0 — review/eligibility gate ONLY; no execution,
+no registration, no ledger writes):
+
+  review-extract --source F --provenance F --out D
+                                                 extract case-candidate records
+  review-run --review-root D --run-id ID --reviewer S --at ISO
+                                                 deterministic three-state review
+  review-verify --review-root D                 verify artifacts, chain, determinism
+  review-adjudicate --review-root D --adjudication F
+                                                 install an owner decision (the seam)
+
 Run from the repository root:  python tools/ecp_cli.py <command> ...
 """
 
@@ -151,6 +162,21 @@ def cmd_boundary_scan(args: argparse.Namespace) -> int:
                 f"  [{violation['rule']}] {violation['path']}: {violation['detail']}"
             )
         exit_code = exit_code or (1 if ledger_violations else 0)
+    if args.review_root:
+        review_violations = boundaries.scan_review_tree(args.review_root)
+        print(
+            "REVIEW TREE "
+            + (
+                f"{len(review_violations)} violation(s)"
+                if review_violations
+                else "CLEAN — review-area boundary respected"
+            )
+        )
+        for violation in review_violations:
+            print(
+                f"  [{violation['rule']}] {violation['path']}: {violation['detail']}"
+            )
+        exit_code = exit_code or (1 if review_violations else 0)
     return exit_code
 
 
@@ -166,6 +192,220 @@ def cmd_verify_commitment(args: argparse.Namespace) -> int:
     print(
         f"COMMITMENT VERIFIED: case {case_doc.get('case_id')} seal matches "
         f"ground truth {args.ground_truth}"
+    )
+    return 0
+
+
+# ---------------------------------------------------------------------------
+# Case review pipeline (M3-CA0 — review/eligibility gate ONLY; no execution)
+# ---------------------------------------------------------------------------
+
+def _atomic_write_bytes(path: Path, data: bytes) -> None:
+    import os
+    import uuid
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp = path.parent / f".{path.name}.tmp-{uuid.uuid4().hex}"
+    try:
+        with open(temp, "wb") as fh:
+            fh.write(data)
+        os.replace(temp, path)
+    finally:
+        if temp.exists():  # pragma: no cover
+            temp.unlink()
+
+
+def cmd_review_extract(args: argparse.Namespace) -> int:
+    from ecp import candidates as candidates_mod
+
+    sidecar = canonical.load_json(args.provenance)
+    try:
+        extracted, report = candidates_mod.extract_candidates(
+            args.source,
+            sidecar,
+            source_label=args.source_label,
+        )
+    except candidates_mod.ExtractionError as exc:
+        print(f"EXTRACTION FAILED: {exc}", file=sys.stderr)
+        return 1
+
+    out_dir = Path(args.out).resolve()
+    candidates_dir = out_dir / "candidates"
+    for candidate in extracted:
+        target = candidates_dir / f"{candidate['candidate_id']}.json"
+        _atomic_write_bytes(target, canonical.canonical_bytes(candidate))
+    report_target = out_dir / "extraction-report.json"
+    _atomic_write_bytes(
+        report_target,
+        json.dumps(report, indent=2, ensure_ascii=False).encode("utf-8") + b"\n",
+    )
+    # retain the provenance sidecar inside the review area (self-contained;
+    # review-verify and re-extraction depend on retained inputs)
+    _atomic_write_bytes(
+        out_dir / "source" / "source-provenance.json",
+        canonical.canonical_bytes(sidecar),
+    )
+    print(f"EXTRACTED: {len(extracted)} candidates -> {candidates_dir}")
+    print(f"source sha256: {report['source']['sha256']}")
+    print(f"coverage: {report['coverage']['status']} ({report['coverage']['accounted_lines']}/{report['coverage']['total_lines']} lines accounted)")
+    anomaly_cases = [a["case_id"] for a in report["per_case_anomalies"]]
+    print(f"cases with recorded anomalies: {anomaly_cases if anomaly_cases else 'none'}")
+    print(f"extraction report: {report_target}")
+    return 0
+
+
+def _load_review_root(review_root: Path) -> "tuple[list[dict], str | None, str | None, list[dict]]":
+    """Load (candidates, source_text, source_label, adjudications) from a
+    review root layout."""
+    candidates_dir = review_root / "candidates"
+    candidates = [
+        canonical.load_json(path)
+        for path in sorted(candidates_dir.glob("*.json"))
+    ]
+    source_text = None
+    source_label = None
+    source_dir = review_root / "source"
+    if source_dir.is_dir():
+        docs = sorted(
+            p for p in source_dir.iterdir()
+            if p.is_file() and p.suffix in (".md", ".txt")
+        )
+        if len(docs) == 1:
+            source_text = docs[0].read_text(encoding="utf-8")
+            source_label = f"source/{docs[0].name}"
+    adjudications = [
+        canonical.load_json(path)
+        for path in sorted((review_root / "adjudications").glob("*.json"))
+    ]
+    return candidates, source_text, source_label, adjudications
+
+
+def cmd_review_run(args: argparse.Namespace) -> int:
+    from ecp import review as review_mod
+
+    review_root = Path(args.review_root).resolve()
+    candidates, source_text, source_label, adjudications = _load_review_root(review_root)
+    if args.source:
+        source_path = Path(args.source).resolve()
+        source_text = source_path.read_text(encoding="utf-8")
+        source_label = args.source_label or source_path.name
+    if not candidates:
+        print("error: no candidates found in review root (candidates/*.json)", file=sys.stderr)
+        return 2
+
+    try:
+        result = review_mod.run_review(
+            candidates,
+            run_id=args.run_id,
+            reviewed_at=args.at,
+            operator=args.reviewer,
+            source_text=source_text,
+            source_label=source_label,
+            adjudications=adjudications,
+        )
+    except review_mod.ReviewError as exc:
+        print(f"REVIEW RUN FAILED: {exc}", file=sys.stderr)
+        return 1
+
+    reviews_dir = review_root / "reviews"
+    for artifact in result["artifacts"]:
+        target = reviews_dir / f"{artifact['review_id']}.json"
+        _atomic_write_bytes(target, canonical.canonical_bytes(artifact))
+    _atomic_write_bytes(
+        review_root / "review-run.json",
+        canonical.canonical_bytes(result["run"]),
+    )
+    decisions = result["run"]["decisions"]
+    print(f"REVIEW RUN COMPLETE: {result['run']['run_id']}")
+    print(
+        f"inspected: {result['run']['input']['candidates_inspected']}  "
+        f"eligible: {decisions['eligible']}  rejected: {decisions['rejected']}  "
+        f"requires_review: {decisions['requires_review']}"
+    )
+    print(f"adjudications applied: {result['run']['adjudications']['applied']}")
+    print(f"chain_head: {result['run']['chain_head']}")
+    print(f"artifacts: {reviews_dir}")
+    return 0
+
+
+def cmd_review_verify(args: argparse.Namespace) -> int:
+    from ecp import review as review_mod
+
+    review_root = Path(args.review_root).resolve()
+    run_path = review_root / "review-run.json"
+    if not run_path.is_file():
+        print(f"error: no review-run.json under {review_root}", file=sys.stderr)
+        return 2
+    run = canonical.load_json(run_path)
+    artifacts = [
+        canonical.load_json(path)
+        for path in sorted((review_root / "reviews").glob("*.json"))
+    ]
+
+    issues: "list[str]" = []
+    for artifact in artifacts:
+        issues.extend(review_mod.verify_artifact(artifact))
+    issues.extend(review_mod.verify_run(run, artifacts))
+    for path in sorted((review_root / "adjudications").glob("*.json")):
+        issues.extend(review_mod.verify_adjudication(canonical.load_json(path)))
+
+    # determinism re-derivation: re-run from retained inputs and compare
+    candidates, source_text, source_label, adjudications = _load_review_root(review_root)
+    if candidates:
+        rederived = review_mod.run_review(
+            candidates,
+            run_id=run["run_id"],
+            reviewed_at=run["reviewed_at"],
+            operator=run["reviewer"]["operator"],
+            source_text=source_text,
+            source_label=source_label,
+            adjudications=adjudications,
+        )
+        for stored, fresh in zip(artifacts, rederived["artifacts"]):
+            if stored.get("artifact_hash") != fresh.get("artifact_hash"):
+                issues.append(
+                    f"{stored.get('review_id', '?')}: DETERMINISM VIOLATION — "
+                    "re-derivation from retained inputs produced a different "
+                    "artifact hash"
+                )
+        if len(artifacts) != len(rederived["artifacts"]):
+            issues.append("DETERMINISM VIOLATION — artifact count differs on re-derivation")
+        if run.get("run_hash") != rederived["run"].get("run_hash"):
+            issues.append("DETERMINISM VIOLATION — run manifest hash differs on re-derivation")
+
+    if issues:
+        print(f"REVIEW VERIFICATION ISSUES ({len(issues)}):")
+        for issue in issues:
+            print(f"  - {issue}")
+        return 1
+    print(
+        f"REVIEW RUN INTACT: {run['run_id']} — {len(artifacts)} artifact(s), "
+        "chain, hashes, cross-references and determinism re-derivation all verified"
+    )
+    return 0
+
+
+def cmd_review_adjudicate(args: argparse.Namespace) -> int:
+    from ecp import review as review_mod
+
+    review_root = Path(args.review_root).resolve()
+    adjudication = canonical.load_json(args.adjudication)
+    issues = review_mod.verify_adjudication(adjudication)
+    if issues:
+        print(f"INVALID ADJUDICATION ({args.adjudication}):")
+        for issue in issues:
+            print(f"  - {issue}")
+        return 1
+    adj_id = adjudication["adjudication_id"]
+    target = review_root / "adjudications" / f"{adj_id}.json"
+    if target.exists():
+        print(f"error: adjudication {adj_id} already recorded (append-only)", file=sys.stderr)
+        return 1
+    _atomic_write_bytes(target, canonical.canonical_bytes(adjudication))
+    print(f"ADJUDICATION RECORDED: {adj_id} -> {target}")
+    print(
+        "owner decision installed; re-run 'review-run' to apply it "
+        "(the engine never fabricates owner decisions)"
     )
     return 0
 
@@ -364,6 +604,11 @@ def main(argv: "list[str] | None" = None) -> int:
         help="additionally scan a public ledger tree for protected-content "
         "violations and structural boundary rules",
     )
+    p_scan.add_argument(
+        "--review-root",
+        help="additionally scan a private review-area tree for review-layer "
+        "boundary rules (M3-CA0)",
+    )
     p_scan.set_defaults(func=cmd_boundary_scan)
 
     p_commit = sub.add_parser("verify-commitment", help="verify a case's ground-truth seal")
@@ -426,6 +671,32 @@ def main(argv: "list[str] | None" = None) -> int:
     p_anchor.add_argument("--ledger", required=True, help="ledger root")
     p_anchor.add_argument("--at", default=None, help="pinned UTC timestamp (default: now)")
     p_anchor.set_defaults(func=cmd_anchor_publish)
+
+    # --- case review pipeline (M3-CA0) ---
+    p_extract = sub.add_parser("review-extract", help="extract case candidates from a source case-set document")
+    p_extract.add_argument("--source", required=True, help="source candidate case-set document (markdown)")
+    p_extract.add_argument("--provenance", required=True, help="provenance sidecar JSON (operator-transcribed source provenance)")
+    p_extract.add_argument("--out", required=True, help="review root directory (candidates/ is created inside)")
+    p_extract.add_argument("--source-label", default=None, help="label recorded for the source document")
+    p_extract.set_defaults(func=cmd_review_extract)
+
+    p_review_run = sub.add_parser("review-run", help="run the deterministic case review (three-state decisions)")
+    p_review_run.add_argument("--review-root", required=True, help="review root directory (candidates/, source/, adjudications/)")
+    p_review_run.add_argument("--run-id", required=True, help="ECP-REVRUN-… run identifier")
+    p_review_run.add_argument("--reviewer", required=True, help="operator identity recorded on the run")
+    p_review_run.add_argument("--at", required=True, help="explicit UTC review timestamp (determinism: no wall clock)")
+    p_review_run.add_argument("--source", default=None, help="override source document path")
+    p_review_run.add_argument("--source-label", default=None, help="override source label")
+    p_review_run.set_defaults(func=cmd_review_run)
+
+    p_review_verify = sub.add_parser("review-verify", help="verify review artifacts, chain, manifest and determinism")
+    p_review_verify.add_argument("--review-root", required=True, help="review root directory")
+    p_review_verify.set_defaults(func=cmd_review_verify)
+
+    p_adj = sub.add_parser("review-adjudicate", help="install an owner adjudication record (the human review seam)")
+    p_adj.add_argument("--review-root", required=True, help="review root directory")
+    p_adj.add_argument("--adjudication", required=True, help="review-adjudication JSON document")
+    p_adj.set_defaults(func=cmd_review_adjudicate)
 
     args = parser.parse_args(argv)
     return args.func(args)

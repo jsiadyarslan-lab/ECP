@@ -8,15 +8,18 @@ registration, preserved execution evidence, two-auditor audit, and cryptographic
 provenance — with a strict separation between **verification** (integrity) and
 **scientific adjudication** (validity).
 
-> **STATUS: R1-I — MINIMAL COUPLED FOUNDATION (infrastructure only).**
+> **STATUS: M3-CA0 — CASE REVIEW PIPELINE (infrastructure only).**
 > This repository contains protocol contracts, versioned schemas,
 > canonicalization/hashing, verification tooling, boundary enforcement,
-> foundation tests, and — as of R1-I (schema bundle 0.2.0) — the **protected
-> evidence store** and **registration ledger** machinery decided in
+> foundation tests, the **protected evidence store** and **registration
+> ledger** machinery decided in
 > [docs/M3-R1-ARCHITECTURE-DECISION.md](docs/M3-R1-ARCHITECTURE-DECISION.md)
-> (Option C — minimal coupled foundation).
+> (Option C — minimal coupled foundation, R1-I / bundle 0.2.0), and — as of
+> M3-CA0 (bundle 0.3.0) — the **deterministic case review pipeline**: the
+> pre-registration eligibility gate for candidate cases (spec §19).
 >
 > - No evaluation case is registered (the public ledger starts **empty**).
+> - No candidate case has been registered, published or executed.
 > - No evaluated model or system has been executed.
 > - No experimental result or benchmark score exists.
 > - **M3 scientific validation has NOT yet been completed.**
@@ -192,6 +195,22 @@ python tools/ecp_cli.py register --ledger /path/to/ecp-ledger \
     --evaluation-id ECP-EVAL-0001
 python tools/ecp_cli.py ledger-verify --ledger /path/to/ecp-ledger
 python tools/ecp_cli.py anchor-publish --ledger /path/to/ecp-ledger
+
+# --- M3-CA0: case review pipeline (review/eligibility gate ONLY) ---
+# extract candidates from a source case-set document (private review area)
+python tools/ecp_cli.py review-extract --source candidate-set.md \
+    --provenance provenance-sidecar.json --out /path/to/review-area
+# run the deterministic three-state review (explicit timestamp: no wall clock)
+python tools/ecp_cli.py review-run --review-root /path/to/review-area \
+    --run-id ECP-REVRUN-0001 --reviewer "ECP Review Executor" \
+    --at 2026-01-01T00:00:00Z
+# verify artifacts, chain, manifest and determinism re-derivation
+python tools/ecp_cli.py review-verify --review-root /path/to/review-area
+# install an owner adjudication (the human review seam), then re-run
+python tools/ecp_cli.py review-adjudicate --review-root /path/to/review-area \
+    --adjudication decision.json
+# scan the private review area for boundary rules
+python tools/ecp_cli.py boundary-scan --review-root /path/to/review-area
 ```
 
 The package can also be imported directly (`src/` layout):
@@ -228,16 +247,23 @@ digest  = hash_document(doc)
 - **R1 (closed: discovery + decision)** — architecture decision record
   ([docs/M3-R1-ARCHITECTURE-DECISION.md](docs/M3-R1-ARCHITECTURE-DECISION.md)):
   Option C — minimal coupled foundation.
-- **R1-I (this state)** — implementation of the minimal coupled foundation:
+- **R1-I (closed)** — implementation of the minimal coupled foundation:
   protected store (CAS write-once, hash-chained op log, deterministic manifest),
   registration ledger (append-only chained entries, explicit supersession /
   invalidation, duplicate control), external Git anchoring, public verification
   tooling, explicit 0.1.x→0.2.0 compatibility. The public ledger exists and is
   EMPTY; no case is registered.
-- **Case review pipeline / authoring / registration of real cases / execution /
-  analysis (future, separately gated)** — none of these exist yet. In particular:
-  no model execution, no case-review pipeline, no evidence ingestion, no audit
-  workflow, no isolation enforcement, no CI, no cross-language platform.
+- **M3-CA0 (this state)** — the case review pipeline (spec §19): faithful
+  candidate extraction with full coverage checking, deterministic review
+  engine with the three-state decision model (ELIGIBLE / REJECTED /
+  REQUIRES_REVIEW — no fourth state), hash-chained review artifacts, run
+  manifests with determinism re-derivation, the owner-adjudication seam,
+  and review-area boundary enforcement. The pipeline reviews and decides
+  eligibility ONLY: no execution, no registration, no ledger writes.
+- **Registration of real cases / execution / analysis (future, separately
+  gated)** — none of these exist yet. In particular: no model execution, no
+  evidence ingestion, no audit workflow, no isolation enforcement, no CI, no
+  cross-language platform.
 
 Nothing in this repository constitutes, implies, or claims any experimental result.
 

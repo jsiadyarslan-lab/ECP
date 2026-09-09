@@ -1,6 +1,6 @@
 # ECP Architecture
 
-Version 0.2.0-draft (R1-I minimal coupled foundation, additive over R0).
+Version 0.3.0-draft (M3-CA0 case review pipeline, additive over R1-I).
 Normative contract details live in
 [spec/ECP-SPEC.md](../spec/ECP-SPEC.md); this document explains the
 *shape* of the system.
@@ -26,24 +26,27 @@ therefore optimizes for three properties, in this order:
 ┌────────────────────────────────────────────────────────────────┐
 │  PUBLIC CONTRACT REPOSITORY (this repository)                  │
 │                                                                │
-│  spec/          normative protocol specification (§1–§18)      │
-│  schemas/       12 machine-validatable contracts (2020-12)     │
+│  spec/          normative protocol specification (§1–§19)      │
+│  schemas/       16 machine-validatable contracts (2020-12)     │
 │  src/ecp/       reference core:                                │
 │      identity       pinned protocol identity                   │
 │      canonical       ECP-CANONICAL-JSON-1.0                    │
 │      hashing         deterministic sha256 (docs/files/fields)  │
 │      manifest        deterministic manifests                   │
 │      validate        schema validation                         │
-│      versions        explicit 0.1.x↔0.2.0 compatibility        │
+│      versions        explicit 0.1.x↔0.2.x↔0.3.x compatibility │
 │      verification    integrity checks (NOT adjudication)       │
 │      boundaries      public/protected + ledger-tree scanning   │
 │      linkage         cross-document provenance linkage         │
 │      store           protected store core (R1-I)              │
 │      ledger          registration ledger core (R1-I)          │
+│      candidates      case-candidate extraction (M3-CA0)       │
+│      review          deterministic review engine (M3-CA0)     │
 │  tools/         ecp_cli.py — identity/validate/hash/manifest/   │
 │                 boundary-scan/verify-commitment + store-init/  │
 │                 seal/verify, ledger-init/register/invalidate/  │
-│                 ledger-verify/anchor-publish                   │
+│                 ledger-verify/anchor-publish + review-extract/ │
+│                 review-run/review-verify/review-adjudicate     │
 │  examples/      format illustrations (clearly marked)          │
 │  cases/ evaluation/ evidence/ verification/  RESERVED (empty)   │
 └────────────────────────────────────────────────────────────────┘
@@ -123,7 +126,7 @@ The public/protected boundary is not a convention — it is executable:
 | `spec/` | normative specification | complete for foundation |
 | `schemas/` | 10 versioned JSON Schemas | complete, tested |
 | `src/ecp/` | reference core | complete, tested |
-| `tests/` | foundation tests | 319 tests, all passing |
+| `tests/` | foundation tests | 433 tests, all passing |
 | `tools/` | CLI | complete |
 | `examples/` | format illustrations | valid, hashes real |
 | `docs/` | architecture/trust/repro/security/open-core/contributing | complete |
@@ -153,7 +156,8 @@ The public/protected boundary is not a convention — it is executable:
 6. **Analysis layer** — only after evidence exists. Status: **future
    gate**.
 
-Contracts are ready for all of them; machinery exists for 2 and 4.
+Contracts are ready for all of them; machinery exists for 1 (review half),
+2 and 4.
 
 ## 8. What deliberately does not exist
 

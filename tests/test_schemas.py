@@ -22,6 +22,10 @@ EXAMPLE_SCHEMA_MAP = [
     ("audit.single-auditor-fallback.example.json", "audit"),
     ("ledger-entry.example.json", "ledger-entry"),
     ("store-manifest.example.json", "store-manifest"),
+    ("case-candidate.example.json", "case-candidate"),
+    ("case-review.example.json", "case-review"),
+    ("review-run.example.json", "review-run"),
+    ("review-adjudication.example.json", "review-adjudication"),
 ]
 
 

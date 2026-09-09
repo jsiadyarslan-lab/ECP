@@ -29,22 +29,21 @@ def verify_protocol_compatibility(
     """Check that *document* cites a protocol (and schema) version that is
     explicitly compatible with this repository's protocol.
 
-    Since the 0.2.0 additive bundle (R1-I), compatibility is an explicit
-    matrix (see :mod:`ecp.versions`): 0.1.x artifacts remain valid — they
-    are not silently reinterpreted, and they are not silently invalidated.
-    The document's cited versions must be members of the accepted sets:
-    ``protocol_version`` in ``("0.1.0", "0.2.0")`` for every object type,
-    and ``schema_version`` in the per-object-type accepted set (0.1.0
-    contracts unchanged since 0.1.0 accept both 0.1.0 and 0.2.0; contracts
-    introduced at 0.2.0 accept only 0.2.0).
+    Since the 0.2.0 additive bundle (R1-I) and the 0.3.0 additive bundle
+    (M3-CA0), compatibility is an explicit matrix (see
+    :mod:`ecp.versions`): 0.1.x/0.2.x artifacts remain valid — they are
+    not silently reinterpreted, and they are not silently invalidated.
+    The document's cited versions must be members of the accepted sets
+    (``ecp.versions.PROTOCOL_VERSIONS`` / per-object-type accepted
+    ``schema_version`` sets).
     """
-    from .versions import version_issues
+    from .versions import PROTOCOL_VERSIONS, version_issues
 
     identity = identity or load_identity()
     issues = version_issues(document)
     # The identity itself pins the CURRENT bundle; cross-check that the
     # repository is in a state this tooling understands.
-    if identity.get("schema_version") not in ("0.1.0", "0.2.0"):
+    if identity.get("schema_version") not in PROTOCOL_VERSIONS:
         issues.append(
             f"identity: repository pins unsupported schema_version "
             f"{identity.get('schema_version')!r}"

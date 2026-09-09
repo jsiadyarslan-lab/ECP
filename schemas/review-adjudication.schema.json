@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ecp-protocol.org/0.3.0/review-adjudication.schema.json",
+  "title": "ECP Review Adjudication (owner decision record)",
+  "description": "The human/owner review seam (M3-CA0, 0.3.0): one record per explicit OWNER decision on an open review question. Adjudications are INPUTS to the review engine: a re-run consumes them and records the decision inside the affected open questions. The engine never fabricates, infers, or defaults an owner decision; without an adjudication record the question stays open. disposition semantics: RESOLVE-CLEAN = question resolved, no longer blocks eligibility; ACCEPT-RISK = owner explicitly accepts the recorded risk, no longer blocks eligibility (recorded as accepted); CONFIRM-DEFECT = the underlying finding is confirmed as disqualifying (candidate REJECTED mechanically); UPHOLD-OPEN = question explicitly kept open (still blocks). adjudication_hash = SHA-256 over the ECP-CANONICAL-JSON-1.0 serialization of this document with the top-level adjudication_hash field removed.",
+  "type": "object",
+  "required": [
+    "ecp_object",
+    "adjudication_id",
+    "owner_identity",
+    "recorded_by_operator",
+    "at",
+    "applies_to",
+    "disposition",
+    "rationale",
+    "protocol_version",
+    "schema_version",
+    "adjudication_hash"
+  ],
+  "properties": {
+    "ecp_object": { "const": "review-adjudication" },
+    "adjudication_id": {
+      "type": "string",
+      "pattern": "^ECP-ADJ-[0-9]{6,}$"
+    },
+    "owner_identity": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Identity of the owner whose decision this record carries (the decision authority; the operator only transcribes)."
+    },
+    "recorded_by_operator": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Operator identity who transcribed the owner decision into the review area (attribution of the transcription, not of the decision)."
+    },
+    "at": {
+      "$ref": "#/$defs/iso8601_utc",
+      "description": "When the owner decision was communicated (owner-asserted; an input, not evidence)."
+    },
+    "applies_to": {
+      "type": "object",
+      "required": ["question_code"],
+      "description": "Scope of the decision: a question code (optionally restricted to one candidate).",
+      "properties": {
+        "question_code": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Open-question code this decision resolves (e.g. 'OQ-NOV-EXTERNAL'). Without candidate_id: applies to every candidate carrying that code."
+        },
+        "candidate_id": {
+          "type": "string",
+          "pattern": "^ECP-CAND-[A-Za-z0-9][A-Za-z0-9._:-]*$",
+          "description": "Optional restriction to one candidate."
+        }
+      },
+      "additionalProperties": false
+    },
+    "disposition": {
+      "enum": ["RESOLVE-CLEAN", "ACCEPT-RISK", "CONFIRM-DEFECT", "UPHOLD-OPEN"]
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The owner's stated rationale (transcribed verbatim; free text)."
+    },
+    "protocol_version": { "$ref": "#/$defs/semver" },
+    "schema_version": { "$ref": "#/$defs/semver" },
+    "adjudication_hash": {
+      "$ref": "#/$defs/sha256_hex",
+      "description": "SHA-256 over the ECP-CANONICAL-JSON-1.0 serialization of this document with adjudication_hash removed."
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "sha256_hex": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "iso8601_utc": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+    }
+  }
+}

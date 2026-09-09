@@ -27,8 +27,20 @@ from pathlib import Path
 
 RESERVED_DIRS = ("cases", "evaluation", "evidence", "verification")
 RESERVED_ALLOWED_FILES = {"README.md"}
-GROUND_TRUTH_CONTENT_KEYS = ("expected_answer", "derivation")
+GROUND_TRUTH_CONTENT_KEYS = (
+    "expected_answer",
+    "derivation",
+    "intended_correct_answers",
+    "derivations",
+)
 COMMITMENT_PATTERN = re.compile(r"^[0-9a-f]{64}$")
+
+#: Review-layer object types (M3-CA0): they belong ONLY in a private review
+#: area, never in the public repository (public illustrations under
+#: examples/ must be content_class 'format-illustration').
+REVIEW_OBJECTS = ("case-candidate", "case-review", "review-run", "review-adjudiction")
+#: Review-layer types that carry ground-truth-class content.
+REVIEW_GT_CARRYING = ("case-candidate", "case-review")
 
 
 def scan_repository(root: "str | Path") -> "list[dict]":
@@ -130,6 +142,30 @@ def scan_repository(root: "str | Path") -> "list[dict]":
                     }
                 )
 
+        # R6/R7 — review-layer objects (M3-CA0) never appear in the public
+        # repository outside examples/; inside examples/ the ground-truth
+        # carrying ones must be explicit format illustrations.
+        ecp_object = document.get("ecp_object")
+        if ecp_object in REVIEW_OBJECTS:
+            if not in_examples:
+                violations.append(
+                    {
+                        "rule": "review-object-outside-examples",
+                        "path": rel,
+                        "detail": "review-layer material belongs in a private "
+                        "review area, never in the public repository",
+                    }
+                )
+            elif ecp_object in REVIEW_GT_CARRYING and document.get("content_class") != "format-illustration":
+                violations.append(
+                    {
+                        "rule": "example-review-object-not-illustration",
+                        "path": rel,
+                        "detail": "review-layer examples under examples/ must be "
+                        "content_class 'format-illustration' (public dummy values)",
+                    }
+                )
+
     return violations
 
 
@@ -228,5 +264,179 @@ def scan_ledger_tree(ledger_root: "str | Path") -> "list[dict]":
                     "the ledger repository",
                 }
             )
+
+    return violations
+
+
+# --- review-area boundary (M3-CA0) --------------------------------------------
+#
+# The private/local review area holds review-layer material (candidates
+# with embedded ground-truth-class content, review artifacts, run
+# manifests, owner adjudications). These rules machine-check that the
+# review area never becomes anything else — in particular that it never
+# fabricates case/registration identities and never masquerades as a
+# ledger.
+
+REVIEW_ALLOWED_OBJECTS = REVIEW_OBJECTS
+REVIEW_OBJECT_DIRS = {
+    "case-candidate": ("candidates",),
+    "case-review": ("reviews",),
+    "review-run": (),  # only at the root, as review-run.json
+    "review-adjudication": ("adjudications",),
+}
+#: Identity strings the review layer must NEVER assign (registration- and
+#: case-layer identities are later, separately authorized acts).
+FORBIDDEN_ID_PREFIXES = ("ECP-CASE-", "ECP-REG-")
+#: Non-object files allowed in a review area (operator/ops artifacts).
+REVIEW_ALLOWED_OPS_FILES = {
+    "README.md",
+    "extraction-report.json",
+    "adjudications/README.md",
+    "candidates/README.md",
+    "reviews/README.md",
+    "source/README.md",
+}
+
+
+def scan_review_tree(review_root: "str | Path") -> "list[dict]":
+    """Scan a private review-area tree for boundary violations.
+
+    Rules:
+
+    - RV1  the review area contains only expected locations
+      (``candidates/``, ``reviews/``, ``adjudications/``, ``source/`` and
+      root files);
+    - RV2  every ECP object sits in its designated directory
+      (case-candidate in candidates/, case-review in reviews/,
+      review-adjudication in adjudications/, review-run only as the root
+      ``review-run.json``);
+    - RV3  no foreign ECP object type appears (ledger, registration, case,
+      system, execution, evaluation, evidence, audit, ground-truth, store
+      objects do not belong in a review area);
+    - RV4  no ``ECP-CASE-`` or ``ECP-REG-`` identity is ever assigned by
+      the review layer (string scan over every file);
+    - RV5  every JSON file parses and validates against its schema;
+    - RV6  unexpected non-object files are flagged.
+    """
+    root = Path(review_root)
+    violations: "list[dict]" = []
+
+    if not root.is_dir():
+        return [
+            {
+                "rule": "review-root-missing",
+                "path": str(root),
+                "detail": "review root is not a directory",
+            }
+        ]
+
+    allowed_top_entries = {
+        "candidates", "reviews", "adjudications", "source",
+        "review-run.json", "README.md", "extraction-report.json",
+    }
+    for entry in sorted(root.iterdir()):
+        name = entry.name
+        if name not in allowed_top_entries:
+            violations.append(
+                {
+                    "rule": "review-unexpected-top-entry",
+                    "path": name,
+                    "detail": "review area allows only candidates/, reviews/, "
+                    "adjudications/, source/ and root ops files",
+                }
+            )
+
+    # RV4 — forbidden identity prefixes, over raw file text.
+    for path in sorted(root.rglob("*")):
+        if not path.is_file():
+            continue
+        rel = path.relative_to(root).as_posix()
+        if any(part.startswith(".") for part in path.relative_to(root).parts):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+        for prefix in FORBIDDEN_ID_PREFIXES:
+            if prefix in text:
+                violations.append(
+                    {
+                        "rule": "review-fabricated-identity",
+                        "path": rel,
+                        "detail": f"review layer must never assign {prefix}* identities",
+                    }
+                )
+
+    # RV2/RV3/RV5/RV6 — walk JSON documents.
+    for path in sorted(root.rglob("*.json")):
+        rel = path.relative_to(root).as_posix()
+        if any(part.startswith(".") for part in path.relative_to(root).parts):
+            continue
+        try:
+            with open(path, "r", encoding="utf-8") as fh:
+                document = json.load(fh)
+        except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+            violations.append(
+                {
+                    "rule": "review-invalid-json",
+                    "path": rel,
+                    "detail": f"unparseable JSON: {exc}",
+                }
+            )
+            continue
+        if not isinstance(document, dict) or "ecp_object" not in document:
+            if rel not in REVIEW_ALLOWED_OPS_FILES and not rel.startswith("source/"):
+                violations.append(
+                    {
+                        "rule": "review-unexpected-ops-file",
+                        "path": rel,
+                        "detail": "non-ECP-object JSON files are not expected here",
+                    }
+                )
+            continue
+
+        ecp_object = document.get("ecp_object")
+        if ecp_object not in REVIEW_ALLOWED_OBJECTS:
+            violations.append(
+                {
+                    "rule": "review-foreign-ecp-object",
+                    "path": rel,
+                    "detail": f"ecp_object {ecp_object!r} does not belong in a review area",
+                }
+            )
+            continue
+
+        allowed_dirs = REVIEW_OBJECT_DIRS[ecp_object]
+        if ecp_object == "review-run":
+            if rel != "review-run.json":
+                violations.append(
+                    {
+                        "rule": "review-object-wrong-location",
+                        "path": rel,
+                        "detail": "review-run manifests live only at the root as review-run.json",
+                    }
+                )
+        elif not any(rel.startswith(d + "/") for d in allowed_dirs):
+            violations.append(
+                {
+                    "rule": "review-object-wrong-location",
+                    "path": rel,
+                        "detail": f"{ecp_object} objects belong in "
+                        f"{'/'.join(allowed_dirs)}/",
+                }
+            )
+
+        if ecp_object != "review-run":
+            from .validate import validate_document
+
+            issues = validate_document(document, ecp_object)
+            if issues:
+                violations.append(
+                    {
+                        "rule": "review-object-schema-invalid",
+                        "path": rel,
+                        "detail": "; ".join(issues[:3]),
+                    }
+                )
 
     return violations

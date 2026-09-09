@@ -1,0 +1,15 @@
+{
+  "ecp_object": "review-adjudication",
+  "adjudication_id": "ECP-ADJ-000001",
+  "owner_identity": "ECP-OWNER-TEST",
+  "recorded_by_operator": "ECP Review Test Executor",
+  "at": "2026-01-02T12:00:00Z",
+  "applies_to": {
+    "question_code": "OQ-NOV-EXTERNAL"
+  },
+  "disposition": "RESOLVE-CLEAN",
+  "rationale": "test fixture owner decision (FORMAT ILLUSTRATION: public dummy values)",
+  "protocol_version": "0.3.0",
+  "schema_version": "0.3.0",
+  "adjudication_hash": "f7c0c315f142c2ca445a1d04c5cee28cfe0146fc1081c3eb3f15b911133753c9"
+}

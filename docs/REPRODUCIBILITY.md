@@ -1,7 +1,7 @@
 # ECP Reproducibility Model
 
-Version 0.2.0-draft (R1-I minimal coupled foundation, additive
-over R0).
+Version 0.3.0-draft (M3-CA0 case review pipeline, additive
+over R1-I).
 
 ## 1. The four classes are NOT synonyms
 
@@ -66,7 +66,17 @@ machinery (R1-I): the registration ledger records item 4 as chained,
 anchored, publicly verifiable entries, and this repository at a pinned
 commit is item 8. Item 9 has a schema slot. None of the *content*
 (cases, executions, evidence) exists yet — no evaluation is registered
-and the public ledger is empty; that is the R1-I scope boundary.
+and the public ledger is empty.
+
+M3-CA0 adds the pre-registration review layer to this picture: every
+review run is a pure function of its explicit retained inputs
+(candidates, source text, adjudications, run id, reviewer, explicit
+timestamp — never wall-clock), and `review-verify` re-derives the ENTIRE
+run from those inputs, requiring byte-identical artifact hashes. The
+review artifacts themselves embed the candidate content, so another
+operator can reconstruct the candidate definition from the retained
+review artifacts alone (R7). That is the M3-CA0 scope boundary — no
+registration, no execution, no results.
 
 ## 4. What R0 already guarantees
 

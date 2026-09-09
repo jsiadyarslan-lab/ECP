@@ -1,6 +1,6 @@
 # ECP Security Foundation — Threat Boundary
 
-Version 0.2.0-draft (R1-I minimal coupled foundation, additive over R0).
+Version 0.3.0-draft (M3-CA0 case review pipeline, additive over R1-I).
 
 ## 1. Status
 
@@ -8,7 +8,12 @@ The full security posture remains **documented, not fully implemented**.
 R1-I implemented the integrity half of the boundary decisions below
 (hash-chained append-only ledger, CAS write-once store, atomic writes,
 external anchoring, duplicate/replay control, tamper-evidence verified by
-tests). Confidentiality enforcement at the filesystem/host level
+tests). M3-CA0 added the review-layer boundary: candidate ground truth
+never enters the public repository or the public ledger (review
+material lives only in a private review area, machine-checked), the
+review engine has no code path to the ledger, the store, models or the
+network, and the review layer never assigns case/registration
+identities. Confidentiality enforcement at the filesystem/host level
 (encryption at rest, access control beyond tool-enforced role rules,
 runtime isolation) remains deferred per the M3-R1 decision (O3) and the
 threat model in
@@ -108,6 +113,21 @@ rejections. Tamper detection for these paths is pinned by the test suite
 batteries). Residual risks (anchor window, single-operator limits) are
 documented in the M3-R1 decision record §5 (T1–T3) and remain accepted
 at this scale.
+
+## 6b. Implemented at M3-CA0 (for the record)
+
+For candidate material before registration: candidate ground-truth
+content is confined to the private review area (boundary-scanned; the
+public repository admits only `format-illustration` examples); review
+artifacts are hash-chained with full determinism re-derivation on
+verification; owner adjudications are explicit, hash-covered records
+(never fabricated); the review engine provably has no path to models,
+the network, the ledger or the store (import-graph-pinned by tests).
+Honest limitations: the leakage/novelty registries are small and
+registry-driven (a miss is not a cleanliness proof — external novelty
+and contamination are escalated as open questions, never guessed), and
+authoring-model family overlap is recorded as a source-contamination
+question for the owner, not silently dismissed.
 
 ## 6. Reporting
 

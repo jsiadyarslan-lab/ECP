@@ -14,13 +14,17 @@ This package implements the repository's scientific core:
 - cross-document provenance linkage (:mod:`ecp.linkage`);
 - protected evidence store — CAS write-once custody (:mod:`ecp.store`);
 - registration ledger — append-only hash-chained authority
-  (:mod:`ecp.ledger`).
+  (:mod:`ecp.ledger`);
+- case-candidate extraction — faithful, coverage-checked intake
+  (:mod:`ecp.candidates`, M3-CA0);
+- case review engine — deterministic three-state eligibility gate
+  (:mod:`ecp.review`, M3-CA0).
 
 It deliberately contains NO model adapters, NO execution machinery, NO scoring
 logic and NO provider-specific code (see spec/ECP-SPEC.md, "Provider neutrality").
 """
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 from .canonical import CANONICALIZATION_ID, canonical_bytes, canonical_dumps
 from .hashing import (

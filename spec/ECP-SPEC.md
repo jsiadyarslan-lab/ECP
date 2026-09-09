@@ -1,8 +1,8 @@
 # ECP Specification
 
-**Version 0.2.0-draft — R1-I Minimal Coupled Foundation (additive over R0)**
+**Version 0.3.0-draft — M3-CA0 Case Review Pipeline (additive over R1-I)**
 
-Status: normative for the repository foundation at schema bundle 0.2.0.
+Status: normative for the repository foundation at schema bundle 0.3.0.
 This document uses RFC 2119-style language (MUST / MUST NOT / SHOULD /
 MAY). The repository root `ECP-IDENTITY.json` pins the versions this
 specification is normative for:
@@ -10,10 +10,10 @@ specification is normative for:
 ```
 protocol_name      ECP
 protocol_title     Evidentiary Evaluation Protocol
-protocol_version   0.2.0
+protocol_version   0.3.0
 protocol_status    draft
-schema_version     0.2.0
-repository_version 0.2.0
+schema_version     0.3.0
+repository_version 0.3.0
 canonicalization   ECP-CANONICAL-JSON-1.0
 hash_algorithm     sha256
 ```
@@ -26,13 +26,22 @@ separation between verification (integrity) and scientific adjudication
 (validity). This specification defines the foundation contracts and the
 deterministic machinery they rely on.
 
-The 0.2.0 revision (R1-I) is **additive**: it introduces the protected
+The 0.2.0 revision (R1-I) was **additive**: it introduced the protected
 evidence store (§15), the registration ledger (§16), external anchoring
 (§17) and the explicit version-compatibility policy (§18), per the
 architecture decision recorded in
 `docs/M3-R1-ARCHITECTURE-DECISION.md` (Option C — minimal coupled
 foundation). No 0.1.0 contract is modified and no 0.1.x artifact is
 reinterpreted (§18).
+
+The 0.3.0 revision (M3-CA0) is likewise **additive**: it introduces the
+case review pipeline (§19) — the deterministic pre-registration review
+and eligibility gate for candidate cases — with four new review-layer
+contracts (`case-candidate`, `case-review`, `review-run`,
+`review-adjudication`). No earlier contract is modified and no 0.1.x or
+0.2.x artifact is reinterpreted (§18). The review layer is a
+**review/eligibility gate ONLY**: it never executes models, never scores,
+never registers, and never writes to the public ledger.
 
 ---
 
@@ -263,12 +272,13 @@ API, agent framework, cloud, or specific evaluated system. Integrations
 with concrete systems live outside the core and are future work under
 separate authorization.
 
-## 13. Scope boundary (R0 → R1-I)
+## 13. Scope boundary (R0 → R1-I → M3-CA0)
 
 R0 provided the foundation only. R1-I (0.2.0) added the protected store
 (§15), the registration ledger (§16), anchoring (§17) and the version
 compatibility policy (§18) — infrastructure only, per the M3-R1
-architecture decision. The following still do not exist and MUST NOT be
+architecture decision. M3-CA0 (0.3.0) added the case review pipeline
+(§19) — the deterministic review/eligibility gate for candidate cases. The following still do not exist and MUST NOT be
 claimed: model adapters, benchmark execution, external model calls,
 scientific case generation, case registration as a scientific experiment,
 scoring, hidden benchmark publication, commercial features, and M3
@@ -398,19 +408,168 @@ the architecture decision record).
    consensus, no over-engineering: a hash chain + public Git anchoring is
    the approved mechanism (decision rule: no forced commercial provider).
 
-## 18. Version compatibility (0.1.x → 0.2.0)
+## 18. Version compatibility (0.1.x → 0.2.0 → 0.3.0)
 
-1. The 0.2.0 schema bundle is **additive**: the ten 0.1.0 contract files
-   are unchanged; two new contracts (`ledger-entry`, `store-manifest`)
-   are added. The protocol version advances because §15–§17 add
-   normative mechanisms.
+1. The 0.2.0 and 0.3.0 schema bundles are **additive**: the ten 0.1.0
+   contract files are unchanged; 0.2.0 added two contracts
+   (`ledger-entry`, `store-manifest`); 0.3.0 adds four review-layer
+   contracts (`case-candidate`, `case-review`, `review-run`,
+   `review-adjudication`). The protocol version advances because each
+   revision adds normative mechanisms.
 2. Compatibility is an explicit, machine-checkable matrix
    (`ecp.versions`): every object type defined at 0.1.0 accepts
-   `schema_version` in {`0.1.0`, `0.2.0`} (the contract content is
-   identical); object types introduced at 0.2.0 accept only `0.2.0`;
-   `protocol_version` in {`0.1.0`, `0.2.0`} is valid for every artifact.
-3. 0.1.x artifacts MUST NOT be silently reinterpreted and MUST NOT be
-   invalidated by the bundle bump. The R0 examples (0.1.0 citations)
-   remain valid artifacts — this is pinned by tests.
+   `schema_version` in {`0.1.0`, `0.2.0`, `0.3.0`} (the contract content
+   is identical); object types introduced at 0.2.0 accept {`0.2.0`,
+   `0.3.0`}; object types introduced at 0.3.0 accept only `0.3.0`;
+   `protocol_version` in {`0.1.0`, `0.2.0`, `0.3.0`} is valid for every
+   artifact.
+3. 0.1.x and 0.2.x artifacts MUST NOT be silently reinterpreted and MUST
+   NOT be invalidated by a bundle bump. The R0 examples (0.1.0
+   citations) and R1-I examples (0.2.0 citations) remain valid
+   artifacts — this is pinned by tests.
 4. Anything outside the matrix is a compatibility violation reported as
    an issue by the verification tooling.
+
+---
+
+## 19. Case Review Pipeline (0.3.0 / M3-CA0)
+
+The case review pipeline is the **deterministic pre-registration review
+and eligibility gate** for candidate cases. It answers, per candidate:
+"is this candidate sufficiently specified, provenance-traceable,
+novelty-safe, leakage-safe, and reproducible enough to become
+registration-eligible?" — and it produces a review decision, NEVER an
+experimental result. This section is normative for the 0.3.0 review-layer
+contracts.
+
+### 19.1 Position and boundary
+
+The pipeline sits BEFORE the registration ceremony in the case
+lifecycle:
+
+```
+candidate source document
+   → extraction (case-candidate records)
+   → deterministic review (case-review artifacts)
+   → eligibility decision (three states)
+   → registration-ready representation (§10 boundary: STOP)
+   → [registration — separate authorization, NOT this layer]
+```
+
+The review layer MUST NOT execute models, call providers, score
+benchmarks, collect results, perform statistical analysis, register
+cases, or write to the public ledger. There is no code path from
+`ecp.review` or `ecp.candidates` to `ecp.ledger` or `ecp.store` — this
+is pinned by tests (import-graph checks) and by construction.
+
+### 19.2 Candidate intake (`case-candidate`)
+
+Candidates enter as source documents in the M3-CA0 case-set format
+(`M3-CA0-case-set-md-1`), extracted by `ecp.candidates` into canonical
+`case-candidate` records (schema 0.3.0). Extraction is faithful and
+total:
+
+1. **Coverage check.** Every line of the source document MUST be
+   accounted for (case blocks, separators, fences, tail sections). A
+   coverage failure aborts extraction loudly — content is never
+   silently dropped.
+2. **Anomaly retention.** Authored anomalies (multiple
+   `INTENDED_CORRECT_ANSWER` / `DERIVATION` blocks, unknown labels,
+   non-numbered premise lines) are retained verbatim and recorded; the
+   extractor never reconciles, repairs, or drops them. Resolution is a
+   human act.
+3. **Provenance sidecar.** Author, provider, acquisition path,
+   transformation history and honest NOT-AVAILABLE fields are supplied
+   by the operator as a provenance sidecar (transcribed from the source
+   report); the extractor never invents provenance. The sidecar's
+   acquisition hash MUST match the actual source document or extraction
+   fails.
+4. **Identity.** `candidate_id` is assigned deterministically by intake
+   order (`ECP-CAND-NNNNNN`); `content_hash` is the SHA-256 over the
+   canonical `content` object. The review layer MUST NOT assign
+   `ECP-CASE-*` or `ECP-REG-*` identities (machine-checked by the
+   review-area boundary scan).
+5. **Class.** Real review material carries `content_class: review` and
+   lives only in a private/local review area; public illustrations
+   carry `content_class: format-illustration` and live only under
+   `examples/`. The engine refuses illustration inputs.
+
+### 19.3 Review dimensions
+
+The engine (`ecp.review`, `ECP-REVIEW-ENGINE-1`) evaluates, per
+candidate: **R1 identity** (content-hash recomputation), **R2
+provenance** (declared completeness, NOT-AVAILABLE fields, source-report
+flags), **R3 specification completeness** (authored content present;
+conflicting or duplicated ground-truth blocks flagged, never reconciled;
+registration-contract fields — constraints, success criterion,
+verification rule — MUST be authored, never inferred), **R4 novelty**
+(within-set exact/canonical/source/signature/overlap detection plus the
+honest external status `NOT_ESTABLISHABLE_MECHANICALLY`), **R5 leakage**
+(detectors: answer-in-task, eval-material-in-task, real-world entities
+[registry-driven, small, honest], known benchmark/puzzle patterns,
+metadata labels; confirmed answer/eval leaks are disqualifying), **R6
+provenance integrity** (candidate → source → transformation → canonical
+artifact recomputed byte-exactly against the retained source document),
+**R7 reproducibility** (the artifact embeds the candidate content so
+another operator can reconstruct the definition from retained review
+artifacts alone).
+
+### 19.4 The three-state decision model
+
+Every candidate terminates in exactly one of: **ELIGIBLE** (all
+mandatory gates pass and no unresolved critical issue exists),
+**REJECTED** (a disqualifying condition is positively established), or
+**REQUIRES_REVIEW** (an important condition cannot be resolved
+mechanically). There is NO fourth state: ambiguous decision inputs
+(out-of-enum check results) abort the run loudly
+(`InvalidReviewState`) — "probably eligible", "looks fine" and
+"pending" do not exist. No candidate is silently discarded and no
+candidate is silently upgraded.
+
+### 19.5 The human review seam (`review-adjudication`)
+
+Important conditions that cannot be resolved mechanically are recorded
+as **open questions** (with evidence and a proposed disposition) inside
+every review artifact. Owner decisions enter ONLY through explicit
+`review-adjudication` records — the engine never fabricates, infers, or
+defaults an owner decision. Adjudication dispositions:
+`RESOLVE-CLEAN` (resolved; no longer blocks), `ACCEPT-RISK` (owner
+explicitly accepts the recorded risk), `CONFIRM-DEFECT` (the finding is
+confirmed as disqualifying — the candidate is mechanically REJECTED),
+`UPHOLD-OPEN` (explicitly kept open). When several adjudications match
+one question, the latest (by `at`, ties by id) applies and every
+matched id is recorded (override semantics, never silent).
+
+### 19.6 Determinism and verification
+
+The review is a pure function of its explicit inputs (candidates,
+source text, adjudications, run id, reviewer, `reviewed_at` timestamp —
+no wall clock, no randomness, no network, no subprocess). Artifacts are
+hash-chained per run (`prev_artifact_hash` / `artifact_hash`); the run
+manifest (`review-run`) records the retained inputs, engine parameters,
+decision tally, artifact chain and a self-referential `run_hash`.
+`review-verify` recomputes every hash, the chain, the manifest
+cross-references AND re-derives the entire run from the retained inputs,
+requiring byte-identical artifact hashes (a determinism violation is a
+verification failure).
+
+### 19.7 Review-area boundary
+
+Review material lives in a private/local review area with a fixed
+layout (`candidates/`, `reviews/`, `adjudications/`, `source/`,
+`review-run.json`, ops files). The boundary scanner
+(`boundary-scan --review-root`) enforces: expected locations only;
+per-type object placement; no foreign ECP object types (ledger,
+registration, case, system, execution, evaluation, evidence, audit,
+ground-truth, store objects do not belong here); no `ECP-CASE-` /
+`ECP-REG-` identity strings anywhere (the review layer never fabricates
+registration-layer identities); JSON parseability and schema validity.
+
+### 19.8 Output boundary (STOP)
+
+For ELIGIBLE candidates the pipeline MAY produce a
+`registration_ready` block: a field mapping and an explicit
+`STOP-BEFORE-REGISTRATION` marker. This is a representation, NOT a
+registration: no ECP-CASE id is assigned, no ground truth is sealed, no
+ledger append occurs. Crossing into registration, execution or results
+requires separate owner authorization — the review layer ends here.

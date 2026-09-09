@@ -27,6 +27,11 @@ SCHEMA_FILES = {
     # 0.2.0 additive contracts (R1-I, Option C):
     "ledger-entry": "ledger-entry.schema.json",
     "store-manifest": "store-manifest.schema.json",
+    # 0.3.0 additive contracts (M3-CA0 case review):
+    "case-candidate": "case-candidate.schema.json",
+    "case-review": "case-review.schema.json",
+    "review-run": "review-run.schema.json",
+    "review-adjudication": "review-adjudication.schema.json",
 }
 
 _CACHE: dict = {}
