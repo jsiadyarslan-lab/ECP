@@ -1,0 +1,266 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ecp-protocol.org/0.6.0/case-readiness.schema.json",
+  "title": "ECP Case Readiness Record (M3-CA1 v1)",
+  "description": "Per-case registration-readiness record (M3-CA1 v1, 0.6.0): the 15-point mechanical check battery executed over the preserved qualification artifacts, the mechanical state, the set-class designation, the ground-truth validation track, the holding reasons (unresolved blocking owner items \u2014 explicit, never silent), and the four-state readiness decision (REGISTER / HOLD / REVISE / REJECT, precedence REJECT > REVISE > HOLD > REGISTER). record_hash = SHA-256 over the ECP-CANONICAL-JSON-1.0 serialization of this document with record_hash removed; records are hash-chained per run (prev_readiness_hash). Real readiness material lives only in a private readiness area; public illustrations under examples/ must be format-illustration records with real recomputable hashes.",
+  "type": "object",
+  "required": [
+    "ecp_object",
+    "readiness_id",
+    "candidate_id",
+    "run_id",
+    "assessed_at",
+    "operator",
+    "qualification_id",
+    "content_hash",
+    "qualification_artifact_hash",
+    "entry_index",
+    "prev_readiness_hash",
+    "engine",
+    "checks",
+    "mechanical_state",
+    "checks_passed",
+    "set_class",
+    "gt_validation_track",
+    "holding_reasons",
+    "forwarded",
+    "decision",
+    "reason_codes",
+    "boundary",
+    "protocol_version",
+    "schema_version",
+    "record_hash"
+  ],
+  "properties": {
+    "ecp_object": {
+      "const": "case-readiness"
+    },
+    "content_class": {
+      "enum": [
+        "review",
+        "format-illustration"
+      ],
+      "description": "'review' = real readiness material (private readiness area only); 'format-illustration' = public dummy (examples/ only)."
+    },
+    "readiness_id": {
+      "type": "string",
+      "pattern": "^ECP-RDNY-[0-9]{6,}$"
+    },
+    "candidate_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_case_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "run_id": {
+      "type": "string",
+      "pattern": "^ECP-RDNYRUN-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "assessed_at": {
+      "$ref": "#/$defs/iso8601_utc"
+    },
+    "operator": {
+      "type": "string",
+      "minLength": 1
+    },
+    "qualification_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "content_hash": {
+      "$ref": "#/$defs/sha256_hex"
+    },
+    "qualification_artifact_hash": {
+      "$ref": "#/$defs/sha256_hex"
+    },
+    "entry_index": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "prev_readiness_hash": {
+      "$ref": "#/$defs/sha256_hex"
+    },
+    "engine": {
+      "type": "object",
+      "required": [
+        "id",
+        "version",
+        "profile"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "$ref": "#/$defs/semver"
+        },
+        "profile": {
+          "$ref": "#/$defs/semver"
+        }
+      },
+      "additionalProperties": false
+    },
+    "checks": {
+      "type": "array",
+      "description": "The frozen 15-point battery results (order \u00a77).",
+      "minItems": 15,
+      "maxItems": 15,
+      "items": {
+        "type": "object",
+        "required": [
+          "code",
+          "check",
+          "status",
+          "evidence"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^C-\\d{2}$"
+          },
+          "check": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": [
+              "PASS",
+              "FAIL"
+            ]
+          },
+          "evidence": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "mechanical_state": {
+      "enum": [
+        "PASS",
+        "FAIL"
+      ]
+    },
+    "checks_passed": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 15
+    },
+    "set_class": {
+      "enum": [
+        "PUBLIC",
+        "PROTECTED",
+        "HIDDEN",
+        "ROTATING"
+      ],
+      "description": "Order \u00a710 designation. PUBLIC is forbidden for evaluation-pool material while zero executions exist project-wide; HIDDEN/ROTATING require a set-binding reference; PROTECTED is the preregistered-evaluation-candidate default."
+    },
+    "gt_validation_track": {
+      "enum": [
+        "CONFIRMED-TRACK",
+        "NONDETERMINATE-READING-RULE-TRACK",
+        "DESIGNED-AMBIGUITY-FORWARDED"
+      ],
+      "description": "G0 architecture doc \u00a74.7: determinate ground truths take the CONFIRMED track; INDETERMINATE (C-004-class) readings require the owner-authorized nondeterminate reading rule; the designed-ambiguity forwarded flag persists until that procedure runs \u2014 never silently converted."
+    },
+    "holding_reasons": {
+      "type": "array",
+      "description": "Explicit blocking reasons (unresolved owner items, owner-ruling findings). A case may only REGISTER when this list is empty.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "forwarded": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "code",
+          "target_stage"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 1
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "target_stage": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "carried_qualification_reason_codes": {
+      "type": "array",
+      "description": "Reason codes recorded on the qualification artifact (may accompany ACCEPT as recorded, non-blocking findings \u2014 carried verbatim, never re-adjudicated here).",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "gt_correspondence_note": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Present when the qualification artifact recorded Q3-CORRESPONDENCE-GAP: partial mechanical NL-formal correspondence (author-attested, declared limitation). Non-blocking at readiness; the O-04 GT validation stage must scrutinize GT defensibility against the natural-language presentation."
+    },
+    "decision": {
+      "enum": [
+        "REGISTER",
+        "HOLD",
+        "REVISE",
+        "REJECT"
+      ]
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "boundary": {
+      "const": "REGISTRATION READINESS ASSESSMENT ONLY \u2014 NOT A REGISTRATION (order \u00a711/\u00a712)"
+    },
+    "protocol_version": {
+      "$ref": "#/$defs/semver"
+    },
+    "schema_version": {
+      "$ref": "#/$defs/semver"
+    },
+    "record_hash": {
+      "$ref": "#/$defs/sha256_hex",
+      "description": "SHA-256 over ECP-CANONICAL-JSON-1.0 of this document with record_hash removed."
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "sha256_hex": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "iso8601_utc": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+    }
+  }
+}

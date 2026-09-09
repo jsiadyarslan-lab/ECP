@@ -29,6 +29,10 @@ EXAMPLE_SCHEMA_MAP = [
     ("case-amendment.example.json", "case-amendment"),
     ("case-qualification.example.json", "case-qualification"),
     ("qualification-run.example.json", "qualification-run"),
+    ("owner-decision-register.example.json", "owner-decision-register"),
+    ("case-readiness.example.json", "case-readiness"),
+    ("readiness-run.example.json", "readiness-run"),
+    ("registration-manifest.example.json", "registration-manifest"),
 ]
 
 

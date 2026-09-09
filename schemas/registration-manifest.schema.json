@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ecp-protocol.org/0.6.0/registration-manifest.schema.json",
+  "title": "ECP Registration Manifest (M3-CA1 v1 set-level freeze)",
+  "description": "The set-level registration freeze document (M3-CA1 v1, 0.6.0, order §11). Built ONLY when the registration-authorization gate is AUTHORIZED (every blocking owner item resolved, every owner-ruling finding ruled, every in-scope case REGISTER, population decision explicit) — the builder REFUSES loudly otherwise, and it never writes the registration ledger: the ledger ceremony remains the separate full-contract instrument binding (evaluation, case version, target system) tuples. The manifest freezes per-case content hashes, qualification artifact hashes, set classes, GT validation tracks, the readiness-run binding (run hash), the population decision, and the immutability rule (changes only through the amendment protocol — two-phase disclosure, full re-review, nothing inherited; ground truth sealed at registration; no post-hoc changes). manifest_hash = SHA-256 over the ECP-CANONICAL-JSON-1.0 serialization of this document with manifest_hash removed. Real manifest material lives only in a private registration area; public illustrations under examples/ must be format-illustration records with real recomputable hashes.",
+  "type": "object",
+  "required": [
+    "ecp_object",
+    "registration_id",
+    "registrar",
+    "registered_at",
+    "readiness_run",
+    "population_decision",
+    "cases",
+    "immutability",
+    "execution_isolation",
+    "protocol_version",
+    "schema_version",
+    "manifest_hash"
+  ],
+  "properties": {
+    "ecp_object": { "const": "registration-manifest" },
+    "content_class": {
+      "enum": ["review", "format-illustration"],
+      "description": "'review' = real manifest material (private registration area only); 'format-illustration' = public dummy (examples/ only)."
+    },
+    "registration_id": {
+      "type": "string",
+      "pattern": "^ECP-REGSET-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "registrar": { "type": "string", "minLength": 1 },
+    "registered_at": { "$ref": "#/$defs/iso8601_utc" },
+    "readiness_run": {
+      "type": "object",
+      "required": ["run_id", "run_hash", "assessed_at", "engine"],
+      "properties": {
+        "run_id": { "type": ["string", "null"] },
+        "run_hash": { "$ref": "#/$defs/sha256_hex" },
+        "assessed_at": { "$ref": "#/$defs/iso8601_utc" },
+        "engine": {
+          "type": "object",
+          "required": ["id", "version", "profile"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "version": { "$ref": "#/$defs/semver" },
+            "profile": { "$ref": "#/$defs/semver" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "population_decision": { "enum": ["30-ONLY", "18-ONLY", "30+18", "OTHER-EXPLICIT"] },
+    "set_binding_reference": { "type": ["string", "null"] },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "candidate_id",
+          "content_hash",
+          "qualification_id",
+          "qualification_artifact_hash",
+          "set_class",
+          "gt_validation_track"
+        ],
+        "properties": {
+          "candidate_id": { "type": "string", "minLength": 1 },
+          "source_case_id": { "type": ["string", "null"] },
+          "content_hash": { "$ref": "#/$defs/sha256_hex" },
+          "qualification_id": { "type": "string", "minLength": 1 },
+          "qualification_artifact_hash": { "$ref": "#/$defs/sha256_hex" },
+          "set_class": { "enum": ["PUBLIC", "PROTECTED", "HIDDEN", "ROTATING"] },
+          "gt_validation_track": {
+            "enum": ["CONFIRMED-TRACK", "NONDETERMINATE-READING-RULE-TRACK", "DESIGNED-AMBIGUITY-FORWARDED"]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "immutability": {
+      "const": "append-only freeze: the manifest may change only through the amendment protocol (two-phase disclosure, full re-review, nothing inherited); ground truth sealed at registration; no post-hoc changes (order §11/§12)"
+    },
+    "execution_isolation": {
+      "const": "manifest freeze only: NO evaluated model execution; NO case execution; NO results"
+    },
+    "protocol_version": { "$ref": "#/$defs/semver" },
+    "schema_version": { "$ref": "#/$defs/semver" },
+    "manifest_hash": {
+      "$ref": "#/$defs/sha256_hex",
+      "description": "SHA-256 over ECP-CANONICAL-JSON-1.0 of this document with manifest_hash removed."
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "sha256_hex": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "iso8601_utc": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+    }
+  }
+}

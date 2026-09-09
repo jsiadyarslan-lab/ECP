@@ -37,6 +37,12 @@ SCHEMA_FILES = {
     # 0.5.0 additive contracts (M3-CA0 v1 authoring + qualification layer):
     "case-qualification": "case-qualification.schema.json",
     "qualification-run": "qualification-run.schema.json",
+    # 0.6.0 additive contracts (M3-CA1 v1 registration readiness & owner
+    # adjudication layer):
+    "case-readiness": "case-readiness.schema.json",
+    "readiness-run": "readiness-run.schema.json",
+    "owner-decision-register": "owner-decision-register.schema.json",
+    "registration-manifest": "registration-manifest.schema.json",
 }
 
 _CACHE: dict = {}

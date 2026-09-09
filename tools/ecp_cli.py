@@ -68,6 +68,25 @@ ground-truth verification is deterministic computation, never a model):
                                                  verify artifacts, chain,
                                                  manifest and determinism
 
+Registration readiness (M3-CA1 v1 — readiness gate ONLY; no model
+execution, no registration, no ledger writes; the manifest builder
+REFUSES while unresolved blocking owner items exist — order §11/§12):
+
+  readiness-run --readiness-root D --qualify-root D --run-id ID
+              --operator S --at ISO [--prior-candidates D]
+                                                 15-point per-case readiness
+                                                 battery + owner-decision-
+                                                 register evaluation +
+                                                 population + set-class
+  readiness-verify --readiness-root D --qualify-root D [--prior-candidates D]
+                                                 verify records, chain, run
+                                                 manifest and determinism
+  registration-manifest --readiness-root D --registrar S --at ISO
+              [--registration-id ID]
+                                                 build the set-level freeze
+                                                 manifest (REFUSES unless
+                                                 the gate is AUTHORIZED)
+
 Run from the repository root:  python tools/ecp_cli.py <command> ...
 """
 
@@ -787,6 +806,217 @@ def cmd_qualify_verify(args: argparse.Namespace) -> int:
 
 
 # ---------------------------------------------------------------------------
+# Registration readiness (M3-CA1 v1 — readiness gate ONLY; no model
+# execution, no registration, no ledger writes; the manifest gate REFUSES
+# while unresolved blocking owner items exist)
+# ---------------------------------------------------------------------------
+
+def _load_readiness_inputs(readiness_root: Path, qualify_root: Path):
+    from ecp import readiness as readiness_mod
+    from ecp.canonical import load_json
+
+    candidates = [
+        load_json(path) for path in sorted((qualify_root / "candidates").glob("*.json"))
+    ]
+    qualification_run = load_json(qualify_root / "qualification-run.json")
+    artifacts = [
+        load_json(path)
+        for path in sorted((qualify_root / "qualification").glob("*.json"))
+    ]
+    register_path = readiness_root / "decisions" / "ECP-OWNDEC-000002.json"
+    register = load_json(register_path)
+    population = load_json(readiness_root / "population" / "population-decision.json")
+    set_class = load_json(readiness_root / "population" / "set-class-designation.json")
+    return candidates, qualification_run, artifacts, register, population, set_class
+
+
+def cmd_readiness_run(args: argparse.Namespace) -> int:
+    from ecp import readiness as readiness_mod
+    from ecp.canonical import load_json
+
+    readiness_root = Path(args.readiness_root).resolve()
+    qualify_root = Path(args.qualify_root).resolve()
+    try:
+        (
+            candidates,
+            qualification_run,
+            artifacts,
+            register,
+            population,
+            set_class,
+        ) = _load_readiness_inputs(readiness_root, qualify_root)
+    except FileNotFoundError as exc:
+        print(f"error: missing readiness input: {exc}", file=sys.stderr)
+        return 2
+    prior_population = _load_prior_population(args.prior_candidates)
+
+    try:
+        result = readiness_mod.run_readiness(
+            candidates,
+            qualification_run,
+            artifacts,
+            decision_register=register,
+            population_decision=population,
+            set_class_designation=set_class,
+            prior_candidates=prior_population,
+            run_id=args.run_id,
+            assessed_at=args.at,
+            operator=args.operator,
+        )
+    except readiness_mod.ReadinessError as exc:
+        print(f"READINESS RUN FAILED (loud, no silent states): {exc}", file=sys.stderr)
+        return 1
+
+    readiness_dir = readiness_root / "readiness"
+    readiness_dir.mkdir(parents=True, exist_ok=True)
+    for record in result["records"]:
+        target = readiness_dir / f"{record['readiness_id']}.json"
+        _atomic_write_bytes(target, canonical.canonical_bytes(record))
+    run_path = readiness_root / "readiness-run.json"
+    _atomic_write_bytes(run_path, canonical.canonical_bytes(result["run"]))
+
+    tallies = result["run"]["decisions"]
+    print(f"READINESS RUN COMPLETE: {result['run']['run_id']}")
+    print(
+        "decisions: "
+        f"REGISTER={tallies['register']} HOLD={tallies['hold']} "
+        f"REVISE={tallies['revise']} REJECT={tallies['reject']} "
+        f"(of {len(result['records'])} candidates)"
+    )
+    auth = result["run"]["registration_authorization"]
+    print(f"registration authorization: {auth['status']}")
+    for reason in auth["reasons"][:8]:
+        print(f"  - {reason}")
+    if len(auth["reasons"]) > 8:
+        print(f"  … and {len(auth['reasons']) - 8} more reason(s)")
+    print(f"verdict: {result['run']['verdict']}")
+    print(f"records: {readiness_dir}")
+    print(f"run manifest: {run_path}")
+    print("boundary: REGISTRATION READINESS ASSESSMENT ONLY — NOT A REGISTRATION")
+    return 0
+
+
+def cmd_readiness_verify(args: argparse.Namespace) -> int:
+    from ecp import readiness as readiness_mod
+    from ecp.canonical import load_json
+
+    readiness_root = Path(args.readiness_root).resolve()
+    qualify_root = Path(args.qualify_root).resolve()
+    run_path = readiness_root / "readiness-run.json"
+    if not run_path.is_file():
+        print(f"error: no readiness-run.json under {readiness_root}", file=sys.stderr)
+        return 2
+    run = load_json(run_path)
+    records = [
+        load_json(path)
+        for path in sorted((readiness_root / "readiness").glob("*.json"))
+    ]
+
+    issues: "list[str]" = []
+    for record in records:
+        issues.extend(readiness_mod.verify_readiness_record(record))
+    issues.extend(readiness_mod.verify_readiness_run(run, records))
+
+    # determinism re-derivation: re-run from retained inputs (stored metadata)
+    try:
+        (
+            candidates,
+            qualification_run,
+            artifacts,
+            register,
+            population,
+            set_class,
+        ) = _load_readiness_inputs(readiness_root, qualify_root)
+    except FileNotFoundError as exc:
+        issues.append(f"re-derivation skipped: missing input: {exc}")
+        candidates = None
+    if candidates:
+        prior_population = _load_prior_population(args.prior_candidates)
+        if run.get("inputs", {}).get("prior_population", {}).get("count", 0) > 0 and not prior_population:
+            issues.append(
+                "re-derivation skipped: the stored run used a prior population but "
+                "--prior-candidates was not supplied"
+            )
+        else:
+            try:
+                rederived = readiness_mod.run_readiness(
+                    candidates,
+                    qualification_run,
+                    artifacts,
+                    decision_register=register,
+                    population_decision=population,
+                    set_class_designation=set_class,
+                    prior_candidates=prior_population,
+                    run_id=run["run_id"],
+                    assessed_at=run["assessed_at"],
+                    operator=run["operator"],
+                )
+            except readiness_mod.ReadinessError as exc:
+                issues.append(f"re-derivation failed: {exc}")
+                rederived = None
+            if rederived is not None:
+                for stored, fresh in zip(records, rederived["records"]):
+                    if stored.get("record_hash") != fresh.get("record_hash"):
+                        issues.append(
+                            f"{stored.get('readiness_id', '?')}: DETERMINISM VIOLATION — "
+                            "re-derivation from retained inputs produced a different "
+                            "record hash"
+                        )
+                if len(records) != len(rederived["records"]):
+                    issues.append("DETERMINISM VIOLATION — record count differs on re-derivation")
+                if run.get("run_hash") != rederived["run"].get("run_hash"):
+                    issues.append("DETERMINISM VIOLATION — run manifest hash differs on re-derivation")
+
+    if issues:
+        print(f"READINESS VERIFICATION ISSUES ({len(issues)}):")
+        for issue in issues:
+            print(f"  - {issue}")
+        return 1
+    print(
+        f"READINESS RUN INTACT: {run['run_id']} — {len(records)} record(s), "
+        "chain, hashes, cross-references and determinism re-derivation all verified"
+    )
+    return 0
+
+
+def cmd_registration_manifest(args: argparse.Namespace) -> int:
+    from ecp import readiness as readiness_mod
+    from ecp.canonical import load_json
+
+    readiness_root = Path(args.readiness_root).resolve()
+    run_path = readiness_root / "readiness-run.json"
+    if not run_path.is_file():
+        print(f"error: no readiness-run.json under {readiness_root}", file=sys.stderr)
+        return 2
+    run = load_json(run_path)
+    records = [
+        load_json(path)
+        for path in sorted((readiness_root / "readiness").glob("*.json"))
+    ]
+    try:
+        manifest = readiness_mod.build_registration_manifest(
+            records,
+            run,
+            registrar=args.registrar,
+            registered_at=args.at,
+            registration_id=args.registration_id,
+        )
+    except readiness_mod.RegistrationManifestRefused as exc:
+        print(f"REGISTRATION MANIFEST REFUSED: {exc}", file=sys.stderr)
+        return 1
+    except readiness_mod.ReadinessError as exc:
+        print(f"REGISTRATION MANIFEST FAILED (loud): {exc}", file=sys.stderr)
+        return 1
+
+    out_path = readiness_root / "registration-manifest.json"
+    _atomic_write_bytes(out_path, canonical.canonical_bytes(manifest))
+    print(f"REGISTRATION MANIFEST BUILT: {manifest['registration_id']}")
+    print(f"cases frozen: {len(manifest['cases'])}")
+    print(f"manifest: {out_path}")
+    return 0
+
+
+# ---------------------------------------------------------------------------
 # Protected store (R1-I, Option C — custody half of the seam)
 # ---------------------------------------------------------------------------
 
@@ -1143,6 +1373,38 @@ def main(argv: "list[str] | None" = None) -> int:
     p_qualify_verify.add_argument("--qualify-root", required=True, help="qualification root directory")
     p_qualify_verify.add_argument("--prior-candidates", default=None, help="prior-pool candidates directory (required when the stored run used one)")
     p_qualify_verify.set_defaults(func=cmd_qualify_verify)
+
+    # --- registration readiness (M3-CA1 v1) ---
+    p_readiness_run = sub.add_parser(
+        "readiness-run",
+        help="run the registration-readiness assessment (15-point battery, decision register, population, set classes)",
+    )
+    p_readiness_run.add_argument("--readiness-root", required=True, help="readiness root directory (decisions/, population/, readiness/ output)")
+    p_readiness_run.add_argument("--qualify-root", required=True, help="qualification root directory (candidates/, qualification/)")
+    p_readiness_run.add_argument("--run-id", required=True, help="ECP-RDNYRUN-… run identifier")
+    p_readiness_run.add_argument("--operator", required=True, help="operator identity recorded on the run")
+    p_readiness_run.add_argument("--at", required=True, help="explicit UTC assessment timestamp (determinism: no wall clock)")
+    p_readiness_run.add_argument("--prior-candidates", default=None, help="prior-pool candidates directory (read-only, cross-population re-derivation)")
+    p_readiness_run.set_defaults(func=cmd_readiness_run)
+
+    p_readiness_verify = sub.add_parser(
+        "readiness-verify",
+        help="verify readiness records, chain, manifest and determinism re-derivation",
+    )
+    p_readiness_verify.add_argument("--readiness-root", required=True, help="readiness root directory")
+    p_readiness_verify.add_argument("--qualify-root", required=True, help="qualification root directory")
+    p_readiness_verify.add_argument("--prior-candidates", default=None, help="prior-pool candidates directory (required when the stored run used one)")
+    p_readiness_verify.set_defaults(func=cmd_readiness_verify)
+
+    p_reg_manifest = sub.add_parser(
+        "registration-manifest",
+        help="build the set-level registration manifest (REFUSES unless the gate is AUTHORIZED)",
+    )
+    p_reg_manifest.add_argument("--readiness-root", required=True, help="readiness root directory")
+    p_reg_manifest.add_argument("--registrar", required=True, help="ECP-REGISTRAR-… identity")
+    p_reg_manifest.add_argument("--at", required=True, help="explicit UTC registration timestamp (determinism: no wall clock)")
+    p_reg_manifest.add_argument("--registration-id", default="ECP-REGSET-CA1V1-0001", help="ECP-REGSET-… identifier")
+    p_reg_manifest.set_defaults(func=cmd_registration_manifest)
 
     args = parser.parse_args(argv)
     return args.func(args)

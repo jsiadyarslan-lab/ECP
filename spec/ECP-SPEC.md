@@ -811,3 +811,161 @@ sets is a registration-gate decision under owner authorization. The
 rotation architecture is preserved by construction: no set-class is
 assigned at authoring, and qualification is performance-blind (no
 outcome data exists anywhere in the project at this stage).
+
+## 22. Registration Readiness & Owner Adjudication Layer (0.6.0 / M3-CA1 v1)
+
+The M3-CA1 v1 layer sits between qualification (§21) and registration
+(§16): it assesses whether a qualified candidate pool may be converted
+into Registered ECP Evaluation Cases, and it gates that conversion behind
+explicit owner adjudication. It executes no model, registers nothing,
+writes no ledger entry, and collects no result. The layer's own verdict
+vocabulary is honest by construction: a run ends in either
+`REGISTRATION-AUTHORIZED` (nothing blocks; the manifest gate may open)
+or `OWNER-DECISION-REQUIRED` (one or more owner items remain open and
+blocking — never a silent default).
+
+### 22.1 The owner-decision register
+
+The carried owner decisions (O-01 external novelty evidence; O-02
+authoring authorization incl. the registration-contract authoring pass;
+O-03 contamination disposition; O-04 ground-truth validation stage) are
+recorded in an `owner-decision-register` document
+(schemas/owner-decision-register.schema.json). Per item, the register
+records the question, the framework reference, every permitted ruling
+with its consequence, the scientific consequences, the threats, the
+EXPLICIT state (`RESOLVED` — which requires a `ruling` and a
+`ruling_basis` — or `REMAINS-OPEN`), the blocking determination for
+registration with its basis, and the registration impact. For O-01 the
+register additionally carries the evidence classification
+(`SUPPORTED` / `UNRESOLVED` / `INSUFFICIENT-EVIDENCE`) with an
+inference-prohibition note: UNRESOLVED or INSUFFICIENT evidence is never
+inferred as NOVEL, and model performance is not admissible evidence.
+Implicit defaults are a loud input error — the engine refuses a register
+whose items are not explicitly stated. Phase findings (custody events;
+structural discoveries that require an owner ruling) are recorded
+separately from the four carried items and gate the manifest exactly
+like unresolved items when they require a ruling.
+
+### 22.2 The 15-point readiness battery
+
+`readiness-run` (src/ecp/readiness.py) executes, per case, a frozen
+15-point check battery over the PRESERVED qualification artifacts
+(`case-candidate` + `case-qualification` + the run manifest):
+
+- C-01 candidate contract; C-02 qualification decision (ACCEPT; recorded
+  findings carried verbatim, never re-adjudicated); C-03 content-hash
+  binding across candidate, artifact and run entry;
+- C-04 provenance completeness (the §21.1 §3 record, all fields);
+  C-05 independence explicitness (non-bare status label with declared
+  limitations; a bare `INDEPENDENT` is rejected);
+- C-06 mechanical ground-truth verification PASS; C-07 authored vs
+  derived ground-truth class consistency; C-08 qualification artifact
+  hash and chain-link integrity;
+- C-09 N3 within-pool structural uniqueness; C-10 N4 cross-population
+  overlap; C-11 N5 implementation encoding; C-12 N6 fixture leakage;
+- C-13 six-class leakage pre-screen (the model class must be
+  `NOT-APPLICABLE-PRE-EXECUTION` while zero executions exist
+  project-wide);
+- C-14 §9 representation-bias disclosure; C-15 §10 environmental
+  pre-check (candidate record AND qualification dimension).
+
+Checks are classified REJECT-class (contract, identity, ground-truth,
+chain, novelty, leakage defects) or REVISE-class (provenance/disclosure
+completeness). Each case ends in exactly one of `REGISTER`, `HOLD`,
+`REVISE`, `REJECT` (precedence REJECT > REVISE > HOLD > REGISTER):
+
+- REGISTER — all 15 checks pass AND nothing blocks (no unresolved
+  blocking owner item, no unresolved owner-ruling finding, valid set
+  class, inside the explicit population scope);
+- HOLD — all 15 checks pass but a blocking owner item or owner-ruling
+  finding binds the case: registration-ready in every mechanical
+  dimension, held ONLY on owner adjudication;
+- REVISE — a revise-class check failed;
+- REJECT — a reject-class check failed, or a forbidden set class.
+
+The battery is integrity-only: it never re-adjudicates the scientific
+qualification decisions (that is the §20 owner-adjudication seam); it
+verifies that the preserved state supports registration.
+
+### 22.3 Ground-truth validation tracks
+
+Every readiness record carries a `gt_validation_track`:
+`CONFIRMED-TRACK` (determinate ground truths: DERIVABLE, CONTRADICTED,
+IMPOSSIBLE), `NONDETERMINATE-READING-RULE-TRACK` (INDETERMINATE ground
+truths — C-004-class material whose reading requires the owner-
+authorized validation procedure), or `DESIGNED-AMBIGUITY-FORWARDED`
+(the §21 FWD-GT-DESIGNED-AMBIGUITY flag, re-targeted to the O-04 stage).
+Forwarded flags are never silently converted to CONFIRMED or REJECTED;
+the track annotation makes the O-04 dependency per case explicit.
+Carried qualification findings (e.g. Q3-CORRESPONDENCE-GAP: partial
+mechanical NL↔formal correspondence) ride the record as
+`gt_correspondence_note` — visible, non-blocking at readiness, and
+flagged for O-04-stage scrutiny of GT defensibility against the
+natural-language presentation.
+
+### 22.4 Population decision
+
+The registration population is an EXPLICIT decision
+(`30-ONLY` / `18-ONLY` / `30+18` / `OTHER-EXPLICIT`) recorded with a
+rationale and analysis blocks (duplication, template sharing, semantic
+overlap, leakage, statistical dependence, prior-pool eligibility). The
+engine re-derives the mechanical facts: prior-pool contract facts
+(format-1 pools carry no formal layer, no ground-truth class, no
+authoring-independence record — counted exactly) and the
+cross-population text-overlap statistics (premise and signature Jaccard,
+the N4 basis). The engine REFUSES any decision that would put
+never-qualified material into registration scope: candidates enter
+through intake → review → qualification, and prior-pool pilot material
+that never passed qualification cannot be registered retroactively —
+any future use requires re-authoring into the current candidate format
+under a separate owner order, arriving as new candidate versions with
+their own provenance.
+
+### 22.5 Set-class designation
+
+Per case, a class is designated from `PUBLIC` / `PROTECTED` / `HIDDEN` /
+`ROTATING`. `PUBLIC` is FORBIDDEN for evaluation-pool material while
+zero executions exist project-wide (pre-execution publication is a
+leakage channel that destroys evaluation validity; public
+development-class cases are a separately authored population).
+`HIDDEN` and `ROTATING` require a set-binding reference — the
+hidden/rotation split is a function of the registered-set composition
+and the statistical plan, both deliberately deferred (charter §8.11);
+an unbound designation now would be arbitrary. `PROTECTED` is the
+preregistered-evaluation-candidate default. The open core is never
+closed by a designation: protected content stays in the private
+readiness area, and boundary-scan continues to enforce that the public
+repository and the ledger tree carry no protected content.
+
+### 22.6 The registration-authorization gate and the manifest
+
+`assess_registration_authorization` reduces the register + population +
+records to `AUTHORIZED` or `REFUSED` with every reason listed. The gate
+is AUTHORIZED only when: every owner item that blocks registration is
+RESOLVED, every finding requiring an owner ruling carries one, every
+in-scope case is REGISTER, and the population decision is explicit.
+`build_registration_manifest` REFUSES (loudly, as
+`RegistrationManifestRefused`) unless the gate is AUTHORIZED and every
+record is REGISTER — the order §12 rule "registering cases with
+unresolved gates is forbidden" is machine-enforced. The manifest
+(`registration-manifest` contract) freezes the set: per-case content
+hashes, qualification artifact hashes, set classes, GT validation
+tracks, the readiness-run binding, the population decision, and the
+immutability rule (changes only through the §20 amendment protocol;
+ground truth sealed at registration; no post-hoc changes). The manifest
+is the set-level freeze; the §16 ledger ceremony remains the separate
+full-contract instrument binding (evaluation, case version, target
+system) tuples, and the manifest builder never writes the ledger.
+
+### 22.7 Determinism and verification
+
+`readiness-run` is a pure function of (candidates, qualification run +
+artifacts, decision register, population decision, set-class
+designation, prior population content, run metadata). Timestamps are
+pinned explicitly (no wall clock). `readiness-verify` re-derives every
+record and the run manifest bit-identically from retained inputs and
+checks record hashes, the record chain, tallies, the
+authorization/verdict consistency, and the schema validity of every
+output. Real readiness material lives only in a private readiness area;
+the public examples are format-illustration records with real
+recomputable hashes.

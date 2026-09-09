@@ -33,6 +33,10 @@ EXAMPLE_FILES = [
     "case-amendment.example.json",
     "case-qualification.example.json",
     "qualification-run.example.json",
+    "owner-decision-register.example.json",
+    "case-readiness.example.json",
+    "readiness-run.example.json",
+    "registration-manifest.example.json",
 ]
 
 
@@ -258,3 +262,44 @@ def test_case_amendment_example_two_phase_hashes_are_real(examples):
     assert amendment["draft_hash"] != amendment["amendment_hash"]
     # §7: material amendments never inherit review state
     assert amendment["re_review"]["required"] is True
+
+
+# ---------------------------------------------------------------------------
+# M3-CA1 v1 registration-readiness examples (real, recomputable hashes)
+# ---------------------------------------------------------------------------
+
+
+def test_readiness_example_hashes_are_real(examples):
+    register = examples["owner-decision-register.example.json"]
+    record = examples["case-readiness.example.json"]
+    run = examples["readiness-run.example.json"]
+    manifest = examples["registration-manifest.example.json"]
+
+    assert register["register_hash"] == hash_document_excluding(register, "register_hash")
+    assert record["record_hash"] == hash_document_excluding(record, "record_hash")
+    assert run["run_hash"] == hash_document_excluding(run, "run_hash")
+    assert manifest["manifest_hash"] == hash_document_excluding(manifest, "manifest_hash")
+
+    # the register is the run's recorded input
+    assert run["inputs"]["decision_register"]["register_hash"] == register["register_hash"]
+    # the record is the run's chain
+    assert run["chain_head"] == record["record_hash"]
+    assert run["entries"][0]["record_hash"] == record["record_hash"]
+    # the record binds the 0.5.0 qualification example
+    qualification = examples["case-qualification.example.json"]
+    assert record["qualification_artifact_hash"] == qualification["artifact_hash"]
+    # the manifest binds the run and the case
+    assert manifest["readiness_run"]["run_hash"] == run["run_hash"]
+    assert manifest["cases"][0]["qualification_artifact_hash"] == qualification["artifact_hash"]
+
+
+def test_readiness_examples_are_honest_about_the_gate(examples):
+    run = examples["readiness-run.example.json"]
+    record = examples["case-readiness.example.json"]
+    # the illustration records the honest REFUSED state, never a fake pass
+    assert run["registration_authorization"]["status"] == "REFUSED"
+    assert run["verdict"] == "OWNER-DECISION-REQUIRED"
+    assert run["registration_authorization"]["reasons"]
+    assert record["decision"] == "HOLD"
+    assert record["mechanical_state"] == "PASS"
+    assert record["checks_passed"] == 15

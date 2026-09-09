@@ -22,13 +22,17 @@ This package implements the repository's scientific core:
   (:mod:`ecp.review`, M3-CA0);
 - case qualification engine — deterministic four-state authoring-layer
   gate with mechanical ground-truth verification (:mod:`ecp.qualification`,
-  M3-CA0 v1).
+  M3-CA0 v1);
+- registration-readiness engine — 15-point per-case readiness battery,
+  owner-decision-register evaluation, population decision, set-class
+  designation and the registration-authorization manifest gate
+  (:mod:`ecp.readiness`, M3-CA1 v1).
 
 It deliberately contains NO model adapters, NO execution machinery, NO scoring
 logic and NO provider-specific code (see spec/ECP-SPEC.md, "Provider neutrality").
 """
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 
 from .canonical import CANONICALIZATION_ID, canonical_bytes, canonical_dumps
 from .hashing import (
