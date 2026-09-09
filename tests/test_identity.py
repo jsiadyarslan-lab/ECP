@@ -25,12 +25,12 @@ def test_identity_core_fields(repo_root):
     with open(repo_root / "ECP-IDENTITY.json", encoding="utf-8") as fh:
         document = json.load(fh)
     assert document["protocol_name"] == "ECP"
-    # 0.4.0 (M3-CA0-A): additive adjudication/amendment contracts on top of the 0.3.0
-    # (R1-I) additive bundle; 0.1.x/0.2.x artifacts remain valid unchanged.
-    # ledger / anchoring); 0.1.0 contracts unchanged and still valid.
-    assert document["protocol_version"] == "0.4.0"
-    assert document["schema_version"] == "0.4.0"
-    assert document["repository_version"] == "0.4.0"
+    # 0.5.0 (M3-CA0 v1): additive authoring/qualification contracts on top of
+    # the 0.4.0 (M3-CA0-A) additive bundle; 0.1.x/0.2.x/0.3.x/0.4.x artifacts
+    # remain valid unchanged (case-candidate extended with optional fields).
+    assert document["protocol_version"] == "0.5.0"
+    assert document["schema_version"] == "0.5.0"
+    assert document["repository_version"] == "0.5.0"
     assert document["protocol_status"] == "draft"
 
 

@@ -52,6 +52,22 @@ STRICTLY before registration; still no execution, no ledger writes):
   review-run --review-root D ... [--prior-run-id ID --prior-run-hash H]
                                                  re-review incl. amended v2 views
 
+Case authoring + qualification (M3-CA0 v1 — authoring/qualification gate
+ONLY; no model execution, no registration, no ledger writes; the formal
+ground-truth verification is deterministic computation, never a model):
+
+  authoring-intake --source F --sidecar F --out D
+                                                 extract format-2 case-candidates
+                                                 (structured authoring layer)
+  qualify-run --qualify-root D --run-id ID --operator S --at ISO
+            [--prior-candidates D]
+                                                 deterministic four-state
+                                                 qualification (ACCEPT/REVISE/
+                                                 REJECT/INCONCLUSIVE)
+  qualify-verify --qualify-root D [--prior-candidates D]
+                                                 verify artifacts, chain,
+                                                 manifest and determinism
+
 Run from the repository root:  python tools/ecp_cli.py <command> ...
 """
 
@@ -592,6 +608,185 @@ def cmd_amendment_disclose(args: argparse.Namespace) -> int:
 
 
 # ---------------------------------------------------------------------------
+# Authoring + qualification pipeline (M3-CA0 v1 — authoring/qualification
+# gate ONLY; no model execution, no registration, no ledger writes)
+# ---------------------------------------------------------------------------
+
+def cmd_authoring_intake(args: argparse.Namespace) -> int:
+    from ecp import authoring as authoring_mod
+
+    source = Path(args.source).resolve()
+    sidecar = canonical.load_json(args.sidecar)
+    try:
+        candidates, report = authoring_mod.extract_candidates_v2(
+            source,
+            sidecar,
+            source_label=args.source_label,
+            candidate_offset=args.candidate_offset,
+        )
+    except authoring_mod.ExtractionError as exc:
+        print(f"AUTHORING INTAKE FAILED: {exc}", file=sys.stderr)
+        return 1
+
+    out_dir = Path(args.out).resolve()
+    candidates_dir = out_dir / "candidates"
+    candidates_dir.mkdir(parents=True, exist_ok=True)
+    for candidate in candidates:
+        target = candidates_dir / f"{candidate['candidate_id']}.json"
+        _atomic_write_bytes(target, canonical.canonical_bytes(candidate))
+    report_path = out_dir / "intake-report.json"
+    _atomic_write_bytes(report_path, canonical.canonical_bytes(report))
+
+    print(f"AUTHORING INTAKE COMPLETE: {len(candidates)} candidates -> {candidates_dir}")
+    if report["per_case_anomalies"]:
+        print(
+            f"per-case anomalies recorded: {len(report['per_case_anomalies'])} "
+            "(retained verbatim, never silently resolved)"
+        )
+    print(f"intake report: {report_path}")
+    return 0
+
+
+def _load_prior_population(prior_candidates: "str | None") -> "list[dict]":
+    if not prior_candidates:
+        return []
+    prior_dir = Path(prior_candidates).resolve()
+    return [
+        canonical.load_json(path)
+        for path in sorted(prior_dir.glob("ECP-CAND-*.json"))
+    ]
+
+
+def cmd_qualify_run(args: argparse.Namespace) -> int:
+    from ecp import qualification as qualification_mod
+
+    qualify_root = Path(args.qualify_root).resolve()
+    candidates_dir = qualify_root / "candidates"
+    candidates = [
+        canonical.load_json(path)
+        for path in sorted(candidates_dir.glob("*.json"))
+    ]
+    if not candidates:
+        print(f"error: no candidates under {candidates_dir}", file=sys.stderr)
+        return 2
+    prior_population = _load_prior_population(args.prior_candidates)
+
+    source_label, source_sha = None, None
+    intake_report_path = qualify_root / "intake-report.json"
+    if intake_report_path.is_file():
+        intake_report = canonical.load_json(intake_report_path)
+        source_label = intake_report.get("source", {}).get("label")
+        source_sha = intake_report.get("source", {}).get("sha256")
+
+    try:
+        result = qualification_mod.run_qualification(
+            candidates,
+            run_id=args.run_id,
+            qualified_at=args.at,
+            operator=args.operator,
+            prior_population=prior_population,
+            source_label=source_label,
+            source_sha=source_sha,
+        )
+    except qualification_mod.QualificationError as exc:
+        print(f"QUALIFICATION RUN FAILED (loud, no silent states): {exc}", file=sys.stderr)
+        return 1
+
+    qualification_dir = qualify_root / "qualification"
+    qualification_dir.mkdir(parents=True, exist_ok=True)
+    for artifact in result["artifacts"]:
+        target = qualification_dir / f"{artifact['qualification_id']}.json"
+        _atomic_write_bytes(target, canonical.canonical_bytes(artifact))
+    run_path = qualify_root / "qualification-run.json"
+    _atomic_write_bytes(run_path, canonical.canonical_bytes(result["run"]))
+
+    tallies = result["run"]["decisions"]
+    print(f"QUALIFICATION RUN COMPLETE: {result['run']['run_id']}")
+    print(
+        "decisions: "
+        f"ACCEPT={tallies['accept']} REVISE={tallies['revise']} "
+        f"REJECT={tallies['reject']} INCONCLUSIVE={tallies['inconclusive']} "
+        f"(of {len(result['artifacts'])} candidates)"
+    )
+    print(f"artifacts: {qualification_dir}")
+    print(f"run manifest: {run_path}")
+    print("boundary: QUALIFIED-POOL-ONLY — NOT REGISTERED (order §14)")
+    return 0
+
+
+def cmd_qualify_verify(args: argparse.Namespace) -> int:
+    from ecp import qualification as qualification_mod
+
+    qualify_root = Path(args.qualify_root).resolve()
+    run_path = qualify_root / "qualification-run.json"
+    if not run_path.is_file():
+        print(f"error: no qualification-run.json under {qualify_root}", file=sys.stderr)
+        return 2
+    run = canonical.load_json(run_path)
+    artifacts = [
+        canonical.load_json(path)
+        for path in sorted((qualify_root / "qualification").glob("*.json"))
+    ]
+
+    issues: "list[str]" = []
+    for artifact in artifacts:
+        issues.extend(qualification_mod.verify_artifact(artifact))
+    issues.extend(qualification_mod.verify_run(run, artifacts))
+
+    # determinism re-derivation: re-run from retained inputs (stored metadata)
+    candidates_dir = qualify_root / "candidates"
+    candidates = [
+        canonical.load_json(path)
+        for path in sorted(candidates_dir.glob("*.json"))
+    ]
+    if candidates:
+        prior_population = _load_prior_population(args.prior_candidates)
+        stored_prior = run.get("prior_population", {})
+        if stored_prior.get("count", 0) > 0 and not prior_population:
+            issues.append(
+                "re-derivation skipped: the stored run used a prior population but "
+                "--prior-candidates was not supplied"
+            )
+        else:
+            try:
+                rederived = qualification_mod.run_qualification(
+                    candidates,
+                    run_id=run["run_id"],
+                    qualified_at=run["qualified_at"],
+                    operator=run["operator"],
+                    prior_population=prior_population,
+                    source_label=run.get("source", {}).get("label"),
+                    source_sha=run.get("source", {}).get("sha256"),
+                )
+            except qualification_mod.QualificationError as exc:
+                issues.append(f"re-derivation failed: {exc}")
+                rederived = None
+            if rederived is not None:
+                for stored, fresh in zip(artifacts, rederived["artifacts"]):
+                    if stored.get("artifact_hash") != fresh.get("artifact_hash"):
+                        issues.append(
+                            f"{stored.get('qualification_id', '?')}: DETERMINISM VIOLATION — "
+                            "re-derivation from retained inputs produced a different "
+                            "artifact hash"
+                        )
+                if len(artifacts) != len(rederived["artifacts"]):
+                    issues.append("DETERMINISM VIOLATION — artifact count differs on re-derivation")
+                if run.get("run_hash") != rederived["run"].get("run_hash"):
+                    issues.append("DETERMINISM VIOLATION — run manifest hash differs on re-derivation")
+
+    if issues:
+        print(f"QUALIFICATION VERIFICATION ISSUES ({len(issues)}):")
+        for issue in issues:
+            print(f"  - {issue}")
+        return 1
+    print(
+        f"QUALIFICATION RUN INTACT: {run['run_id']} — {len(artifacts)} artifact(s), "
+        "chain, hashes, cross-references and determinism re-derivation all verified"
+    )
+    return 0
+
+
+# ---------------------------------------------------------------------------
 # Protected store (R1-I, Option C — custody half of the seam)
 # ---------------------------------------------------------------------------
 
@@ -917,6 +1112,37 @@ def main(argv: "list[str] | None" = None) -> int:
     p_amd_disclose.add_argument("--completed-at", required=True, help="explicit UTC disclosure timestamp (after drafting)")
     p_amd_disclose.add_argument("--basis", required=True, help="honest disclosure basis (knowledge state, influence surface)")
     p_amd_disclose.set_defaults(func=cmd_amendment_disclose)
+
+    # --- case authoring + qualification pipeline (M3-CA0 v1) ---
+    p_intake = sub.add_parser(
+        "authoring-intake",
+        help="extract format-2 case candidates from an authored case-set document (structured authoring layer)",
+    )
+    p_intake.add_argument("--source", required=True, help="authored candidate case-set document (format M3-CA0V1-case-set-md-2)")
+    p_intake.add_argument("--sidecar", required=True, help="provenance sidecar JSON (order §3 authoring-independence record)")
+    p_intake.add_argument("--out", required=True, help="qualification root directory (candidates/ + intake-report.json are created inside)")
+    p_intake.add_argument("--source-label", default=None, help="label recorded for the source document")
+    p_intake.add_argument("--candidate-offset", type=int, default=100, help="numeric offset for ECP-CAND ids (default 100 => ECP-CAND-000101+)")
+    p_intake.set_defaults(func=cmd_authoring_intake)
+
+    p_qualify_run = sub.add_parser(
+        "qualify-run",
+        help="run the deterministic four-state qualification (ACCEPT/REVISE/REJECT/INCONCLUSIVE)",
+    )
+    p_qualify_run.add_argument("--qualify-root", required=True, help="qualification root directory (candidates/, qualification/)")
+    p_qualify_run.add_argument("--run-id", required=True, help="ECP-QUALRUN-… run identifier")
+    p_qualify_run.add_argument("--operator", required=True, help="operator identity recorded on the run")
+    p_qualify_run.add_argument("--at", required=True, help="explicit UTC qualification timestamp (determinism: no wall clock)")
+    p_qualify_run.add_argument("--prior-candidates", default=None, help="prior-pool candidates directory for cross-population novelty (read-only)")
+    p_qualify_run.set_defaults(func=cmd_qualify_run)
+
+    p_qualify_verify = sub.add_parser(
+        "qualify-verify",
+        help="verify qualification artifacts, chain, manifest and determinism re-derivation",
+    )
+    p_qualify_verify.add_argument("--qualify-root", required=True, help="qualification root directory")
+    p_qualify_verify.add_argument("--prior-candidates", default=None, help="prior-pool candidates directory (required when the stored run used one)")
+    p_qualify_verify.set_defaults(func=cmd_qualify_verify)
 
     args = parser.parse_args(argv)
     return args.func(args)

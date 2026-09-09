@@ -31,6 +31,8 @@ EXAMPLE_FILES = [
     "review-run.example.json",
     "review-adjudication.example.json",
     "case-amendment.example.json",
+    "case-qualification.example.json",
+    "qualification-run.example.json",
 ]
 
 

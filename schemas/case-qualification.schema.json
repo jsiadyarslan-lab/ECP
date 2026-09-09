@@ -1,0 +1,242 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ecp-protocol.org/0.5.0/case-qualification.schema.json",
+  "title": "ECP Case Qualification (M3-CA0 v1 authoring-layer gate)",
+  "description": "Deterministic four-state qualification artifact for one candidate case (M3-CA0 v1, 0.5.0). The qualification engine (src/ecp/qualification.py) answers: is this authored candidate structurally complete, ground-truth verifiable, novel within and across populations, leakage-safe, provenance-complete and honestly disclosed enough to enter the QUALIFIED candidate pool (which is still NOT registration)? Exactly one of four decisions is produced — ACCEPT / REVISE / REJECT / INCONCLUSIVE (order §11); ambiguous engine inputs abort the run loudly instead of producing a fifth state. Ground truth is verified MECHANICALLY against the candidate's formal layer (four finite semantics), never by consulting a model. Artifacts are hash-chained per run (prev_qualification_hash) and tamper-evident (artifact_hash = SHA-256 over the ECP-CANONICAL-JSON-1.0 serialization of this document with artifact_hash removed). REJECTED and INCONCLUSIVE candidates remain fully traceable — no silent discards. Real qualification material lives only in a private qualification area; public illustrations under examples/ must use content_class 'format-illustration' fields with real recomputable hashes.",
+  "type": "object",
+  "required": [
+    "ecp_object",
+    "qualification_id",
+    "candidate_id",
+    "run_id",
+    "qualified_at",
+    "operator",
+    "source_case_id",
+    "content_hash",
+    "entry_index",
+    "prev_qualification_hash",
+    "engine",
+    "dimensions",
+    "decision",
+    "reason_codes",
+    "boundary",
+    "protocol_version",
+    "schema_version",
+    "artifact_hash"
+  ],
+  "properties": {
+    "ecp_object": { "const": "case-qualification" },
+    "content_class": {
+      "enum": ["review", "format-illustration"],
+      "description": "'review' = real qualification material (private qualification area only). 'format-illustration' = public dummy illustration (examples/ only). The engine refuses illustration inputs."
+    },
+    "qualification_id": {
+      "type": "string",
+      "pattern": "^ECP-QUAL-[0-9]{6,}$",
+      "description": "Qualification-layer identity (NOT an ECP-CASE id, NOT an ECP-REG id; neither is ever assigned at this layer)."
+    },
+    "candidate_id": {
+      "type": "string",
+      "pattern": "^ECP-CAND-[A-Za-z0-9][A-Za-z0-9._:-]*$",
+      "description": "The candidate being qualified."
+    },
+    "run_id": {
+      "type": "string",
+      "pattern": "^ECP-QUALRUN-[A-Za-z0-9][A-Za-z0-9._:-]*$",
+      "description": "The qualification run this artifact belongs to."
+    },
+    "qualified_at": {
+      "$ref": "#/$defs/iso8601_utc"
+    },
+    "operator": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_case_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The case id inside the authored source document (e.g. 'N-001')."
+    },
+    "content_hash": {
+      "$ref": "#/$defs/sha256_hex",
+      "description": "The qualified candidate's content hash (R1/Q1 identity link; the engine recomputes and compares)."
+    },
+    "entry_index": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "1-based position of this artifact within its run (chain order = candidate order)."
+    },
+    "prev_qualification_hash": {
+      "$ref": "#/$defs/sha256_hex",
+      "description": "Hash of the previous artifact in the run (genesis '0'*64 for the first)."
+    },
+    "engine": {
+      "type": "object",
+      "required": ["id", "version"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "version": { "$ref": "#/$defs/semver" }
+      },
+      "additionalProperties": false
+    },
+    "dimensions": {
+      "type": "object",
+      "description": "The eight qualification dimensions (Q1–Q8). Statuses are per-dimension; findings are recorded, never silently resolved.",
+      "required": [
+        "identity",
+        "structural",
+        "ground_truth",
+        "novelty",
+        "leakage",
+        "independence",
+        "representation_bias",
+        "environmental_pre_check"
+      ],
+      "properties": {
+        "identity": {
+          "type": "object",
+          "required": ["status", "content_hash_verified"],
+          "properties": {
+            "status": { "enum": ["PASS", "FAIL"] },
+            "content_hash_verified": { "type": "boolean" },
+            "canonicalization": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
+        },
+        "structural": { "$ref": "#/$defs/dimension_block" },
+        "ground_truth": {
+          "type": "object",
+          "description": "Q3: mechanical verification of the formal layer against the authored ground truth.",
+          "required": ["status", "findings"],
+          "properties": {
+            "status": {
+              "enum": ["PASS", "MISMATCH", "UNVERIFIABLE", "MALFORMED", "INCONSISTENT-DESIGN"]
+            },
+            "findings": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+            "verification": {
+              "type": "object",
+              "description": "The deterministic verification result (derived class, method, value, trace summary)."
+            },
+            "authored_class": {
+              "enum": ["DERIVABLE", "CONTRADICTED", "IMPOSSIBLE", "INDETERMINATE", null]
+            },
+            "derived_class": {
+              "enum": ["DERIVABLE", "CONTRADICTED", "IMPOSSIBLE", "INDETERMINATE", null]
+            }
+          },
+          "additionalProperties": true
+        },
+        "novelty": {
+          "type": "object",
+          "description": "Q4: N1–N6 structural novelty. N1/N2 are recorded OPEN questions (external novelty NOT_ESTABLISHABLE_MECHANICALLY without model invocation or retrieval, both forbidden at CA0); N3 is computed from renaming-invariant structural skeletons; N4 is text-level against the prior format-1 pool; N5/N6 are identifier-registry checks.",
+          "required": ["status", "findings"],
+          "properties": {
+            "status": { "enum": ["UNIQUE", "DUPLICATE", "SUSPICION", "FLAGGED", "NOT-COMPUTABLE"] },
+            "findings": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+            "n1_direct_retrieval": { "type": "string", "minLength": 1 },
+            "n2_solution_retrieval": { "type": "string", "minLength": 1 },
+            "n3_within_pool": { "type": "string", "minLength": 1 },
+            "n4_cross_population": {},
+            "n5_implementation_encoding": { "type": "string", "minLength": 1 },
+            "n6_fixture_leakage": { "type": "string", "minLength": 1 },
+            "skeleton": {
+              "type": ["string", "null"],
+              "description": "Renaming-invariant skeleton hash (null when not computable)."
+            }
+          },
+          "additionalProperties": false
+        },
+        "leakage": {
+          "type": "object",
+          "description": "Q5: the six order §8 leakage classes. A CONFIRMED direct answer leak is disqualifying; risks are recorded. Model leakage is NOT-APPLICABLE-PRE-EXECUTION with the permanent pretraining-exposure declaration.",
+          "required": ["status", "findings", "classes"],
+          "properties": {
+            "status": { "enum": ["CLEAN", "RISK", "CONFIRMED"] },
+            "findings": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+            "classes": {
+              "type": "object",
+              "required": [
+                "direct_answer",
+                "semantic_answer",
+                "solution_trajectory",
+                "implementation_encoding",
+                "fixture",
+                "model"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "direct_answer": { "type": "string", "minLength": 1 },
+                "semantic_answer": { "type": "string", "minLength": 1 },
+                "solution_trajectory": { "type": "string", "minLength": 1 },
+                "implementation_encoding": { "type": "string", "minLength": 1 },
+                "fixture": { "type": "string", "minLength": 1 },
+                "model": { "type": "string", "minLength": 1 }
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "independence": { "$ref": "#/$defs/dimension_block" },
+        "representation_bias": { "$ref": "#/$defs/dimension_block" },
+        "environmental_pre_check": { "$ref": "#/$defs/dimension_block" }
+      },
+      "additionalProperties": false
+    },
+    "decision": {
+      "enum": ["ACCEPT", "REVISE", "REJECT", "INCONCLUSIVE"],
+      "description": "Order §11: exactly one of four states; no fifth state exists (ambiguous engine inputs abort the run loudly)."
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "description": "Deterministic codes mapping findings to the decision (precedence REJECT > REVISE > INCONCLUSIVE > ACCEPT, recorded in the run manifest)."
+    },
+    "forwarded": {
+      "type": "array",
+      "description": "Open questions and designed-ambiguity records forwarded to downstream stages (e.g. FWD-GT-DESIGNED-AMBIGUITY, FWD-GT-UNVERIFIABLE).",
+      "items": {
+        "type": "object",
+        "required": ["code", "note", "target_stage"],
+        "properties": {
+          "code": { "type": "string", "minLength": 1 },
+          "note": { "type": "string", "minLength": 1 },
+          "target_stage": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "boundary": {
+      "const": "QUALIFIED-POOL-ONLY — NOT REGISTERED (order §14: registration closed)"
+    },
+    "protocol_version": { "$ref": "#/$defs/semver" },
+    "schema_version": { "$ref": "#/$defs/semver" },
+    "artifact_hash": {
+      "$ref": "#/$defs/sha256_hex",
+      "description": "SHA-256 over ECP-CANONICAL-JSON-1.0 of this document with artifact_hash removed — tamper evidence re-derivable by any third party."
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "sha256_hex": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "iso8601_utc": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+    },
+    "dimension_block": {
+      "type": "object",
+      "required": ["status", "findings"],
+      "properties": {
+        "status": { "type": "string", "minLength": 1 },
+        "findings": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      },
+      "additionalProperties": true
+    }
+  }
+}

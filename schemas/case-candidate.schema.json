@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.ecp-protocol.org/0.3.0/case-candidate.schema.json",
   "title": "ECP Case Candidate (review-layer intake)",
-  "description": "Canonical intake representation of an UNREGISTERED, UNEXECUTED candidate case (M3-CA0, 0.3.0; extended additively in 0.4.0 with optional case_version and amendment linkage for M3-CA0-A case versioning). Candidates are pre-registration review material: they carry no ECP-CASE id, no ECP-REG id, and are never published to the public ledger or the public repository. Real review material (content_class 'review') lives only in a private/local review area; public illustrations under examples/ must use content_class 'format-illustration'. content_hash is SHA-256 over the ECP-CANONICAL-JSON-1.0 serialization of the content object (R1 identity). Multiple intended_correct_answers/derivations blocks are represented faithfully (all blocks retained) — the review engine flags such anomalies; the parser never silently drops or reconciles them.",
+  "description": "Canonical intake representation of an UNREGISTERED, UNEXECUTED candidate case (M3-CA0, 0.3.0; extended additively in 0.4.0 with optional case_version and amendment linkage for M3-CA0-A case versioning; extended additively in 0.5.0 with optional authoring-layer fields for M3-CA0 v1: expected_property, forbidden_shortcuts, ground_truth, formal inside content, and authoring_independence, representation_bias_disclosure, environmental_pre_check at the top level — schema-optional, engine-mandatory for 0.5.0-protocol candidates). Candidates are pre-registration review material: they carry no ECP-CASE id, no ECP-REG id, and are never published to the public ledger or the public repository. Real review material (content_class 'review') lives only in a private/local review area; public illustrations under examples/ must use content_class 'format-illustration'. content_hash is SHA-256 over the ECP-CANONICAL-JSON-1.0 serialization of the content object (R1 identity). Multiple intended_correct_answers/derivations blocks are represented faithfully (all blocks retained) — the review engine flags such anomalies; the parser never silently drops or reconciles them. The formal layer (0.5.0) is PROTECTED verification material: a machine-checkable encoding whose ground truth the qualification engine verifies deterministically; it is never shown to an evaluated system.",
   "type": "object",
   "required": [
     "ecp_object",
@@ -117,6 +117,95 @@
     },
     "provenance": {
       "$ref": "#/$defs/provenance"
+    },
+    "authoring_independence": {
+      "type": "object",
+      "description": "Order §3 authoring-independence record (0.5.0, engine-mandatory for 0.5.0 candidates, schema-optional for backward compatibility). Transcribed verbatim from the provenance sidecar by the intake layer; never invented, upgraded or reinterpreted. A bare 'INDEPENDENT' status label is rejected by the qualification engine (independence is declared per dimension).",
+      "required": [
+        "author_identity",
+        "authoring_environment",
+        "model_tool",
+        "model_version",
+        "prompt_instructions",
+        "information_available",
+        "information_unavailable",
+        "relationship_to_ecp_developers",
+        "relationship_to_evaluated_systems",
+        "access_to_prior_ecp_results",
+        "independence_status"
+      ],
+      "properties": {
+        "author_identity": { "type": "string", "minLength": 1 },
+        "authoring_environment": { "type": "string", "minLength": 1 },
+        "model_tool": { "type": "string", "minLength": 1 },
+        "model_version": { "type": "string", "minLength": 1 },
+        "prompt_instructions": {
+          "type": "object",
+          "required": ["reference", "sha256"],
+          "properties": {
+            "reference": { "type": "string", "minLength": 1 },
+            "sha256": { "$ref": "#/$defs/sha256_hex" }
+          },
+          "additionalProperties": false
+        },
+        "information_available": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "information_unavailable": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "relationship_to_ecp_developers": { "type": "string", "minLength": 1 },
+        "relationship_to_evaluated_systems": { "type": "string", "minLength": 1 },
+        "access_to_prior_ecp_results": { "type": "string", "minLength": 1 },
+        "independence_status": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["label"],
+              "properties": {
+                "label": { "type": "string", "minLength": 1 },
+                "case_author_independence": { "type": "string", "minLength": 1 },
+                "performance_blindness": { "type": "string", "minLength": 1 },
+                "system_neutrality": { "type": "string", "minLength": 1 },
+                "note": { "type": "string", "minLength": 1 }
+              },
+              "additionalProperties": false
+            },
+            { "type": "string", "minLength": 1 }
+          ]
+        },
+        "validation_procedure": { "type": "string", "minLength": 1 },
+        "independence_limitations": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      },
+      "additionalProperties": false
+    },
+    "representation_bias_disclosure": {
+      "type": "object",
+      "description": "Order §9 representation-bias disclosure (0.5.0, engine-mandatory for 0.5.0 candidates): recorded separately from structural novelty, never merged; uncertainty preserved, neutrality never manufactured.",
+      "required": ["status", "evidence", "known_limitation"],
+      "properties": {
+        "status": { "enum": ["DISCLOSED", "POSSIBLE", "KNOWN", "UNKNOWN"] },
+        "evidence": { "type": "string", "minLength": 1 },
+        "known_limitation": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "environmental_pre_check": {
+      "type": "object",
+      "description": "Order §10 environmental pre-check (0.5.0, engine-mandatory for 0.5.0 candidates): suspected knowledge sources, fixtures, implementation artifacts, memory paths, model-access paths, answer-bearing artifacts. NOT the formal Environmental Anti-Leakage Gate (a separate downstream gate).",
+      "required": [
+        "knowledge_sources",
+        "fixtures",
+        "implementation_artifacts",
+        "memory_paths",
+        "model_access_paths",
+        "answer_bearing_artifacts"
+      ],
+      "properties": {
+        "knowledge_sources": { "type": "string", "minLength": 1 },
+        "fixtures": { "type": "string", "minLength": 1 },
+        "implementation_artifacts": { "type": "string", "minLength": 1 },
+        "memory_paths": { "type": "string", "minLength": 1 },
+        "model_access_paths": { "type": "string", "minLength": 1 },
+        "answer_bearing_artifacts": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
     },
     "registration_authoring": {
       "type": "object",
@@ -316,6 +405,84 @@
             },
             "structurally_distinct": {
               "$ref": "#/$defs/self_review_value"
+            }
+          },
+          "additionalProperties": false
+        },
+        "expected_property": {
+          "type": "string",
+          "minLength": 1,
+          "description": "0.5.0 (order §5): the property a correct answer to this case must have — what counts as a valid response, independent of the answer's content."
+        },
+        "forbidden_shortcuts": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 },
+          "description": "0.5.0 (order §5): reasoning shortcuts the case forbids (mention-order heuristics, world-knowledge substitution, converse/inverse misapplication, distractor use, etc.)."
+        },
+        "ground_truth": {
+          "type": "object",
+          "description": "0.5.0 (order §6): the authored ground-truth claim, verified mechanically by the qualification engine against the formal layer. PROTECTED-CLASS MATERIAL when content_class is 'review'.",
+          "required": ["class", "statement"],
+          "properties": {
+            "class": {
+              "enum": ["DERIVABLE", "CONTRADICTED", "IMPOSSIBLE", "INDETERMINATE"],
+              "description": "Order §6.4 taxonomy: derivable / contradicted / impossible / indeterminate."
+            },
+            "statement": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The queried proposition or finding the ground truth asserts."
+            },
+            "ambiguity_note": {
+              "type": "string",
+              "minLength": 1,
+              "description": "For designed-indeterminate cases: the ambiguity reported per order §6 (never forced into a determinate class)."
+            }
+          },
+          "additionalProperties": false
+        },
+        "formal": {
+          "type": "object",
+          "description": "0.5.0 (order §6): machine-checkable verification layer (PROTECTED qualification material — never shown to an evaluated system). The qualification engine verifies the authored ground truth deterministically under one of four finite semantics; the layer carries no answer in NL-visible form.",
+          "required": ["semantics", "premises", "query"],
+          "properties": {
+            "semantics": {
+              "enum": [
+                "relational-closure",
+                "propositional-truth-table",
+                "constraint-enumeration",
+                "default-extensions"
+              ]
+            },
+            "entities": {
+              "type": "array",
+              "items": { "type": "string", "minLength": 1 },
+              "description": "relational-closure: the finite entity domain."
+            },
+            "props": {
+              "type": "array",
+              "items": { "type": "string", "minLength": 1 },
+              "description": "propositional/default: the proposition symbols."
+            },
+            "variables": {
+              "type": "array",
+              "items": { "type": "string", "minLength": 1 },
+              "description": "constraint-enumeration: the assignment variables."
+            },
+            "domains": {
+              "type": "object",
+              "description": "constraint-enumeration: per-variable domain specs ({'range': [lo, hi]} inclusive, or {'values': [...]}) matching 'variables' exactly."
+            },
+            "premises": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "object" },
+              "description": "Semantics-specific premise encodings: rel_fact / rel_rule (relational-closure); prop_fact / impl (propositional; impl also in the strict part of default-extensions); all_different / equals / not_equal / linear / immediately_before (constraint-enumeration); default (default-extensions). Shapes are validated by the qualification engine, loudly."
+            },
+            "query": {
+              "type": "object",
+              "description": "The verification query: {relation, args} (relational statement), {prop, value} (propositional/default statement), {kind: consistency | repair_count}, {kind: value_of | truth_of | solution_exists, var/value} (constraint)."
             }
           },
           "additionalProperties": false

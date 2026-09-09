@@ -689,3 +689,125 @@ ledger append, ground-truth publication, model execution, evidence
 collection, scoring, and statistics — even for candidates that become
 ELIGIBLE. Registration remains a separately authorized stage with its
 own ceremony (§16).
+
+## 21. Case Authoring + Qualification Layer (0.5.0 / M3-CA0 v1)
+
+The M3-CA0 v1 layer sits BEFORE registration and AFTER (or alongside) the
+§19 review pipeline: it authors a candidate population under the frozen G0
+scientific design and qualifies it with a deterministic four-state gate.
+It executes no model, registers nothing, and leaves the ledger untouched.
+
+### 21.1 Authored case-set intake (format 2)
+
+Authored candidate material arrives as a case-set document in format
+`M3-CA0V1-case-set-md-2` (the structured extension of the §19.2 format):
+per-case sections for the family, structural signature, numbered premises,
+question, expected property, intended answer, derivation, ground-truth class
+and statement (with an optional ambiguity note for designed-indeterminate
+cases), forbidden shortcuts, a fenced machine-checkable FORMAL layer, risk
+notes, representation-bias disclosure (order §9 sub-keys), environmental
+pre-check (order §10 sub-keys) and self-review; tail blocks carry the
+authoring provenance (order §3) and the case-set summary (pool design).
+
+`authoring-intake` (src/ecp/authoring.py) parses this format with the same
+guarantees as §19.2: line-complete coverage accounting (nothing silently
+dropped), verbatim `raw_block` retention including fence lines, loud
+failure on malformed FORMAL JSON, provenance sidecar acquisition-hash
+binding, and byte-identical re-extraction. The sidecar additionally carries
+the §3 authoring-independence record (author identity, environment,
+model/tool, prompt/instructions with hash, information available and
+explicitly unavailable, relationships to ECP developers and evaluated
+systems, prior-result access, and an EXPLICIT independence status label).
+A bare `INDEPENDENT` label is rejected by the qualification engine:
+independence is declared per dimension, never as an unaudited word.
+
+### 21.2 The formal verification layer (protected material)
+
+Every 0.5.0 candidate carries a `formal` object — a machine-checkable
+encoding of its premises and query under one of four finite semantics:
+
+- `relational-closure` — facts and grounded rules over a finite entity
+  domain, forward-chained to a fixpoint (statement, consistency and
+  repair-count queries);
+- `propositional-truth-table` — implications and facts over propositions,
+  verified by exhaustive model enumeration (modus ponens and modus tollens
+  fall out classically; statement, consistency and repair-count queries);
+- `constraint-enumeration` — finite-domain assignment problems
+  (all-different, equals, not-equal, linear arithmetic,
+  immediately-before) verified by exhaustive enumeration with a declared
+  search-space cap;
+- `default-extensions` — normal-case rules with exceptions, verified by
+  enumerating maximal consistent default subsets; conflicting defaults
+  yield multiple extensions and a designed indeterminacy that is REPORTED,
+  never resolved (the §19.3 honesty rule applied at authoring time).
+
+The formal layer is PROTECTED qualification material: it is never shown to
+an evaluated system, never published, and exists so that ground truth is
+established and verified independently of any evaluated system (order §6)
+by deterministic computation alone. NL-to-formal correspondence is checked
+mechanically in part (symbol coverage: every declared formal symbol must
+appear in the NL task text) and is otherwise author-attested — a declared
+limitation, never a silently assumed property.
+
+### 21.3 The four-state qualification gate
+
+`qualify-run` (src/ecp/qualification.py) produces exactly one of
+`ACCEPT`, `REVISE`, `REJECT`, `INCONCLUSIVE` per candidate — there is no
+fifth state; ambiguous engine inputs abort the run loudly. Dimensions:
+
+- **Q1 identity** — content hash recomputation;
+- **Q2 structural** — the order §5 field set (core content fields vs
+  auxiliary fields distinguished);
+- **Q3 ground truth** — mechanical verification of the formal layer against
+  the authored class (and value, where the query yields one); a mismatch,
+  an inconsistent premise set under a statement query, or a malformed
+  formal layer are findings, never silent repairs; a missing formal layer
+  yields the honest INCONCLUSIVE (cannot qualify now), not a forced
+  ACCEPT;
+- **Q4 novelty N1–N6** — N1/N2 recorded as OPEN questions (external
+  novelty NOT_ESTABLISHABLE_MECHANICALLY without model invocation or
+  retrieval, both forbidden at this stage); N3 within-pool duplication via
+  renaming-invariant structural skeletons (entity and relation names are
+  abstracted away — a superficial rename is NOT a new case); N4
+  cross-population replay against a prior pool (text-level, with the
+  prior pool's content hashes recorded for tamper evidence); N5/N6
+  identifier-registry checks over case-content symbols;
+- **Q5 leakage pre-screen** — the six §8-classes; a CONFIRMED direct
+  answer leak (the queried statement is itself a premise fact) is
+  disqualifying; model leakage is NOT-APPLICABLE-PRE-EXECUTION with the
+  permanent pretraining-exposure declaration (§19 threat model);
+- **Q6 independence** — the §3 record complete with an explicit bounded
+  status;
+- **Q7 representation-bias disclosure** — present per candidate, recorded
+  separately from novelty, uncertainty preserved;
+- **Q8 environmental pre-check** — present per candidate.
+
+Decision precedence is fixed and recorded in every run manifest:
+REJECT > REVISE > INCONCLUSIVE > ACCEPT. REJECTED and INCONCLUSIVE
+candidates remain fully traceable (no silent discards).
+
+### 21.4 Qualification runs, determinism and verification
+
+A qualification run is a pure function of (candidates, run metadata,
+prior population content). Artifacts are hash-chained in candidate order
+(`prev_qualification_hash`, genesis all-zero); the run manifest records
+the engine identity and profile, the decision-rule table, the engine
+parameters, the prior-population reference, per-candidate entries, the
+four-state tallies, the chain head, and `run_hash` (self-referential
+SHA-256 over the canonical serialization). `qualify-verify` re-derives
+every artifact and the manifest from retained inputs and reports INTACT
+or the exact violations (hash mismatch, chain break, tally drift,
+determinism violation). Verification is integrity-only: it never
+adjudicates science.
+
+### 21.5 Boundary (STOP)
+
+The qualification layer MUST STOP before: registration, public ledger
+append, ground-truth publication, hidden/dev set designation, model
+execution, evidence collection, scoring, and statistics — even for
+ACCEPTED candidates. The qualified pool is pool material only; partition
+into public development / preregistered / hidden / rotating / private
+sets is a registration-gate decision under owner authorization. The
+rotation architecture is preserved by construction: no set-class is
+assigned at authoring, and qualification is performance-blind (no
+outcome data exists anywhere in the project at this stage).

@@ -22,21 +22,32 @@ for the ECP foundation objects:
 | `review-run.schema.json` | `review-run` | **0.3.0 (new, M3-CA0)** | review layer — run manifest (determinism re-derivable) |
 | `review-adjudication.schema.json` | `review-adjudication` | **0.3.0 (new, M3-CA0)** | review layer — owner decision record (the human seam) |
 | `case-amendment.schema.json` | `case-amendment` | **0.4.0 (new, M3-CA0-A)** | adjudication layer — versioned case amendment with the two-phase representation-bias disclosure (draft_hash + amendment_hash) |
+| `case-qualification.schema.json` | `case-qualification` | **0.5.0 (new, M3-CA0 v1)** | qualification layer — deterministic four-state artifact (ACCEPT/REVISE/REJECT/INCONCLUSIVE, private qualification area only) |
+| `qualification-run.schema.json` | `qualification-run` | **0.5.0 (new, M3-CA0 v1)** | qualification layer — run manifest (determinism re-derivable; mechanical ground-truth verification) |
 
 Notes:
 
 - The `$id` values are **stable identifiers**, not fetchable URLs.
 - The schema bundle version is pinned in the repository-root `ECP-IDENTITY.json`
   (`schema_version`). Every schema change requires a schema-version bump.
-- The 0.2.0, 0.3.0 and 0.4.0 bundles are **additive**: the ten 0.1.0 contract
+- The 0.2.0, 0.3.0, 0.4.0 and 0.5.0 bundles are **additive**: the ten 0.1.0 contract
   files are unchanged; the two 0.2.0 contracts (ledger-entry,
   store-manifest) implement the R1-I minimal coupled foundation (protected
   store + registration ledger, see `spec/ECP-SPEC.md` §15–§18 and
-  `docs/M3-R1-ARCHITECTURE-DECISION.md`); the four 0.3.0 contracts; the 0.4.0 bundle adds `case-amendment` and extends the 0.3.0 review contracts with optional fields only (case_version/amendment linkage, amendments/lineage manifest blocks)
+  `docs/M3-R1-ARCHITECTURE-DECISION.md`); the four 0.3.0 contracts
   (case-candidate, case-review, review-run, review-adjudication)
-  implement the M3-CA0 case review pipeline (see `spec/ECP-SPEC.md` §19).
-  0.1.x and 0.2.x artifacts remain valid — the explicit compatibility
-  matrix is `src/ecp/versions.py`.
+  implement the M3-CA0 case review pipeline (see `spec/ECP-SPEC.md` §19);
+  the 0.4.0 bundle adds `case-amendment` and extends the 0.3.0 review
+  contracts with optional fields only (case_version/amendment linkage,
+  amendments/lineage manifest blocks); the 0.5.0 bundle (M3-CA0 v1) adds
+  the two qualification-layer contracts and extends `case-candidate` with
+  optional authoring-layer fields (expected_property, forbidden_shortcuts,
+  ground_truth, formal inside content; authoring_independence,
+  representation_bias_disclosure, environmental_pre_check at the top
+  level — schema-optional, engine-mandatory for 0.5.0-protocol candidates;
+  see `spec/ECP-SPEC.md` §21).
+  0.1.x, 0.2.x, 0.3.x and 0.4.x artifacts remain valid — the explicit
+  compatibility matrix is `src/ecp/versions.py`.
 - There are **no provider-specific schemas** in this directory; provider/system
   integrations belong outside the protocol core (see `docs/ARCHITECTURE.md`).
 - The `ground-truth` schema describes the **format** of sealed ground-truth

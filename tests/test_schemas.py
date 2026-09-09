@@ -26,6 +26,9 @@ EXAMPLE_SCHEMA_MAP = [
     ("case-review.example.json", "case-review"),
     ("review-run.example.json", "review-run"),
     ("review-adjudication.example.json", "review-adjudication"),
+    ("case-amendment.example.json", "case-amendment"),
+    ("case-qualification.example.json", "case-qualification"),
+    ("qualification-run.example.json", "qualification-run"),
 ]
 
 
