@@ -64,7 +64,24 @@
   "historical_23_case_modified": false,
   "jarvis_modified": false,
   "registration": false,
-  "execution": false,
+  "execution": {
+    "execution_run_id": "ECP-EXEC-RUN-M3-NATIVE-V1",
+    "bundle_hash": "cd9d75dd98cbbdf4fcbf9f0d638bbe416ea9c69e482ef597ce63268b0486653e",
+    "execution_count": 3,
+    "valid_executions": 3,
+    "invalid_executions": 0,
+    "experimental_outcomes": {
+      "SUCCESS": 0,
+      "FAIL": 0,
+      "INCONCLUSIVE": 3,
+      "INVALID": 0
+    },
+    "model_calls": 0,
+    "target_system_calls": 0,
+    "evidence_storage": "private protected store only",
+    "repeat_execution": "byte-identical bundle",
+    "execution_status": "PERSISTED_NO_PUBLIC_EVIDENCE"
+  },
   "model_calls": 0,
   "protected_store": {
     "repository": "jsiadyarslan-lab/ecp-protected-store",
@@ -72,7 +89,7 @@
     "storage_class": "PROTECTED",
     "retention_status": "ACTIVE_WRITE_ONCE",
     "manifest_version": 1,
-    "manifest_sha256": "eacbec762a6ffadb11e30695c69c3181a2fbe998e406e8e045a2463a573259f5",
+    "manifest_sha256": "3a9e7ea2f76d17384114099509562f91e12ba211533084922504c435c3ad5dfa",
     "artifact_ids": [
       "M3-CASE-ECP-NATIVE-001-V1",
       "M3-CASE-ECP-NATIVE-002-V1",
@@ -82,7 +99,13 @@
       "M3-QUAL-ECP-CAND-000103-V1"
     ],
     "full_case_set_sha256": "1ef751de6752c3e475f3ac74d90c42ecdb748ca20213043586b6f6bda9bce458",
-    "protected_store_commit": "859844a96457f29e6b83d0a4224824025eb64cd9",
-    "recovery_contract": "fresh private clone plus full registry hash verification"
+    "protected_store_commit": "625200cc540a5997558538a58f90120f13a20113",
+    "recovery_contract": "fresh private clone plus full registry hash verification",
+    "execution_artifact_ids": [
+      "M3-EXEC-BUNDLE-M3-NATIVE-V1",
+      "M3-EXEC-ECP-NATIVE-001-V1",
+      "M3-EXEC-ECP-NATIVE-002-V1",
+      "M3-EXEC-ECP-NATIVE-003-V1"
+    ]
   }
 }
