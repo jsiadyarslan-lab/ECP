@@ -1,0 +1,164 @@
+{
+  "ecp_object": "ESV-SYSTEM-DISCOVERY-RECORD",
+  "record_id": "ESV-SYSTEM-DISCOVERY-M3-EXTERNAL-V1",
+  "protocol_version": "0.5.0",
+  "discovery_timestamp": "2026-09-10T21:22:00Z",
+  "repository_scope": "jsiadyarslan-lab/ECP only",
+  "branch": "main",
+  "baseline_m3_classification": "ECP-M3-CLASSIFICATION-CLOSURE-V1",
+  "mode": "READ_ONLY_DISCOVERY_ELIGIBILITY_AUTHORIZATION_PREPARATION",
+  "execution_authorized": false,
+  "case_authoring_authorized": false,
+  "registration_authorized": false,
+  "statistical_analysis_authorized": false,
+  "candidates_considered": [
+    {
+      "candidate_id": "ESV-CAND-001",
+      "system_name": "OpenAI API",
+      "provider_organization": "OpenAI",
+      "model_identity": "Official API model family; no model selected for execution",
+      "version_snapshot": "Not frozen; no direct OpenAI credential or endpoint configured",
+      "api_runtime_interface": "Official Responses API",
+      "system_configuration": "Not configured in the session; no execution attempted",
+      "agent_framework": "None established",
+      "tools": "API supports tools/function calling in principle; not enabled or evaluated",
+      "retrieval_external_services": "Not enabled or evaluated",
+      "execution_method": "Would require direct authenticated Responses API invocation",
+      "reproducibility_characteristics": "Official interface supports explicit model/request capture, but immutable model snapshot and access were not established",
+      "evidence_capture_capability": "Raw request/response can be client-captured in a future authorized run; not tested",
+      "model_tool_boundary": "Could be recorded if direct endpoint and configuration were frozen",
+      "network_behavior": "External HTTPS API; no call made",
+      "raw_input_output_preservation": "Feasible in client-controlled runner; unverified in this gate",
+      "exact_execution_identity": "Not available without configured direct access and frozen model/configuration",
+      "independence_class": "INDEPENDENT-EXTERNAL candidate by provider lineage",
+      "eligibility_result": "INELIGIBLE_FOR_THIS_GATE",
+      "exclusion_reason": "No configured direct credential/endpoint and no frozen version/snapshot; execution is not authorized",
+      "discovery_evidence": [
+        "https://developers.openai.com/api/reference/responses/overview/"
+      ]
+    },
+    {
+      "candidate_id": "ESV-CAND-002",
+      "system_name": "Claude API",
+      "provider_organization": "Anthropic",
+      "model_identity": "Official Messages API model family; no model selected for execution",
+      "version_snapshot": "Not frozen; no Anthropic credential configured",
+      "api_runtime_interface": "Official Messages API",
+      "system_configuration": "Not configured in the session; no execution attempted",
+      "agent_framework": "None established",
+      "tools": "API documents tool-use and server-tool boundaries; not enabled or evaluated",
+      "retrieval_external_services": "Not enabled or evaluated",
+      "execution_method": "Would require direct authenticated Messages API invocation",
+      "reproducibility_characteristics": "Official response includes model and usage metadata, but immutable access/configuration was not established",
+      "evidence_capture_capability": "Raw request/response and response metadata can be client-captured in a future authorized run; not tested",
+      "model_tool_boundary": "Could be recorded if direct endpoint and configuration were frozen",
+      "network_behavior": "External HTTPS API; no call made",
+      "raw_input_output_preservation": "Feasible in client-controlled runner; unverified in this gate",
+      "exact_execution_identity": "Not available without configured direct access and frozen model/configuration",
+      "independence_class": "INDEPENDENT-EXTERNAL candidate by provider lineage",
+      "eligibility_result": "INELIGIBLE_FOR_THIS_GATE",
+      "exclusion_reason": "No configured direct credential and no frozen version/snapshot; execution is not authorized",
+      "discovery_evidence": [
+        "https://platform.claude.com/docs/en/api/messages/create"
+      ]
+    },
+    {
+      "candidate_id": "ESV-CAND-003",
+      "system_name": "Gemini API",
+      "provider_organization": "Google",
+      "model_identity": "Official Gemini API model family; no model selected for execution",
+      "version_snapshot": "Not frozen; no Google API key configured",
+      "api_runtime_interface": "Official Gemini API generateContent / related endpoints",
+      "system_configuration": "Not configured in the session; no execution attempted",
+      "agent_framework": "None established",
+      "tools": "API supports content generation and tool-capable interfaces; not enabled or evaluated",
+      "retrieval_external_services": "Not enabled or evaluated",
+      "execution_method": "Would require direct authenticated Gemini API invocation",
+      "reproducibility_characteristics": "Official API exposes explicit model endpoint selection, but immutable model snapshot and access were not established",
+      "evidence_capture_capability": "Raw request/response can be client-captured in a future authorized run; not tested",
+      "model_tool_boundary": "Could be recorded if direct endpoint and configuration were frozen",
+      "network_behavior": "External HTTPS API; no call made",
+      "raw_input_output_preservation": "Feasible in client-controlled runner; unverified in this gate",
+      "exact_execution_identity": "Not available without configured direct access and frozen model/configuration",
+      "independence_class": "INDEPENDENT-EXTERNAL candidate by provider lineage",
+      "eligibility_result": "INELIGIBLE_FOR_THIS_GATE",
+      "exclusion_reason": "No configured direct API key and no frozen version/snapshot; execution is not authorized",
+      "discovery_evidence": [
+        "https://ai.google.dev/api"
+      ]
+    },
+    {
+      "candidate_id": "ESV-CAND-004",
+      "system_name": "Manus OpenAI-compatible gateway",
+      "provider_organization": "Manus gateway; catalog reports provider ownership metadata",
+      "model_identity": [
+        "gpt-5-nano (catalog owner: openai)",
+        "gpt-5-mini (catalog owner: openai)",
+        "gpt-5 (catalog owner: openai)",
+        "gpt-5.5 (catalog owner: openai)",
+        "gemini-3-flash-preview (catalog owner: google)",
+        "gemini-3.1-pro-preview (catalog owner: google)"
+      ],
+      "version_snapshot": "Catalog IDs observed; immutable backend snapshot/provider routing not established",
+      "api_runtime_interface": "Authenticated OpenAI-compatible /models discovery endpoint at api.manus.im; no generation endpoint called",
+      "system_configuration": "Session-provided gateway configuration; exact routing and hidden runtime configuration not exposed",
+      "agent_framework": "None established",
+      "tools": "Not inspected or enabled",
+      "retrieval_external_services": "Not inspected or enabled",
+      "execution_method": "Could use an OpenAI-compatible request path, but no model execution was authorized",
+      "reproducibility_characteristics": "Model IDs are observable, but gateway routing, snapshot, and runtime configuration are not frozen",
+      "evidence_capture_capability": "Discovery response captured locally; model input/output evidence not tested",
+      "model_tool_boundary": "Provider and gateway boundary is unresolved; cannot attribute future output solely to a frozen external system",
+      "network_behavior": "External HTTPS gateway; only non-generative model catalog discovery was performed",
+      "raw_input_output_preservation": "Not established because no generation call was made",
+      "exact_execution_identity": "Catalog model ID available, immutable execution identity unavailable",
+      "independence_class": "INDEPENDENT-EXTERNAL candidate by non-ECP/JARVIS lineage, subject to gateway attribution",
+      "eligibility_result": "INELIGIBLE_FOR_THIS_GATE",
+      "exclusion_reason": "Gateway-mediated routing and immutable model/runtime snapshot are not established; no controlled evidence boundary can yet be asserted",
+      "discovery_evidence": [
+        "Authenticated GET /models discovery completed without generation",
+        "Observed catalog count: 6",
+        "No model output, case input, or experimental result was produced"
+      ]
+    }
+  ],
+  "jarvis_internal_candidates": [],
+  "independent_system_availability": "NONE_ELIGIBLE",
+  "independent_stratum": "UNAVAILABLE_WITHIN_TIMEBOX",
+  "timebox": {
+    "mode": "single read-only discovery window",
+    "started_at": "2026-09-10T21:21:59Z",
+    "ended_at": "2026-09-10T21:22:16Z",
+    "stopped_without_lowering_eligibility": true
+  },
+  "boundary_checks": {
+    "ground_truth_accessed": false,
+    "scoring_accessed": false,
+    "case_selection_performed": false,
+    "execution_performed": false,
+    "model_calls": 0,
+    "target_system_calls": 0,
+    "external_outputs_generated": false,
+    "m3_cases_reexecuted": false,
+    "jarvis_accessed": false,
+    "public_sensitive_content_added": false
+  },
+  "case_readiness": {
+    "case_strategy_ready": false,
+    "new_case_authoring_required": true,
+    "registration_required": true,
+    "execution_authorized": false
+  },
+  "gaps": [
+    "No independently attributable, immutable target model/runtime snapshot is currently configured",
+    "No direct provider credentials are configured for OpenAI, Anthropic, or Google",
+    "The available Manus gateway does not expose sufficient frozen routing/runtime identity for eligibility",
+    "Raw model input/output and tool traces remain untested because execution is not authorized"
+  ],
+  "blockers": [
+    "NONE_ELIGIBLE independent external system within the discovery timebox"
+  ],
+  "final_verdict": "BLOCKED — NO ELIGIBLE EXTERNAL SYSTEM",
+  "next_gate": "OWNER DECISION REQUIRED before any credential/configuration change or renewed discovery window",
+  "provenance": "Official provider documentation plus authenticated non-generative model-catalog discovery; no model execution"
+}
