@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ECP Evaluation Console</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <p class="eyebrow">ECP / CONTROLLED EXECUTION SURFACE</p>
+      <h1>ECP Evaluation Console</h1>
+      <p class="lede">Select an authorized registered evaluation. The browser sends identifiers only; the local gateway resolves credentials and owns execution, evidence, audit, and persistence.</p>
+    </header>
+
+    <section class="card pairing-card" aria-labelledby="pairing-title">
+      <div class="section-title"><h2 id="pairing-title">Gateway</h2><span id="gateway-state" class="pill neutral">CHECKING</span></div>
+      <p id="gateway-detail" class="muted">Checking the loopback gateway at <code>127.0.0.1</code>…</p>
+      <div class="pairing-row">
+        <label for="pairing-code">Temporary pairing code</label>
+        <input id="pairing-code" type="password" autocomplete="one-time-code" inputmode="text" placeholder="Enter the code printed by the local gateway">
+        <button id="pair-button" type="button">PAIR</button>
+      </div>
+      <p class="hint">The code is short-lived, held in gateway memory, and never committed to this site.</p>
+    </section>
+
+    <section class="card" aria-labelledby="selection-title">
+      <div class="section-title"><h2 id="selection-title">Authorized evaluation</h2><span id="catalog-state" class="pill neutral">NOT LOADED</span></div>
+      <div class="form-grid">
+        <label>Evaluation<select id="evaluation-select" disabled><option>Pair with the gateway first</option></select></label>
+        <label>Credential reference<select id="credential-select" disabled><option>—</option></select></label>
+        <label>Test<select id="test-select" disabled><option>—</option></select></label>
+      </div>
+      <button id="run-button" class="run" type="button" disabled>RUN TEST</button>
+      <p id="selection-detail" class="muted">No protected case material or credential value is loaded into the browser.</p>
+    </section>
+
+    <section class="card" aria-labelledby="execution-title">
+      <div class="section-title"><h2 id="execution-title">Execution</h2><span id="execution-state" class="pill neutral">IDLE</span></div>
+      <dl class="status-grid">
+        <div><dt>Execution ID</dt><dd id="execution-id">—</dd></div>
+        <div><dt>External call</dt><dd id="external-status">NOT STARTED</dd></div>
+        <div><dt>Response</dt><dd id="response-status">NOT RECEIVED</dd></div>
+        <div><dt>Evidence</dt><dd id="evidence-status">NOT GENERATED</dd></div>
+        <div><dt>Audit-safe record</dt><dd id="audit-status">NOT GENERATED</dd></div>
+        <div><dt>Persistence</dt><dd id="persistence-status">NOT PERSISTED</dd></div>
+      </dl>
+      <pre id="result" class="result" aria-live="polite">No execution has been requested.</pre>
+      <p id="error" class="error" role="alert"></p>
+    </section>
+
+    <footer><span>Execution surface only.</span><span>Scientific registration, Ground Truth, scoring, and historical artifacts are immutable here.</span></footer>
+  </main>
+  <script src="./app.js"></script>
+</body>
+</html>
