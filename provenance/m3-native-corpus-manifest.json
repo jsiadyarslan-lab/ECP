@@ -1,0 +1,61 @@
+{
+  "record_type": "native-corpus-persistence-manifest",
+  "record_version": "1.0",
+  "scope": "public-provenance-and-reproducibility-metadata-only",
+  "corpus_status": "ECP-NATIVE-AUTHORED-QUALIFICATION-INPUT-READY",
+  "artifact_boundary": "private/local review area",
+  "historical_source": {
+    "repository": "jsiadyarslan-lab/JARVIS",
+    "commit": "5267a8055ad95f64fc51052d804e8aea8a0a2db7",
+    "sha256": "cc867e9794d72b160396f3527f928cb919641812dc8ef1ae3bd7db21723bf001",
+    "case_count": 23,
+    "imported_to_ecp": false
+  },
+  "native_corpus": {
+    "case_count": 3,
+    "case_ids": ["ECP-NATIVE-001", "ECP-NATIVE-002", "ECP-NATIVE-003"],
+    "source_sha256": "1ef751de6752c3e475f3ac74d90c42ecdb748ca20213043586b6f6bda9bce458",
+    "schema_version": "0.5.0",
+    "protocol_version": "0.5.0",
+    "authoring_mode": "native; no model invoked",
+    "semantic_families": ["relational-closure", "propositional-truth-table", "constraint-enumeration"]
+  },
+  "qualification_summary": {
+    "engine_profile": "0.5.0",
+    "authored": 3,
+    "extracted": 3,
+    "candidates": 3,
+    "accept": 3,
+    "reject": 0,
+    "inconclusive": 0,
+    "revise": 0,
+    "duplicates": 0,
+    "missing": 0,
+    "invented": 0,
+    "orphans": 0,
+    "deterministic_repeat": true,
+    "model_calls": 0,
+    "registration": false,
+    "execution": false
+  },
+  "candidate_content_hashes": [
+    "8e8feb011bfb8895b59fafff6091f36308393ae53bb11262fbbc6f29a9c817f5",
+    "73fbb9904cfd1c1af6eb063dcffaa8bb07dc77a9366b68960c7d5bb63ca6a7da",
+    "0d054c99dd5957c23b2948fbac8c59f697ea6b0f0ef074407910b0d915832711"
+  ],
+  "qualification_artifact_hashes": [
+    "5733f9b70c93576055b599fa59dc416db805404ad4d932b6ae12e54302ae558b",
+    "ec6e0d1bbc5747e92150e0a29c905fe3aa3c199490d5c0c22dc8794698c20fd2",
+    "bee3a69a3f20980550d34806aa2495ebd88c60f37995cae5c41f14b772d793d9"
+  ],
+  "sensitive_content_published": false,
+  "full_case_corpus_published": false,
+  "full_candidates_published": false,
+  "full_qualification_artifacts_published": false,
+  "historical_ecp_import": "NOT ESTABLISHED",
+  "historical_23_case_modified": false,
+  "jarvis_modified": false,
+  "registration": false,
+  "execution": false,
+  "model_calls": 0
+}
