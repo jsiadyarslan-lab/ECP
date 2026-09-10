@@ -9,3 +9,13 @@ dist/
 .coverage
 htmlcov/
 .DS_Store
+
+# Local secret sources; never commit credentials or environment files.
+.env
+.env.*
+!.env.example
+credentials.json
+secrets.json
+API_KEYS.md
+*.pem
+*.key

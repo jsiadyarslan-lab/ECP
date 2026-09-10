@@ -34,8 +34,10 @@ This package implements the repository's scientific core:
   provenance lineage, controlled access seams and full registration
   integrity verification (:mod:`ecp.trust`, M3-RG0).
 
-It deliberately contains NO model adapters, NO execution machinery, NO scoring
-logic and NO provider-specific code (see spec/ECP-SPEC.md, "Provider neutrality").
+ It deliberately contains NO model adapters, NO execution machinery, NO scoring
+ logic and NO provider-specific code (see spec/ECP-SPEC.md, "Provider neutrality").
+ The credential module is an infrastructure boundary only; it does not call
+ providers or execute evaluated systems.
 """
 
 __version__ = "0.7.0"
@@ -49,6 +51,23 @@ from .hashing import (
     sha256_hex,
 )
 from .identity import IDENTITY_FILE, REPO_ROOT, get_identity, load_identity
+from .credentials import (
+    CredentialGateway,
+    CredentialIdentity,
+    CredentialError,
+    CredentialExpired,
+    CredentialNotFound,
+    CredentialRevoked,
+    CredentialScopeError,
+    CredentialStateError,
+    EnvironmentSecretStore,
+    ExternalSystemAdapter,
+    SecretLease,
+    SecretRedactionFilter,
+    SecretStore,
+    redact_secrets,
+    safe_exception_message,
+)
 
 __all__ = [
     "__version__",
@@ -64,4 +83,19 @@ __all__ = [
     "REPO_ROOT",
     "get_identity",
     "load_identity",
+    "CredentialGateway",
+    "CredentialIdentity",
+    "CredentialError",
+    "CredentialExpired",
+    "CredentialNotFound",
+    "CredentialRevoked",
+    "CredentialScopeError",
+    "CredentialStateError",
+    "EnvironmentSecretStore",
+    "ExternalSystemAdapter",
+    "SecretLease",
+    "SecretRedactionFilter",
+    "SecretStore",
+    "redact_secrets",
+    "safe_exception_message",
 ]

@@ -32,6 +32,19 @@ claim of complete current protection.
 | public contracts/schemas | this repository | benchmark tampering, protocol drift |
 | execution environments | future harness | environment manipulation, escape |
 
+Credential values are a separate secret-store asset. The public repository
+contains only non-secret credential metadata and the provider-neutral gateway
+contract; it does not contain API keys, bearer tokens, or credential payloads.
+
+The implemented boundary is documented in
+[docs/CREDENTIALS.md](CREDENTIALS.md) and
+[docs/SECRETS-BOUNDARY.md](SECRETS-BOUNDARY.md). The gateway enforces logical
+identity, scope, expiry, and revocation checks and returns a redacted
+short-lived in-memory lease. Synthetic tests cover the boundary. This is not a
+claim of production security: encryption at rest, host-level isolation,
+provider-side controls, and operational secret-manager hardening remain
+deployment responsibilities.
+
 ## 3. Threat boundary
 
 1. **Hidden-file inspection** — an evaluated system reading test files
