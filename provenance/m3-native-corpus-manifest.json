@@ -89,7 +89,7 @@
     "storage_class": "PROTECTED",
     "retention_status": "ACTIVE_WRITE_ONCE",
     "manifest_version": 1,
-    "manifest_sha256": "3a9e7ea2f76d17384114099509562f91e12ba211533084922504c435c3ad5dfa",
+    "manifest_sha256": "295aa5e5f670fc0b7f67727a741c759ffcbc61b41a766623d65790cbc94e7c1b",
     "artifact_ids": [
       "M3-CASE-ECP-NATIVE-001-V1",
       "M3-CASE-ECP-NATIVE-002-V1",
@@ -99,13 +99,49 @@
       "M3-QUAL-ECP-CAND-000103-V1"
     ],
     "full_case_set_sha256": "1ef751de6752c3e475f3ac74d90c42ecdb748ca20213043586b6f6bda9bce458",
-    "protected_store_commit": "625200cc540a5997558538a58f90120f13a20113",
+    "protected_store_commit": "5f0caf0a8651eb9a307f519c58e36cdaeb513fc5",
     "recovery_contract": "fresh private clone plus full registry hash verification",
     "execution_artifact_ids": [
       "M3-EXEC-BUNDLE-M3-NATIVE-V1",
       "M3-EXEC-ECP-NATIVE-001-V1",
       "M3-EXEC-ECP-NATIVE-002-V1",
       "M3-EXEC-ECP-NATIVE-003-V1"
+    ],
+    "audit_artifact_ids": [
+      "M3-AUDIT-M3-001-V1",
+      "M3-AUDIT-M3-002-V1",
+      "M3-AUDIT-M3-003-V1",
+      "M3-AUDIT-SET-M3-NATIVE-V1"
     ]
+  },
+  "audit": {
+    "audit_id": "ECP-AUDIT-SET-M3-NATIVE-V1",
+    "audited_cases": 3,
+    "audit_verdicts": {
+      "AUDIT-PASS": 3,
+      "AUDIT-FAIL": 0
+    },
+    "aggregate_audit_hash": "dfbc261ab38e55f33d7c981b2ba4e11783b687a368fccdcf59d9e32651f590a7",
+    "classification": {
+      "SUCCESS": 0,
+      "FAIL": 0,
+      "INCONCLUSIVE": 3,
+      "INVALID": 0
+    },
+    "duplicates": 0,
+    "missing": 0,
+    "orphan_registrations": 0,
+    "orphan_executions": 0,
+    "missing_evidence": 0,
+    "hash_mismatches": 0,
+    "identity_drift": 0,
+    "provenance_breaks": 0,
+    "evidence_recomputed": true,
+    "execution_replayed": false,
+    "fresh_clone_recovery": "PASS",
+    "public_boundary": "CLEAN",
+    "model_calls": 0,
+    "target_system_calls": 0,
+    "audit_status": "PERSISTED_NO_PUBLIC_EVIDENCE"
   }
 }
