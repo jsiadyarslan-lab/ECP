@@ -13,12 +13,20 @@
   },
   "native_corpus": {
     "case_count": 3,
-    "case_ids": ["ECP-NATIVE-001", "ECP-NATIVE-002", "ECP-NATIVE-003"],
+    "case_ids": [
+      "ECP-NATIVE-001",
+      "ECP-NATIVE-002",
+      "ECP-NATIVE-003"
+    ],
     "source_sha256": "1ef751de6752c3e475f3ac74d90c42ecdb748ca20213043586b6f6bda9bce458",
     "schema_version": "0.5.0",
     "protocol_version": "0.5.0",
     "authoring_mode": "native; no model invoked",
-    "semantic_families": ["relational-closure", "propositional-truth-table", "constraint-enumeration"]
+    "semantic_families": [
+      "relational-closure",
+      "propositional-truth-table",
+      "constraint-enumeration"
+    ]
   },
   "qualification_summary": {
     "engine_profile": "0.5.0",
@@ -57,5 +65,24 @@
   "jarvis_modified": false,
   "registration": false,
   "execution": false,
-  "model_calls": 0
+  "model_calls": 0,
+  "protected_store": {
+    "repository": "jsiadyarslan-lab/ecp-protected-store",
+    "visibility": "PRIVATE",
+    "storage_class": "PROTECTED",
+    "retention_status": "ACTIVE_WRITE_ONCE",
+    "manifest_version": 1,
+    "manifest_sha256": "eacbec762a6ffadb11e30695c69c3181a2fbe998e406e8e045a2463a573259f5",
+    "artifact_ids": [
+      "M3-CASE-ECP-NATIVE-001-V1",
+      "M3-CASE-ECP-NATIVE-002-V1",
+      "M3-CASE-ECP-NATIVE-003-V1",
+      "M3-QUAL-ECP-CAND-000101-V1",
+      "M3-QUAL-ECP-CAND-000102-V1",
+      "M3-QUAL-ECP-CAND-000103-V1"
+    ],
+    "full_case_set_sha256": "1ef751de6752c3e475f3ac74d90c42ecdb748ca20213043586b6f6bda9bce458",
+    "protected_store_commit": "859844a96457f29e6b83d0a4224824025eb64cd9",
+    "recovery_contract": "fresh private clone plus full registry hash verification"
+  }
 }
