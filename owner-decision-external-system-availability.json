@@ -1,0 +1,93 @@
+{
+  "ecp_object": "OWNER-DECISION — EXTERNAL-SYSTEM-AVAILABILITY",
+  "decision_id": "OWNER-DECISION-ESV-AVAILABILITY-V1",
+  "decision_version": 1,
+  "decision_timestamp": "2026-09-10T21:39:00Z",
+  "repository": "jsiadyarslan-lab/ECP",
+  "branch": "main",
+  "decision_authority": "Owner Decision Gate; recorded under the authorized ESV-G0 execution order",
+  "current_status": "NONE_ELIGIBLE",
+  "esv_g0_status": "CLOSED",
+  "esv_g0_verdict": "BLOCKED — NO ELIGIBLE EXTERNAL SYSTEM",
+  "esv_g0_commit": "e39148731377853af1e972c42215929981ef7272",
+  "independent_stratum": "UNAVAILABLE_WITHIN_TIMEBOX",
+  "eligibility_standard": "UNCHANGED",
+  "m3_status": "CLOSED_AND_FROZEN",
+  "m3_classification_id": "ECP-M3-CLASSIFICATION-CLOSURE-V1",
+  "m3_classification_hash": "672230875318b95ec58acf1ded0fa275bb40fe3fcf4f6106210260eeed23d105",
+  "discovered_candidates": [
+    {
+      "candidate_id": "ESV-CAND-001",
+      "name": "OpenAI API",
+      "status": "DISCOVERED",
+      "eligibility": "NOT ELIGIBLE",
+      "execution": "NOT EXECUTED",
+      "evaluation": "NOT EVALUATED"
+    },
+    {
+      "candidate_id": "ESV-CAND-002",
+      "name": "Claude API",
+      "status": "DISCOVERED",
+      "eligibility": "NOT ELIGIBLE",
+      "execution": "NOT EXECUTED",
+      "evaluation": "NOT EVALUATED"
+    },
+    {
+      "candidate_id": "ESV-CAND-003",
+      "name": "Gemini API",
+      "status": "DISCOVERED",
+      "eligibility": "NOT ELIGIBLE",
+      "execution": "NOT EXECUTED",
+      "evaluation": "NOT EVALUATED"
+    },
+    {
+      "candidate_id": "ESV-CAND-004",
+      "name": "Manus OpenAI-compatible gateway",
+      "status": "DISCOVERED",
+      "eligibility": "NOT ELIGIBLE",
+      "execution": "NOT EXECUTED",
+      "evaluation": "NOT EVALUATED"
+    }
+  ],
+  "decision": {
+    "protocol_readiness": "ESTABLISHED",
+    "external_system_availability": "BLOCKED",
+    "external_validation": "NOT YET EXECUTED",
+    "next_path": [
+      "EXTERNAL SYSTEM VALIDATION",
+      "ACCESS / SYSTEM PROVISIONING",
+      "SYSTEM IDENTITY FREEZE",
+      "ELIGIBILITY GATE",
+      "CASE DESIGN / PREREGISTRATION",
+      "EXTERNAL EXECUTION"
+    ],
+    "next_path_authorized_now": false,
+    "owner_decision_required_before_provisioning": true
+  },
+  "prohibitions_preserved": [
+    "do not lower eligibility criteria",
+    "do not treat a model ID as a complete system identity",
+    "do not execute before eligibility",
+    "do not create M4",
+    "do not re-execute M3",
+    "do not modify historical cases or results",
+    "do not mix JARVIS-internal evidence with independent-external evidence",
+    "do not modify the manuscript or frozen artifacts"
+  ],
+  "scope": "READ/RECORD ONLY",
+  "model_calls": 0,
+  "target_system_calls": 0,
+  "case_authoring": false,
+  "registration": false,
+  "experimental_execution": false,
+  "scoring": false,
+  "statistical_analysis": false,
+  "m3_modified": false,
+  "manuscript_modified": false,
+  "jarvis_modified": false,
+  "t1_m1_m2_modified": false,
+  "historical_esv_g0_preserved": true,
+  "public_private_boundary": "metadata-only decision record; no protected case content",
+  "provenance": "ESV-G0 discovery record and M3 closure record; no candidate was promoted",
+  "protocol_version": "0.5.0"
+}
