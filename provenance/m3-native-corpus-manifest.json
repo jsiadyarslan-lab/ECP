@@ -89,7 +89,7 @@
     "storage_class": "PROTECTED",
     "retention_status": "ACTIVE_WRITE_ONCE",
     "manifest_version": 1,
-    "manifest_sha256": "295aa5e5f670fc0b7f67727a741c759ffcbc61b41a766623d65790cbc94e7c1b",
+    "manifest_sha256": "d08a6692a116a80bc29ec4db356c64e2df272345df9a019acb24ac3232b18b8c",
     "artifact_ids": [
       "M3-CASE-ECP-NATIVE-001-V1",
       "M3-CASE-ECP-NATIVE-002-V1",
@@ -99,7 +99,7 @@
       "M3-QUAL-ECP-CAND-000103-V1"
     ],
     "full_case_set_sha256": "1ef751de6752c3e475f3ac74d90c42ecdb748ca20213043586b6f6bda9bce458",
-    "protected_store_commit": "5f0caf0a8651eb9a307f519c58e36cdaeb513fc5",
+    "protected_store_commit": "8a5b9227b50aabab09d2ea0b0fc2065427be54f8",
     "recovery_contract": "fresh private clone plus full registry hash verification",
     "execution_artifact_ids": [
       "M3-EXEC-BUNDLE-M3-NATIVE-V1",
@@ -112,7 +112,8 @@
       "M3-AUDIT-M3-002-V1",
       "M3-AUDIT-M3-003-V1",
       "M3-AUDIT-SET-M3-NATIVE-V1"
-    ]
+    ],
+    "classification_artifact_id": "M3-CLASSIFICATION-CLOSURE-V1"
   },
   "audit": {
     "audit_id": "ECP-AUDIT-SET-M3-NATIVE-V1",
@@ -143,5 +144,32 @@
     "model_calls": 0,
     "target_system_calls": 0,
     "audit_status": "PERSISTED_NO_PUBLIC_EVIDENCE"
+  },
+  "classification_closure": {
+    "classification_id": "ECP-M3-CLASSIFICATION-CLOSURE-V1",
+    "classification_record_hash": "672230875318b95ec58acf1ded0fa275bb40fe3fcf4f6106210260eeed23d105",
+    "final_experimental_classification": {
+      "SUCCESS": 0,
+      "FAIL": 0,
+      "INCONCLUSIVE": 3,
+      "INVALID": 0
+    },
+    "case_count": 3,
+    "qualified_count": 3,
+    "registered_count": 3,
+    "executed_count": 3,
+    "audited_count": 3,
+    "what_is_proven": "pipeline integrity, attribution, reproducibility, and auditability for three ECP-native deterministic cases",
+    "what_is_not_proven": "target-system performance, model performance, hypothesis confirmation, or experimental SUCCESS/FAIL",
+    "limitations": [
+      "no target-system/model experiment was executed",
+      "all experimental outcomes remain INCONCLUSIVE",
+      "scope is limited to three ECP-native deterministic cases"
+    ],
+    "fresh_clone_recovery": "PASS",
+    "public_boundary": "CLEAN",
+    "model_calls": 0,
+    "target_system_calls": 0,
+    "closure_status": "COMPLETE_METADATA_ONLY"
   }
 }
