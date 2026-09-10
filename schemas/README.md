@@ -56,3 +56,15 @@ Notes:
   repository; only `content_class: "format-illustration"` documents may appear,
   and only under `examples/`. This is machine-enforced by
   `tools/ecp_cli.py boundary-scan` and the test suite.
+
+- The 0.6.0 bundle (M3-CA1 v1) adds the registration-readiness &
+  owner-adjudication contracts (case-readiness, readiness-run,
+  owner-decision-register, registration-manifest; see
+  `spec/ECP-SPEC.md` §22). The 0.7.0 bundle (M3-RG0) adds the eight
+  trust-layer contracts (registration-gate-state, owner-gate-order,
+  registration-package, trust-registration, registration-amendment,
+  lineage-event, trust-store-manifest, runtime-observation; see
+  `spec/ECP-SPEC.md` §23) — the protected evaluation + registration
+  trust layer whose existence ADJ-06 makes a hard precondition for
+  opening registration. All bundles are additive: earlier contract
+  files are unchanged and earlier artifacts remain valid.

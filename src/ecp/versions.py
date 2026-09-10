@@ -1,4 +1,4 @@
-"""Explicit protocol/schema version compatibility (0.3.0 → 0.4.0 → 0.5.0 → 0.6.0 additive).
+"""Explicit protocol/schema version compatibility (0.3.0 → 0.4.0 → 0.5.0 → 0.6.0 → 0.7.0 additive).
 
 O8 (M3-R1 architecture decision, owner-approved) advanced the schema bundle
 to 0.2.0 by ADDING two new object contracts (``ledger-entry``,
@@ -24,9 +24,9 @@ is stated machine-checkably.
 Rules (normative, see spec §18–§22):
 
 - The *protocol* axis is backward compatible: documents citing
-  ``0.1.0``, ``0.2.0``, ``0.3.0``, ``0.4.0`` or ``0.5.0`` remain valid
-  under a ``0.6.0`` toolchain (the protocol only gained mechanisms; no
-  earlier semantics changed).
+  ``0.1.0``, ``0.2.0``, ``0.3.0``, ``0.4.0``, ``0.5.0`` or ``0.6.0``
+  remain valid under a ``0.7.0`` toolchain (the protocol only gained
+  mechanisms; no earlier semantics changed).
 - The *schema* axis is per-object-type:
   - object types whose contract file is unchanged since 0.1.0 accept
     ``0.1.0`` through ``0.5.0``;
@@ -40,7 +40,12 @@ Rules (normative, see spec §18–§22):
   - object types introduced at 0.5.0 (case-qualification/
     qualification-run) accept ``0.5.0`` and ``0.6.0``;
   - object types introduced at 0.6.0 (case-readiness/readiness-run/
-    owner-decision-register/registration-manifest) accept only ``0.6.0``.
+    owner-decision-register/registration-manifest) accept ``0.6.0`` and
+    ``0.7.0`` (their contract files are unchanged in the 0.7.0 bundle);
+  - object types introduced at 0.7.0 (registration-gate-state/
+    owner-gate-order/registration-package/trust-registration/
+    registration-amendment/lineage-event/trust-store-manifest/
+    runtime-observation — the M3-RG0 trust layer) accept only ``0.7.0``.
 
 Anything outside these sets is a compatibility violation (an issue, not an
 exception — the caller decides severity). There is still no implicit
@@ -99,20 +104,34 @@ V060_CONTRACTS = (
     "registration-manifest",
 )
 
+# Object types introduced by the 0.7.0 schema bundle (M3-RG0 protected
+# evaluation + registration trust layer):
+V070_CONTRACTS = (
+    "registration-gate-state",
+    "owner-gate-order",
+    "registration-package",
+    "trust-registration",
+    "registration-amendment",
+    "lineage-event",
+    "trust-store-manifest",
+    "runtime-observation",
+)
+
 #: Per-object-type accepted ``schema_version`` values.
 SCHEMA_VERSIONS: dict = {
-    **{name: ("0.1.0", "0.2.0", "0.3.0", "0.4.0", "0.5.0", "0.6.0") for name in V010_CONTRACTS},
-    **{name: ("0.2.0", "0.3.0", "0.4.0", "0.5.0", "0.6.0") for name in V020_CONTRACTS},
-    **{name: ("0.3.0", "0.4.0", "0.5.0", "0.6.0") for name in V030_CONTRACTS},
-    **{name: ("0.4.0", "0.5.0", "0.6.0") for name in V040_CONTRACTS},
-    **{name: ("0.5.0", "0.6.0") for name in V050_CONTRACTS},
-    **{name: ("0.6.0",) for name in V060_CONTRACTS},
+    **{name: ("0.1.0", "0.2.0", "0.3.0", "0.4.0", "0.5.0", "0.6.0", "0.7.0") for name in V010_CONTRACTS},
+    **{name: ("0.2.0", "0.3.0", "0.4.0", "0.5.0", "0.6.0", "0.7.0") for name in V020_CONTRACTS},
+    **{name: ("0.3.0", "0.4.0", "0.5.0", "0.6.0", "0.7.0") for name in V030_CONTRACTS},
+    **{name: ("0.4.0", "0.5.0", "0.6.0", "0.7.0") for name in V040_CONTRACTS},
+    **{name: ("0.5.0", "0.6.0", "0.7.0") for name in V050_CONTRACTS},
+    **{name: ("0.6.0", "0.7.0") for name in V060_CONTRACTS},
+    **{name: ("0.7.0",) for name in V070_CONTRACTS},
 }
 
 #: Accepted ``protocol_version`` values for every artifact (protocol axis is
 #: backward compatible; all versions share identical semantics for all
 #: pre-0.6.0 mechanisms).
-PROTOCOL_VERSIONS = ("0.1.0", "0.2.0", "0.3.0", "0.4.0", "0.5.0", "0.6.0")
+PROTOCOL_VERSIONS = ("0.1.0", "0.2.0", "0.3.0", "0.4.0", "0.5.0", "0.6.0", "0.7.0")
 
 
 def allowed_schema_versions(object_type: "str | None") -> tuple:

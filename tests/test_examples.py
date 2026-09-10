@@ -37,6 +37,14 @@ EXAMPLE_FILES = [
     "case-readiness.example.json",
     "readiness-run.example.json",
     "registration-manifest.example.json",
+    "registration-gate-state.example.json",
+    "owner-gate-order.example.json",
+    "registration-package.example.json",
+    "trust-registration.example.json",
+    "registration-amendment.example.json",
+    "lineage-event.example.json",
+    "trust-store-manifest.example.json",
+    "runtime-observation.example.json",
 ]
 
 
@@ -303,3 +311,81 @@ def test_readiness_examples_are_honest_about_the_gate(examples):
     assert record["decision"] == "HOLD"
     assert record["mechanical_state"] == "PASS"
     assert record["checks_passed"] == 15
+
+
+# ---------------------------------------------------------------------------
+# M3-RG0 trust-layer examples: every embedded hash is REAL and the
+# cross-references recompute exactly (order §7/§11).
+# ---------------------------------------------------------------------------
+
+
+def test_gate_state_example_hash_is_real(examples):
+    gate = examples["registration-gate-state.example.json"]
+    assert gate["gate_hash"] == hash_document_excluding(gate, "gate_hash")
+    assert gate["registration_gate"] == "CLOSED"
+    assert gate["owner_ruling_citations"] == {
+        slot: None for slot in ("O-01", "O-02", "O-04", "F-01a", "F-01b", "POP")
+    }
+
+
+def test_registration_package_example_hash_is_real(examples):
+    package = examples["registration-package.example.json"]
+    assert package["package_hash"] == hash_document_excluding(package, "package_hash")
+
+
+def test_registration_package_example_case_seam_is_real(examples):
+    package = examples["registration-package.example.json"]
+    case = examples["case.development.example.json"]
+    gt = examples["ground-truth.format-example.json"]
+    assert package["case_document"] == case
+    assert package["success_criterion"] == case["success_criterion"]
+    assert package["ground_truth"]["commitment"] == hash_document(gt)
+    assert package["ground_truth"]["commitment"] == case["ground_truth_reference"]["commitment"]
+
+
+def test_trust_registration_example_hash_is_real(examples):
+    record = examples["trust-registration.example.json"]
+    assert record["registration_hash"] == hash_document_excluding(record, "registration_hash")
+
+
+def test_trust_registration_example_commitments_recompute(examples):
+    record = examples["trust-registration.example.json"]
+    package = examples["registration-package.example.json"]
+    c = record["commitments"]
+    assert c["case"] == hash_document(package["case_document"])
+    assert c["ground_truth"] == package["ground_truth"]["commitment"]
+    assert c["criterion"] == hash_document({"success_criterion": package["success_criterion"]})
+    assert c["environment"] == hash_document(package["environment"])
+    assert c["provenance"] == hash_document(package["provenance"])
+    assert c["package"] == package["package_hash"]
+
+
+def test_lineage_event_example_hash_is_real_and_binds_record(examples):
+    event = examples["lineage-event.example.json"]
+    record = examples["trust-registration.example.json"]
+    assert event["event_hash"] == hash_document_excluding(event, "event_hash")
+    assert event["payload"]["record_hash"] == hash_document(record)
+    assert event["payload"]["registration_id"] == record["registration_id"]
+
+
+def test_registration_amendment_example_hash_is_real_and_binds_target(examples):
+    amendment = examples["registration-amendment.example.json"]
+    record = examples["trust-registration.example.json"]
+    assert amendment["amendment_hash"] == hash_document_excluding(amendment, "amendment_hash")
+    assert amendment["target_registration_hash"] == hash_document(record)
+
+
+def test_trust_store_manifest_example_hash_is_real(examples):
+    manifest = examples["trust-store-manifest.example.json"]
+    event = examples["lineage-event.example.json"]
+    gate = examples["registration-gate-state.example.json"]
+    assert manifest["manifest_hash"] == hash_document_excluding(manifest, "manifest_hash")
+    assert manifest["lineage"]["head_event_hash"] == event["event_hash"]
+    assert manifest["gate"]["gate_hash"] != gate["gate_hash"]  # the manifest illustrates an OPEN gate
+
+
+def test_runtime_observation_example_hash_is_real_and_non_authoritative(examples):
+    obs = examples["runtime-observation.example.json"]
+    assert obs["observation_hash"] == hash_document_excluding(obs, "observation_hash")
+    assert obs["authority_class"] == "NON-AUTHORITATIVE"
+    assert obs["zone"] == "operational"

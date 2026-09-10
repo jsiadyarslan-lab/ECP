@@ -26,13 +26,19 @@ This package implements the repository's scientific core:
 - registration-readiness engine — 15-point per-case readiness battery,
   owner-decision-register evaluation, population decision, set-class
   designation and the registration-authorization manifest gate
-  (:mod:`ecp.readiness`, M3-CA1 v1).
+  (:mod:`ecp.readiness`, M3-CA1 v1);
+- protected evaluation + registration trust layer — ownership-explicit
+  protected store (authoritative / operational / evidence zones),
+  Registration Authority, immutable registration records, state /
+  reference-truth separation, cryptographic commitments, append-only
+  provenance lineage, controlled access seams and full registration
+  integrity verification (:mod:`ecp.trust`, M3-RG0).
 
 It deliberately contains NO model adapters, NO execution machinery, NO scoring
 logic and NO provider-specific code (see spec/ECP-SPEC.md, "Provider neutrality").
 """
 
-__version__ = "0.6.0"
+__version__ = "0.7.0"
 
 from .canonical import CANONICALIZATION_ID, canonical_bytes, canonical_dumps
 from .hashing import (

@@ -72,6 +72,7 @@ Registration readiness (M3-CA1 v1 — readiness gate ONLY; no model
 execution, no registration, no ledger writes; the manifest builder
 REFUSES while unresolved blocking owner items exist — order §11/§12):
 
+
   readiness-run --readiness-root D --qualify-root D --run-id ID
               --operator S --at ISO [--prior-candidates D]
                                                  15-point per-case readiness
@@ -88,6 +89,34 @@ REFUSES while unresolved blocking owner items exist — order §11/§12):
                                                  the gate is AUTHORIZED)
 
 Run from the repository root:  python tools/ecp_cli.py <command> ...
+
+Protected evaluation + registration trust layer (M3-RG0 — infrastructure
+construction ONLY; the registration gate REMAINS CLOSED; no model
+execution, no scientific results; the authority REFUSES registration
+until an explicit owner gate order opens the gate):
+
+  trust-init --root D --trust-id ID --scope S [--at ISO]
+                                                 initialize a protected trust
+                                                 store (gate CLOSED, citations
+                                                 null — never inferred)
+  trust-verify --root D                       full deterministic verification
+  trust-gate --root D                         read the authoritative gate state
+  trust-gate-apply --root D --order F [--at ISO]
+                                                 apply an owner gate order
+                                                 (the ONLY gate transition)
+  trust-register --root D --registrar ID --package F --at ISO
+                                                 registration ceremony —
+                                                 REFUSES while the gate is
+                                                 CLOSED (fail-closed)
+  trust-amend --root D --registrar ID --amendment F --at ISO
+                                                 record an amendment event
+                                                 (append-only, never a rewrite)
+  trust-resolve --root D --registration ID    WHAT WAS REGISTERED vs WHAT
+                                                 LATER HAPPENED (never merged)
+  trust-truth --root D                        registered reference truth
+  trust-runtime --root D --observation F [--at ISO]
+                                                 record a NON-AUTHORITATIVE
+                                                 runtime observation
 """
 
 import argparse
@@ -1177,6 +1206,190 @@ def cmd_anchor_publish(args: argparse.Namespace) -> int:
     return 0
 
 
+# ---------------------------------------------------------------------------
+# Protected evaluation + registration trust layer (M3-RG0 — the gate stays
+# CLOSED; the authority refuses scientific registration until an explicit
+# owner gate order opens it)
+# ---------------------------------------------------------------------------
+
+def _load_trust_mod():
+    from ecp import trust as trust_mod
+
+    return trust_mod
+
+
+def cmd_trust_init(args: argparse.Namespace) -> int:
+    trust_mod = _load_trust_mod()
+    try:
+        manifest = trust_mod.init_trust_store(
+            args.root, args.trust_id, args.scope, at=args.at
+        )
+    except trust_mod.TrustError as exc:
+        print(f"REJECTED: {exc}", file=sys.stderr)
+        return 1
+    print(
+        f"trust store initialized (gate CLOSED, zero registrations): {args.root}"
+    )
+    _print_json(manifest)
+    return 0
+
+
+def cmd_trust_verify(args: argparse.Namespace) -> int:
+    trust_mod = _load_trust_mod()
+    report = trust_mod.verify_trust_store(args.root)
+    if report["ok"]:
+        gate = report["gate"]
+        counts = report["counts"]
+        print(
+            f"TRUST STORE VERIFIED: {counts['registrations']} registration(s), "
+            f"{counts['amendments']} amendment(s), "
+            f"{counts['lineage_events']} lineage event(s), "
+            f"{counts['runtime_observations']} runtime observation(s); "
+            f"gate {gate['registration_gate']}/"
+            f"{gate['model_execution_gate']}/{gate['scientific_results']}"
+        )
+        return 0
+    print(f"TRUST STORE ISSUES ({args.root}):")
+    for issue in report["issues"]:
+        print(f"  - {issue}")
+    return 1
+
+
+def cmd_trust_gate(args: argparse.Namespace) -> int:
+    trust_mod = _load_trust_mod()
+    try:
+        state = trust_mod.store_gate_state(args.root)
+    except trust_mod.TrustError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(
+        f"REGISTRATION GATE: {state['registration_gate']} | "
+        f"MODEL EXECUTION: {state['model_execution_gate']} | "
+        f"SCIENTIFIC RESULTS: {state['scientific_results']}"
+    )
+    _print_json(state)
+    return 0
+
+
+def cmd_trust_gate_apply(args: argparse.Namespace) -> int:
+    trust_mod = _load_trust_mod()
+    order = canonical.load_json(args.order)
+    try:
+        state = trust_mod.apply_owner_gate_order(args.root, order, at=args.at)
+    except trust_mod.OwnerOrderRejected as exc:
+        print(f"REJECTED: {exc}", file=sys.stderr)
+        return 1
+    except trust_mod.TrustError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(f"gate transition applied: registration -> {state['registration_gate']}")
+    _print_json(state)
+    return 0
+
+
+def cmd_trust_register(args: argparse.Namespace) -> int:
+    trust_mod = _load_trust_mod()
+    package = canonical.load_json(args.package)
+    try:
+        authority = trust_mod.RegistrationAuthority(args.root, args.registrar)
+        result = authority.submit_registration(package, at=args.at)
+    except trust_mod.RegistrationRefused as exc:
+        print(f"REFUSED: {exc}", file=sys.stderr)
+        return 1
+    except trust_mod.TrustError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    summary = {
+        "registration_id": result["registration_id"],
+        "registration_hash": result["registration_hash"],
+        "record_hash": result["record_hash"],
+        "event_index": result["event_index"],
+        "event_hash": result["event_hash"],
+        "commitments": result["commitments"],
+    }
+    print(f"registered: {result['registration_id']} (event {result['event_index']})")
+    _print_json(summary)
+    return 0
+
+
+def cmd_trust_amend(args: argparse.Namespace) -> int:
+    trust_mod = _load_trust_mod()
+    request = canonical.load_json(args.amendment)
+    try:
+        authority = trust_mod.RegistrationAuthority(args.root, args.registrar)
+        result = authority.amend_registration(request, at=args.at)
+    except trust_mod.AmendmentRefused as exc:
+        print(f"REFUSED: {exc}", file=sys.stderr)
+        return 1
+    except trust_mod.TrustError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    summary = {
+        "amendment_id": result["amendment_id"],
+        "amendment_hash": result["amendment_hash"],
+        "event_index": result["event_index"],
+        "event_hash": result["event_hash"],
+    }
+    print(f"amendment recorded: {result['amendment_id']} (event {result['event_index']})")
+    _print_json(summary)
+    return 0
+
+
+def cmd_trust_resolve(args: argparse.Namespace) -> int:
+    trust_mod = _load_trust_mod()
+    try:
+        resolved = trust_mod.resolve_registration(args.root, args.registration)
+    except trust_mod.TrustError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(
+        f"registration {resolved['registration_id']}: "
+        f"state={resolved['current_state']} | "
+        f"amendments={len(resolved['what_later_happened']['amendments'])} | "
+        f"runtime_observations={len(resolved['what_later_happened']['runtime_observations'])}"
+    )
+    _print_json(resolved)
+    return 0
+
+
+def cmd_trust_truth(args: argparse.Namespace) -> int:
+    trust_mod = _load_trust_mod()
+    try:
+        truth = trust_mod.store_reference_truth(args.root)
+    except trust_mod.TrustError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+    print(
+        f"WHAT WAS REGISTERED (authoritative zone only): "
+        f"{len(truth['registrations'])} registration(s), "
+        f"{len(truth['amendments'])} amendment(s), "
+        f"gate {truth['gate']['registration_gate']}"
+    )
+    _print_json(truth)
+    return 0
+
+
+def cmd_trust_runtime(args: argparse.Namespace) -> int:
+    trust_mod = _load_trust_mod()
+    observation = canonical.load_json(args.observation)
+    try:
+        doc = trust_mod.record_runtime_observation(
+            args.root, observation, at=args.at
+        )
+    except trust_mod.AccessBoundaryError as exc:
+        print(f"BOUNDARY VIOLATION: {exc}", file=sys.stderr)
+        return 1
+    except trust_mod.TrustError as exc:
+        print(f"REJECTED: {exc}", file=sys.stderr)
+        return 1
+    print(
+        f"runtime observation recorded (NON-AUTHORITATIVE, operational zone): "
+        f"{doc['observation_id']}"
+    )
+    _print_json(doc)
+    return 0
+
+
 def main(argv: "list[str] | None" = None) -> int:
     parser = argparse.ArgumentParser(prog="ecp_cli", description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -1405,6 +1618,87 @@ def main(argv: "list[str] | None" = None) -> int:
     p_reg_manifest.add_argument("--at", required=True, help="explicit UTC registration timestamp (determinism: no wall clock)")
     p_reg_manifest.add_argument("--registration-id", default="ECP-REGSET-CA1V1-0001", help="ECP-REGSET-… identifier")
     p_reg_manifest.set_defaults(func=cmd_registration_manifest)
+
+
+    # M3-RG0: protected evaluation + registration trust layer (the gate
+    # REMAINS CLOSED; trust-register REFUSES until an owner gate order
+    # opens the gate — order §10)
+    p_trust_init = sub.add_parser(
+        "trust-init",
+        help="initialize a protected trust store (gate CLOSED; never inside the public repository)",
+    )
+    p_trust_init.add_argument("--root", required=True, help="trust store root directory (outside the public repository)")
+    p_trust_init.add_argument("--trust-id", required=True, help="ECP-TRUST-… identifier")
+    p_trust_init.add_argument("--scope", required=True, choices=["development", "operational"], help="store scope")
+    p_trust_init.add_argument("--at", default=None, help="explicit UTC initialization timestamp (determinism: no wall clock)")
+    p_trust_init.set_defaults(func=cmd_trust_init)
+
+    p_trust_verify = sub.add_parser(
+        "trust-verify",
+        help="full deterministic verification of a protected trust store",
+    )
+    p_trust_verify.add_argument("--root", required=True, help="trust store root directory")
+    p_trust_verify.set_defaults(func=cmd_trust_verify)
+
+    p_trust_gate = sub.add_parser(
+        "trust-gate",
+        help="read the authoritative registration gate state",
+    )
+    p_trust_gate.add_argument("--root", required=True, help="trust store root directory")
+    p_trust_gate.set_defaults(func=cmd_trust_gate)
+
+    p_trust_gate_apply = sub.add_parser(
+        "trust-gate-apply",
+        help="apply an owner gate order (the ONLY legal gate transition)",
+    )
+    p_trust_gate_apply.add_argument("--root", required=True, help="trust store root directory")
+    p_trust_gate_apply.add_argument("--order", required=True, help="owner-gate-order JSON document")
+    p_trust_gate_apply.add_argument("--at", default=None, help="explicit UTC application timestamp")
+    p_trust_gate_apply.set_defaults(func=cmd_trust_gate_apply)
+
+    p_trust_register = sub.add_parser(
+        "trust-register",
+        help="registration ceremony (REFUSES while the gate is CLOSED — fail-closed)",
+    )
+    p_trust_register.add_argument("--root", required=True, help="trust store root directory")
+    p_trust_register.add_argument("--registrar", required=True, help="ECP-REGISTRAR-… identity")
+    p_trust_register.add_argument("--package", required=True, help="registration-package JSON document")
+    p_trust_register.add_argument("--at", default=None, help="explicit UTC registration timestamp (determinism: no wall clock)")
+    p_trust_register.set_defaults(func=cmd_trust_register)
+
+    p_trust_amend = sub.add_parser(
+        "trust-amend",
+        help="record an amendment event (append-only; the original is never rewritten)",
+    )
+    p_trust_amend.add_argument("--root", required=True, help="trust store root directory")
+    p_trust_amend.add_argument("--registrar", required=True, help="ECP-REGISTRAR-… identity")
+    p_trust_amend.add_argument("--amendment", required=True, help="amendment request JSON document")
+    p_trust_amend.add_argument("--at", default=None, help="explicit UTC amendment timestamp")
+    p_trust_amend.set_defaults(func=cmd_trust_amend)
+
+    p_trust_resolve = sub.add_parser(
+        "trust-resolve",
+        help="resolve one registration: WHAT WAS REGISTERED vs WHAT LATER HAPPENED",
+    )
+    p_trust_resolve.add_argument("--root", required=True, help="trust store root directory")
+    p_trust_resolve.add_argument("--registration", required=True, help="ECP-TREG-… identifier")
+    p_trust_resolve.set_defaults(func=cmd_trust_resolve)
+
+    p_trust_truth = sub.add_parser(
+        "trust-truth",
+        help="registered reference truth (authoritative zone only)",
+    )
+    p_trust_truth.add_argument("--root", required=True, help="trust store root directory")
+    p_trust_truth.set_defaults(func=cmd_trust_truth)
+
+    p_trust_runtime = sub.add_parser(
+        "trust-runtime",
+        help="record a NON-AUTHORITATIVE runtime observation (operational zone only)",
+    )
+    p_trust_runtime.add_argument("--root", required=True, help="trust store root directory")
+    p_trust_runtime.add_argument("--observation", required=True, help="runtime-observation JSON document")
+    p_trust_runtime.add_argument("--at", default=None, help="explicit UTC observation timestamp")
+    p_trust_runtime.set_defaults(func=cmd_trust_runtime)
 
     args = parser.parse_args(argv)
     return args.func(args)

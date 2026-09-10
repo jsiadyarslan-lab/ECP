@@ -1,0 +1,94 @@
+{
+  "ecp_object": "registration-package",
+  "content_class": "format-illustration",
+  "package_id": "ECP-PKG-EXAMPLE-0001",
+  "evaluation_id": "ECP-EVAL-EXAMPLE-0001",
+  "case_document": {
+    "ecp_object": "case",
+    "case_id": "ECP-CASE-DEV-0001",
+    "case_version": "0.1.0",
+    "case_status": "candidate",
+    "case_family": "deterministic-reasoning",
+    "case_definition": {
+      "statement": "DEVELOPMENT EXAMPLE (not a scientific case). A depot holds exactly 17 sealed crates. During one transfer window, 12 crates are moved out of the depot to a platform and no crates enter the depot. Nothing else changes the number of crates in the depot.",
+      "objective": "Compute the number of crates remaining in the depot."
+    },
+    "input": {
+      "prompt": "A depot holds exactly 17 sealed crates. During one transfer window, 12 crates are moved out of the depot to a platform and no crates enter the depot. Nothing else changes the number of crates in the depot. How many crates remain in the depot? Answer with the integer only."
+    },
+    "condition": {
+      "constraints": [
+        "Reason from the given premises only.",
+        "No external lookup or tool use."
+      ],
+      "permitted_resources": []
+    },
+    "success_criterion": "The answer equals the unique value derivable from the premises (committed in the protected ground truth).",
+    "verification_rule": {
+      "rule_id": "dev-0001-int-diff",
+      "rule_type": "exact-match",
+      "description": "Integer equality against the sealed expected answer.",
+      "binding": "protected"
+    },
+    "ground_truth_reference": {
+      "commitment": "7b5063955df6b0a70d889ef53e35f23b7139ee147c22fccbf27f388f072fef82",
+      "hash_algorithm": "sha256",
+      "canonicalization": "ECP-CANONICAL-JSON-1.0",
+      "committed_object": "ground-truth",
+      "sealing_status": "sealed",
+      "sealed_at": "2026-09-09T00:00:00Z",
+      "seal_holder": "format example: values are public dummies (examples/ground-truth.format-example.json)"
+    },
+    "authoring_provenance": {
+      "authored_at": "2026-09-09T00:00:00Z",
+      "author_role": "internal-author",
+      "information_boundary": "not-declared",
+      "authoring_environment": "authored inside the repository foundation solely to illustrate the public case format",
+      "authoring_reference": "M3-R0"
+    },
+    "difficulty": "SHALLOW",
+    "structural_signature": "single-step integer subtraction over stated premises",
+    "proposed_reasoning_family": "arithmetic-difference",
+    "protocol_version": "0.1.0",
+    "schema_version": "0.1.0"
+  },
+  "ground_truth": {
+    "commitment": "7b5063955df6b0a70d889ef53e35f23b7139ee147c22fccbf27f388f072fef82",
+    "sealing_status": "sealed",
+    "store_reference": "FORMAT ILLUSTRATION store (public template)"
+  },
+  "success_criterion": "The answer equals the unique value derivable from the premises (committed in the protected ground truth).",
+  "environment": {
+    "environment_id": "ENV-EXAMPLE-001",
+    "description": "public format-illustration environment template",
+    "pins": {
+      "python": "3.12",
+      "jsonschema": "4.18"
+    }
+  },
+  "provenance": {
+    "origin": {
+      "source_label": "examples/case.development.example.json",
+      "sha256": "c1d3b176652f51f8a75626c13e1c15d685fba362a595d0ceb2c892d256b2a122"
+    },
+    "qualification": {
+      "qualification_id": "ECP-QUAL-EXAMPLE-0001",
+      "artifact_hash": "d1f89fa176a9fcc6e8d7740a9c5e9c6ff1e2da90de381ad59a34bcb3923e2cc0"
+    },
+    "readiness": {
+      "run_id": "ECP-RDNYRUN-EXAMPLE-0001",
+      "run_hash": "69dae4eeb925247bc4a2eb9073af3f4448b938d16b0a38f46faa63036f9b2f0c"
+    }
+  },
+  "owner_ruling_citations": {
+    "O-01": "O-01-B (FORMAT ILLUSTRATION: public template ruling — not an owner instrument)",
+    "O-02": "AUTHORIZE (example template ruling — not an owner instrument)",
+    "O-04": "O-04-DEFERRED-VERIFICATION (example template ruling — not an owner instrument)",
+    "F-01a": "DEFER-TO-EXECUTION-PLANNING (example template ruling — not an owner instrument)",
+    "F-01b": "CASE-ID-ASC (example template ruling — not an owner instrument)",
+    "POP": "30-ONLY (example template ruling — not an owner instrument)"
+  },
+  "protocol_version": "0.7.0",
+  "schema_version": "0.7.0",
+  "package_hash": "9718454bb51ceeaf4bb997c31e3fd2b9cab12c1ec50fe164aad67bc7d75cf91c"
+}

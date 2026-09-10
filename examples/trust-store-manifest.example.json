@@ -1,0 +1,36 @@
+{
+  "ecp_object": "trust-store-manifest",
+  "content_class": "format-illustration",
+  "trust_store_id": "ECP-TRUST-EXAMPLE-0001",
+  "scope": "development",
+  "zones": {
+    "authoritative": {
+      "registrations": 1,
+      "amendments": 1,
+      "lineage_events": 4
+    },
+    "operational": {
+      "observations": 1,
+      "ownership": "mutable operational state — NON-AUTHORITATIVE: never a source of reference truth; replaceable without affecting the registered truth"
+    },
+    "evidence": {
+      "files": 0,
+      "writer": "none (0.7.0): no evidence write path exists in M3-RG0; execution-side writes require a separate owner gate"
+    }
+  },
+  "gate": {
+    "registration_gate": "OPEN",
+    "model_execution_gate": "CLOSED",
+    "scientific_results": "NONE",
+    "gate_hash": "01df0ef94d7a0ee3d29646561d6a5385b9291d7709eae839f2e20e0e2277a002"
+  },
+  "lineage": {
+    "event_count": 4,
+    "head_event_hash": "e62d68b7ec2fb13f83a29e53a904b52642cd48503024b3876971b9d6b01b0025"
+  },
+  "generated_at": "2026-09-10T00:00:00Z",
+  "note": "FORMAT ILLUSTRATION: public template index (derived, never a trust anchor)",
+  "protocol_version": "0.7.0",
+  "schema_version": "0.7.0",
+  "manifest_hash": "deacda8a862a430e463002948f461ac6c91a5c13530bbbe5099109eed4e46720"
+}

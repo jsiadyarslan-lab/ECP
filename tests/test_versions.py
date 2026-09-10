@@ -1,13 +1,13 @@
-"""Explicit version-compatibility tests (0.3.0 → 0.4.0 → 0.5.0 → 0.6.0 additive bundle).
+"""Explicit version-compatibility tests (0.3.0 → … → 0.7.0 additive bundle).
 
-0.1.x, 0.2.x, 0.3.x, 0.4.x and 0.5.x artifacts are NOT silently reinterpreted
-and NOT invalidated: the matrix in ecp.versions is the single normative
-statement of what cites what. Provenance identity checks (protocol version,
-schema version, object identity) are covered here for every object type,
-including the four M3-CA0 review-layer contracts introduced at 0.3.0, the
-M3-CA0-A case-amendment contract introduced at 0.4.0, the two M3-CA0 v1
-authoring-layer contracts introduced at 0.5.0, and the four M3-CA1 v1
-registration-readiness contracts introduced at 0.6.0.
+0.1.x through 0.6.x artifacts are NOT silently reinterpreted and NOT
+invalidated: the matrix in ecp.versions is the single normative statement of
+what cites what. Provenance identity checks (protocol version, schema
+version, object identity) are covered here for every object type, including
+the four M3-CA0 review-layer contracts (0.3.0), the case-amendment contract
+(0.4.0), the two authoring-layer contracts (0.5.0), the four registration-
+readiness contracts (0.6.0) and the eight M3-RG0 trust-layer contracts
+introduced at 0.7.0.
 """
 
 import pytest
@@ -21,6 +21,7 @@ from ecp.versions import (
     V040_CONTRACTS,
     V050_CONTRACTS,
     V060_CONTRACTS,
+    V070_CONTRACTS,
     allowed_schema_versions,
     version_issues,
 )
@@ -34,8 +35,9 @@ def test_matrix_covers_all_known_object_types():
         | set(V040_CONTRACTS)
         | set(V050_CONTRACTS)
         | set(V060_CONTRACTS)
+        | set(V070_CONTRACTS)
     )
-    assert len(SCHEMA_VERSIONS) == 23
+    assert len(SCHEMA_VERSIONS) == 31
 
 
 def test_v010_contracts_accept_all_bundle_versions():
@@ -47,10 +49,11 @@ def test_v010_contracts_accept_all_bundle_versions():
             "0.4.0",
             "0.5.0",
             "0.6.0",
+            "0.7.0",
         ), name
 
 
-def test_v020_contracts_accept_020_through_060():
+def test_v020_contracts_accept_020_through_070():
     for name in V020_CONTRACTS:
         assert allowed_schema_versions(name) == (
             "0.2.0",
@@ -58,35 +61,41 @@ def test_v020_contracts_accept_020_through_060():
             "0.4.0",
             "0.5.0",
             "0.6.0",
+            "0.7.0",
         ), name
 
 
-def test_v030_contracts_accept_030_through_060():
+def test_v030_contracts_accept_030_through_070():
     for name in V030_CONTRACTS:
-        assert allowed_schema_versions(name) == ("0.3.0", "0.4.0", "0.5.0", "0.6.0"), name
+        assert allowed_schema_versions(name) == ("0.3.0", "0.4.0", "0.5.0", "0.6.0", "0.7.0"), name
 
 
-def test_v040_contracts_accept_040_through_060():
+def test_v040_contracts_accept_040_through_070():
     for name in V040_CONTRACTS:
-        assert allowed_schema_versions(name) == ("0.4.0", "0.5.0", "0.6.0"), name
+        assert allowed_schema_versions(name) == ("0.4.0", "0.5.0", "0.6.0", "0.7.0"), name
 
 
-def test_v050_contracts_accept_050_and_060():
+def test_v050_contracts_accept_050_through_070():
     for name in V050_CONTRACTS:
-        assert allowed_schema_versions(name) == ("0.5.0", "0.6.0"), name
+        assert allowed_schema_versions(name) == ("0.5.0", "0.6.0", "0.7.0"), name
 
 
-def test_v060_contracts_accept_only_060():
+def test_v060_contracts_accept_060_and_070():
     for name in V060_CONTRACTS:
-        assert allowed_schema_versions(name) == ("0.6.0",), name
+        assert allowed_schema_versions(name) == ("0.6.0", "0.7.0"), name
+
+
+def test_v070_contracts_accept_only_070():
+    for name in V070_CONTRACTS:
+        assert allowed_schema_versions(name) == ("0.7.0",), name
 
 
 def test_unknown_object_type_falls_back_to_union():
     assert allowed_schema_versions("not-a-type") == PROTOCOL_VERSIONS
 
 
-def test_protocol_axis_accepts_010_through_060():
-    assert PROTOCOL_VERSIONS == ("0.1.0", "0.2.0", "0.3.0", "0.4.0", "0.5.0", "0.6.0")
+def test_protocol_axis_accepts_010_through_070():
+    assert PROTOCOL_VERSIONS == ("0.1.0", "0.2.0", "0.3.0", "0.4.0", "0.5.0", "0.6.0", "0.7.0")
 
 
 def test_version_issues_accepts_010_citations():
@@ -203,7 +212,7 @@ def test_version_issues_rejects_030_citation_on_amendment_contract():
 
 
 def test_version_issues_rejects_future_protocol_version():
-    document = {"ecp_object": "case", "protocol_version": "0.7.0"}
+    document = {"ecp_object": "case", "protocol_version": "0.8.0"}
     issues = version_issues(document)
     assert any("protocol_version" in issue for issue in issues)
 
@@ -259,3 +268,36 @@ def test_version_issues_requires_protocol_version():
 
 def test_version_issues_rejects_non_dict():
     assert version_issues([1, 2, 3]) != []
+
+
+def test_version_issues_accepts_070_trust_contracts():
+    for object_type in V070_CONTRACTS:
+        document = {
+            "ecp_object": object_type,
+            "protocol_version": "0.7.0",
+            "schema_version": "0.7.0",
+        }
+        assert version_issues(document) == [], object_type
+
+
+def test_version_issues_rejects_060_citation_on_trust_contracts():
+    document = {
+        "ecp_object": "trust-registration",
+        "protocol_version": "0.6.0",
+        "schema_version": "0.6.0",
+    }
+    issues = version_issues(document)
+    assert any("schema_version" in issue for issue in issues)
+
+
+def test_v070_contracts_are_the_eight_trust_layer_contracts():
+    assert V070_CONTRACTS == (
+        "registration-gate-state",
+        "owner-gate-order",
+        "registration-package",
+        "trust-registration",
+        "registration-amendment",
+        "lineage-event",
+        "trust-store-manifest",
+        "runtime-observation",
+    )

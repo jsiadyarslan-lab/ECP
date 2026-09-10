@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ecp-protocol.org/0.7.0/owner-gate-order.schema.json",
+  "title": "ECP Owner Gate Order (M3-RG0 — the ONLY gate-transition instrument)",
+  "description": "The explicit owner instrument that transitions the registration gate of a trust store (M3-RG0, 0.7.0, order §9/§10). It is the only legal input to apply_owner_gate_order: the seam validates schema, scope binding, ruling completeness and transition legality, then rewrites the authoritative gate state and appends a lineage gate-transition event. All six Owner-bound operational rulings (O-01/O-02/O-04/F-01a/F-01b/POP) MUST be supplied as non-empty strings — an order with a missing value is malformed and refused (fail-closed; the authority never invents Owner decisions). Model execution may not open before the registration gate is open. A development-scope order can never govern an operational-scope trust store (scope binding). Public illustrations under examples/ must be format-illustration records (synthetic development-scope templates, never real owner instruments).",
+  "type": "object",
+  "required": [
+    "ecp_object",
+    "order_id",
+    "scope",
+    "owner_rulings",
+    "new_registration_gate",
+    "new_model_execution_gate",
+    "order_reference",
+    "recorded_at",
+    "protocol_version",
+    "schema_version"
+  ],
+  "properties": {
+    "ecp_object": { "const": "owner-gate-order" },
+    "content_class": {
+      "enum": ["review", "format-illustration"],
+      "description": "'review' = real owner instrument (private custody only); 'format-illustration' = synthetic public template (examples/ only)."
+    },
+    "order_id": {
+      "type": "string",
+      "pattern": "^ECP-GATEORDER-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "scope": {
+      "enum": ["development", "operational"],
+      "description": "Must equal the trust store scope exactly; a mismatch is rejected."
+    },
+    "owner_rulings": {
+      "type": "object",
+      "required": ["O-01", "O-02", "O-04", "F-01a", "F-01b", "POP"],
+      "additionalProperties": false,
+      "properties": {
+        "O-01": { "type": "string", "minLength": 1 },
+        "O-02": { "type": "string", "minLength": 1 },
+        "O-04": { "type": "string", "minLength": 1 },
+        "F-01a": { "type": "string", "minLength": 1 },
+        "F-01b": { "type": "string", "minLength": 1 },
+        "POP": { "type": "string", "minLength": 1 }
+      },
+      "description": "The complete set of six Owner-bound rulings; nulls are forbidden here — an incomplete order is refused, never completed by inference."
+    },
+    "new_registration_gate": { "enum": ["CLOSED", "OPEN"] },
+    "new_model_execution_gate": { "enum": ["CLOSED", "OPEN"] },
+    "order_reference": {
+      "type": "object",
+      "required": ["basis"],
+      "additionalProperties": false,
+      "properties": {
+        "basis": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Free-text provenance of the owner order this instrument transcribes (owner message / order-of-record citation)."
+        },
+        "order_of_record_sha256": { "$ref": "#/$defs/sha256_hex" }
+      }
+    },
+    "recorded_at": { "$ref": "#/$defs/iso8601_utc" },
+    "protocol_version": { "$ref": "#/$defs/semver" },
+    "schema_version": { "$ref": "#/$defs/semver" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "sha256_hex": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "iso8601_utc": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+    }
+  }
+}

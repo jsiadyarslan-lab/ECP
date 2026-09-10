@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ecp-protocol.org/0.7.0/lineage-event.schema.json",
+  "title": "ECP Trust Lineage Event (M3-RG0 — append-only, hash-chained)",
+  "description": "One event of the authoritative trust lineage chain (M3-RG0, 0.7.0, order §8). The chain is append-only and hash-chained: event_hash covers the event INCLUDING prev_event_hash (with event_hash itself removed per the self-referential exclusion rule), so inserting, removing, reordering or editing any historical event breaks every subsequent event. The lineage answers, deterministically and for every accepted registration: where it originated (the package), which artifact and version were registered, which commitments identify it, which event accepted it, and whether it was subsequently amended. No execution result ever overwrites registration provenance — execution-side material is not an event kind. event kinds: trust-init (store initialization), gate-transition (owner order applied), registration-accepted, registration-refused (fail-closed refusals are logged, never silently dropped), amendment-recorded. Real lineage material lives only in a private trust area; public illustrations under examples/ must be format-illustration records with real recomputable hashes.",
+  "type": "object",
+  "required": [
+    "ecp_object",
+    "trust_store_id",
+    "event_index",
+    "event_kind",
+    "actor",
+    "payload",
+    "claimed_at",
+    "protocol_version",
+    "schema_version",
+    "prev_event_hash",
+    "event_hash"
+  ],
+  "properties": {
+    "ecp_object": { "const": "lineage-event" },
+    "content_class": {
+      "enum": ["review", "format-illustration"],
+      "description": "'review' = real lineage material (private trust area only); 'format-illustration' = public dummy (examples/ only)."
+    },
+    "trust_store_id": {
+      "type": "string",
+      "pattern": "^ECP-TRUST-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "event_index": { "type": "integer", "minimum": 1 },
+    "event_kind": {
+      "enum": [
+        "trust-init",
+        "gate-transition",
+        "registration-accepted",
+        "registration-refused",
+        "amendment-recorded"
+      ]
+    },
+    "actor": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The governed actor: ECP-REGISTRAR-… for authority acts, the ECP-GATEORDER-… order id for owner seam acts, or 'trust-init'."
+    },
+    "payload": {
+      "type": "object",
+      "description": "Kind-specific details; required sub-fields enforced by the conditionals below."
+    },
+    "claimed_at": { "$ref": "#/$defs/iso8601_utc" },
+    "protocol_version": { "$ref": "#/$defs/semver" },
+    "schema_version": { "$ref": "#/$defs/semver" },
+    "prev_event_hash": { "$ref": "#/$defs/sha256_hex" },
+    "event_hash": { "$ref": "#/$defs/sha256_hex" }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": { "properties": { "event_kind": { "const": "trust-init" } } },
+      "then": {
+        "properties": {
+          "payload": { "required": ["scope"], "properties": { "scope": { "enum": ["development", "operational"] } } }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "event_kind": { "const": "gate-transition" } } },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": ["order_id", "from_registration_gate", "to_registration_gate"],
+            "properties": {
+              "order_id": { "type": "string", "minLength": 1 },
+              "from_registration_gate": { "enum": ["CLOSED", "OPEN"] },
+              "to_registration_gate": { "enum": ["CLOSED", "OPEN"] }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "event_kind": { "const": "registration-accepted" } } },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": ["registration_id", "record_hash"],
+            "properties": {
+              "registration_id": { "type": "string", "pattern": "^ECP-TREG-[0-9]{6}$" },
+              "record_hash": { "$ref": "#/$defs/sha256_hex" },
+              "package_id": { "type": "string" },
+              "evaluation_id": { "type": "string" },
+              "case_id": { "type": "string" },
+              "case_version": { "$ref": "#/$defs/semver" },
+              "commitments": { "type": "object" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "event_kind": { "const": "registration-refused" } } },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": ["package_id", "stage", "reason"],
+            "properties": {
+              "package_id": { "type": "string", "minLength": 1 },
+              "stage": {
+                "enum": ["gate", "package", "owner-bound", "commitments", "case", "ground-truth", "duplicate", "write-once"]
+              },
+              "reason": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "event_kind": { "const": "amendment-recorded" } } },
+      "then": {
+        "properties": {
+          "payload": {
+            "required": ["amendment_id", "target_registration_id", "amendment_kind"],
+            "properties": {
+              "amendment_id": { "type": "string", "pattern": "^ECP-TAMND-[0-9]{6}$" },
+              "target_registration_id": { "type": "string", "pattern": "^ECP-TREG-[0-9]{6}$" },
+              "amendment_kind": { "enum": ["environment-revision", "provenance-correction", "invalidation"] },
+              "amendment_hash": { "$ref": "#/$defs/sha256_hex" },
+              "target_registration_hash": { "$ref": "#/$defs/sha256_hex" }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "sha256_hex": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "iso8601_utc": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+    }
+  }
+}

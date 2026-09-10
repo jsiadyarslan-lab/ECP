@@ -1,0 +1,50 @@
+{
+  "ecp_object": "trust-registration",
+  "content_class": "format-illustration",
+  "registration_id": "ECP-TREG-000001",
+  "package_id": "ECP-PKG-EXAMPLE-0001",
+  "evaluation_id": "ECP-EVAL-EXAMPLE-0001",
+  "case": {
+    "case_id": "ECP-CASE-DEV-0001",
+    "case_version": "0.1.0"
+  },
+  "environment_id": "ENV-EXAMPLE-001",
+  "commitments": {
+    "algorithm": "sha256",
+    "canonicalization": "ECP-CANONICAL-JSON-1.0",
+    "case": "c1d3b176652f51f8a75626c13e1c15d685fba362a595d0ceb2c892d256b2a122",
+    "ground_truth": "7b5063955df6b0a70d889ef53e35f23b7139ee147c22fccbf27f388f072fef82",
+    "criterion": "1b3f05fdb191ef93e3949cca1c002c3e072ea17d932345d52f35e9510b072442",
+    "environment": "8e57b9d51c243ee578a3d20ef3579d992b47a0e69505c88404995f24e0bcc674",
+    "provenance": "253ee08babd4efdd745051eb54b37255ee28e469116abce86e2d0dd02d311132",
+    "package": "9718454bb51ceeaf4bb997c31e3fd2b9cab12c1ec50fe164aad67bc7d75cf91c"
+  },
+  "owner_ruling_citations": {
+    "O-01": "O-01-B (FORMAT ILLUSTRATION: public template ruling — not an owner instrument)",
+    "O-02": "AUTHORIZE (example template ruling — not an owner instrument)",
+    "O-04": "O-04-DEFERRED-VERIFICATION (example template ruling — not an owner instrument)",
+    "F-01a": "DEFER-TO-EXECUTION-PLANNING (example template ruling — not an owner instrument)",
+    "F-01b": "CASE-ID-ASC (example template ruling — not an owner instrument)",
+    "POP": "30-ONLY (example template ruling — not an owner instrument)"
+  },
+  "authority": {
+    "registrar": "ECP-REGISTRAR-EXAMPLE-0001",
+    "decision": "ACCEPTED",
+    "decided_at": "2026-09-10T00:00:00Z"
+  },
+  "gate": {
+    "registration_gate": "OPEN",
+    "gate_id": "ECP-GATE-EXAMPLE-0001",
+    "gate_order_id": "ECP-GATEORDER-EXAMPLE-0001"
+  },
+  "lineage": {
+    "event_index": 3
+  },
+  "registered_at": "2026-09-10T00:00:00Z",
+  "immutability": "append-only — the original record is never rewritten; corrections are new registration-amendment events; the original commitments remain independently verifiable",
+  "hash_algorithm": "sha256",
+  "canonicalization": "ECP-CANONICAL-JSON-1.0",
+  "protocol_version": "0.7.0",
+  "schema_version": "0.7.0",
+  "registration_hash": "a1fed6f02d795abfcb972e7fe21a96f166130614d6a77c121214be6172d49320"
+}

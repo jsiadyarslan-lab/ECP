@@ -1,0 +1,22 @@
+{
+  "ecp_object": "owner-gate-order",
+  "content_class": "format-illustration",
+  "order_id": "ECP-GATEORDER-EXAMPLE-0001",
+  "scope": "development",
+  "owner_rulings": {
+    "O-01": "O-01-B (FORMAT ILLUSTRATION: public template ruling — not an owner instrument)",
+    "O-02": "AUTHORIZE (example template ruling — not an owner instrument)",
+    "O-04": "O-04-DEFERRED-VERIFICATION (example template ruling — not an owner instrument)",
+    "F-01a": "DEFER-TO-EXECUTION-PLANNING (example template ruling — not an owner instrument)",
+    "F-01b": "CASE-ID-ASC (example template ruling — not an owner instrument)",
+    "POP": "30-ONLY (example template ruling — not an owner instrument)"
+  },
+  "new_registration_gate": "OPEN",
+  "new_model_execution_gate": "CLOSED",
+  "order_reference": {
+    "basis": "FORMAT ILLUSTRATION template ONLY — a synthetic development-scope instrument; a development order can never govern an operational-scope trust store (scope binding); NOT an owner instrument and NOT an authorization to register real cases"
+  },
+  "recorded_at": "2026-09-10T00:00:00Z",
+  "protocol_version": "0.7.0",
+  "schema_version": "0.7.0"
+}

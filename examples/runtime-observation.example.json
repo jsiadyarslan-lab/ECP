@@ -1,0 +1,16 @@
+{
+  "ecp_object": "runtime-observation",
+  "content_class": "format-illustration",
+  "observation_id": "ECP-OBS-EXAMPLE-0001",
+  "observation_kind": "runtime-note",
+  "registration_id": "ECP-TREG-000001",
+  "content": {
+    "note": "FORMAT ILLUSTRATION: WHAT LATER HAPPENED — a runtime note; never a source of reference truth for WHAT WAS REGISTERED"
+  },
+  "authority_class": "NON-AUTHORITATIVE",
+  "zone": "operational",
+  "recorded_at": "2026-09-10T00:00:00Z",
+  "protocol_version": "0.7.0",
+  "schema_version": "0.7.0",
+  "observation_hash": "a965f83a881e406235597f3c524c11099d5e08e89f59021477496f606970e9bc"
+}

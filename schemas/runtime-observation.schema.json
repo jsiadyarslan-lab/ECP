@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ecp-protocol.org/0.7.0/runtime-observation.schema.json",
+  "title": "ECP Runtime Observation (M3-RG0 — operational zone, NON-AUTHORITATIVE)",
+  "description": "A runtime/operational state document of the trust store's operational zone (M3-RG0, 0.7.0, order §6/§9). Runtime observations record WHAT LATER HAPPENED (execution attempts observed, environment probes, status views) and are — by contract and by verification — NEVER a source of reference truth for WHAT WAS REGISTERED: authority_class is the const 'NON-AUTHORITATIVE', zone is the const 'operational', and verify_trust_store rejects any operational document lacking these markers or carrying an authoritative object type. The writer (record_runtime_observation) is the ONLY operational write path and it has no authority to touch the authoritative zone; there is no evidence-zone writer at 0.7.0. observation_hash = SHA-256 over the ECP-CANONICAL-JSON-1.0 serialization with observation_hash removed (tampering detection for the log; the zone as a whole remains replaceable without affecting registered truth). Real observation material lives only in a private trust area; public illustrations under examples/ must be format-illustration records with real recomputable hashes.",
+  "type": "object",
+  "required": [
+    "ecp_object",
+    "observation_id",
+    "observation_kind",
+    "registration_id",
+    "content",
+    "authority_class",
+    "zone",
+    "recorded_at",
+    "protocol_version",
+    "schema_version",
+    "observation_hash"
+  ],
+  "properties": {
+    "ecp_object": { "const": "runtime-observation" },
+    "content_class": {
+      "enum": ["review", "format-illustration"],
+      "description": "'review' = real operational material (private trust area only); 'format-illustration' = public dummy (examples/ only)."
+    },
+    "observation_id": {
+      "type": "string",
+      "pattern": "^ECP-OBS-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "observation_kind": {
+      "enum": [
+        "runtime-note",
+        "execution-attempt-observation",
+        "environment-probe",
+        "registration-status-view"
+      ]
+    },
+    "registration_id": {
+      "type": ["string", "null"],
+      "description": "The ECP-TREG-… registration this observation refers to, or null for general runtime state. A non-null reference must resolve to an existing authoritative registration (fail-closed)."
+    },
+    "content": {
+      "type": "object",
+      "description": "Free-form operational content; explicitly NON-AUTHORITATIVE — never consulted for registration truth."
+    },
+    "authority_class": { "const": "NON-AUTHORITATIVE" },
+    "zone": { "const": "operational" },
+    "recorded_at": { "$ref": "#/$defs/iso8601_utc" },
+    "protocol_version": { "$ref": "#/$defs/semver" },
+    "schema_version": { "$ref": "#/$defs/semver" },
+    "observation_hash": { "$ref": "#/$defs/sha256_hex" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "sha256_hex": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "iso8601_utc": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+    }
+  }
+}

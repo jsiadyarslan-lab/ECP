@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ecp-protocol.org/0.7.0/registration-package.schema.json",
+  "title": "ECP Registration Package (M3-RG0 — submission to the Registration Authority)",
+  "description": "The package submitted to the Registration Authority for acceptance into the protected registration boundary (M3-RG0, 0.7.0, order §4). It embeds the full public case document, the sealed ground-truth commitment (never the ground-truth content — the protected store keeps custody), the frozen success-criterion copy, the evaluation environment, the provenance lineage references, and the six Owner-bound ruling citations in force at submission. The authority validates the schema, recomputes every cryptographic commitment (case, criterion, environment, provenance, package self-hash), verifies the ground-truth seam, checks the ruling citations against the authoritative gate, enforces duplicate control, assigns the deterministic registration identity and establishes the immutable registration record — or REFUSES (fail-closed) before any authoritative write. package_hash = SHA-256 over the ECP-CANONICAL-JSON-1.0 serialization of this document with package_hash removed. Public illustrations under examples/ must be format-illustration records with real recomputable hashes.",
+  "type": "object",
+  "required": [
+    "ecp_object",
+    "package_id",
+    "evaluation_id",
+    "case_document",
+    "ground_truth",
+    "success_criterion",
+    "environment",
+    "provenance",
+    "owner_ruling_citations",
+    "protocol_version",
+    "schema_version",
+    "package_hash"
+  ],
+  "properties": {
+    "ecp_object": { "const": "registration-package" },
+    "content_class": {
+      "enum": ["review", "format-illustration"],
+      "description": "'review' = real submission material (private trust area only); 'format-illustration' = public dummy (examples/ only)."
+    },
+    "package_id": {
+      "type": "string",
+      "pattern": "^ECP-PKG-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "evaluation_id": {
+      "type": "string",
+      "pattern": "^ECP-EVAL-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "case_document": {
+      "type": "object",
+      "description": "The full PUBLIC case document (validated against the 'case' contract by the authority; carries its own ground_truth_reference.commitment)."
+    },
+    "ground_truth": {
+      "type": "object",
+      "required": ["commitment", "sealing_status"],
+      "additionalProperties": false,
+      "properties": {
+        "commitment": { "$ref": "#/$defs/sha256_hex" },
+        "sealing_status": { "const": "sealed" },
+        "store_reference": {
+          "type": "string",
+          "description": "Optional pointer to the protected store that holds the sealed ground truth (custody side of the seam)."
+        }
+      }
+    },
+    "success_criterion": {
+      "type": ["string", "object"],
+      "description": "Frozen copy of the case document's success criterion (the case contract pins it as a non-empty string; object form reserved for richer criterion contracts); the authority verifies byte-equality with case_document.success_criterion (criterion tampering detection)."
+    },
+    "environment": {
+      "type": "object",
+      "required": ["environment_id"],
+      "additionalProperties": false,
+      "properties": {
+        "environment_id": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 },
+        "pins": {
+          "type": "object",
+          "description": "Pinned environment facts (tool versions, system pins, harness parameters) — part of the environment commitment."
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["origin"],
+      "additionalProperties": false,
+      "properties": {
+        "origin": {
+          "type": "object",
+          "required": ["source_label", "sha256"],
+          "additionalProperties": false,
+          "properties": {
+            "source_label": { "type": "string", "minLength": 1 },
+            "sha256": { "$ref": "#/$defs/sha256_hex" }
+          }
+        },
+        "qualification": {
+          "type": "object",
+          "required": ["qualification_id", "artifact_hash"],
+          "additionalProperties": false,
+          "properties": {
+            "qualification_id": { "type": "string", "minLength": 1 },
+            "artifact_hash": { "$ref": "#/$defs/sha256_hex" }
+          }
+        },
+        "readiness": {
+          "type": "object",
+          "required": ["run_id", "run_hash"],
+          "additionalProperties": false,
+          "properties": {
+            "run_id": { "type": "string", "minLength": 1 },
+            "run_hash": { "$ref": "#/$defs/sha256_hex" }
+          }
+        }
+      }
+    },
+    "owner_ruling_citations": {
+      "type": "object",
+      "required": ["O-01", "O-02", "O-04", "F-01a", "F-01b", "POP"],
+      "additionalProperties": false,
+      "properties": {
+        "O-01": { "type": "string", "minLength": 1 },
+        "O-02": { "type": "string", "minLength": 1 },
+        "O-04": { "type": "string", "minLength": 1 },
+        "F-01a": { "type": "string", "minLength": 1 },
+        "F-01b": { "type": "string", "minLength": 1 },
+        "POP": { "type": "string", "minLength": 1 }
+      },
+      "description": "The six rulings cited in force at submission; the authority verifies they match the authoritative gate citations exactly (divergence = REFUSED, never merged)."
+    },
+    "protocol_version": { "$ref": "#/$defs/semver" },
+    "schema_version": { "$ref": "#/$defs/semver" },
+    "package_hash": { "$ref": "#/$defs/sha256_hex" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "sha256_hex": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "iso8601_utc": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+    }
+  }
+}

@@ -1,0 +1,158 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ecp-protocol.org/0.7.0/trust-registration.schema.json",
+  "title": "ECP Trust Registration Record (M3-RG0 — immutable after acceptance)",
+  "description": "The immutable registration record established by the Registration Authority when a package is accepted into the protected registration boundary (M3-RG0, 0.7.0, order §5). It preserves: case identity; the full commitment set (case content, ground truth, success criterion, environment, provenance, originating package); the six Owner-bound ruling citations frozen at acceptance; the authority decision; the gate snapshot under which acceptance occurred; the deterministic registration identity (authority-assigned, monotone); and the lineage index of the accepting event (the event carries the record hash — bidirectional binding without circular hashing). The file is write-once; any correction is a NEW registration-amendment event, never an edit. registration_hash = SHA-256 over the ECP-CANONICAL-JSON-1.0 serialization with registration_hash removed; record_hash (computed by the verifier/lineage) additionally covers the populated registration_hash field. Real records live only in a private trust area; public illustrations under examples/ must be format-illustration records with real recomputable hashes.",
+  "type": "object",
+  "required": [
+    "ecp_object",
+    "registration_id",
+    "package_id",
+    "evaluation_id",
+    "case",
+    "environment_id",
+    "commitments",
+    "owner_ruling_citations",
+    "authority",
+    "gate",
+    "lineage",
+    "registered_at",
+    "immutability",
+    "hash_algorithm",
+    "canonicalization",
+    "protocol_version",
+    "schema_version",
+    "registration_hash"
+  ],
+  "properties": {
+    "ecp_object": { "const": "trust-registration" },
+    "content_class": {
+      "enum": ["review", "format-illustration"],
+      "description": "'review' = real registration material (private trust area only); 'format-illustration' = public dummy (examples/ only)."
+    },
+    "registration_id": {
+      "type": "string",
+      "pattern": "^ECP-TREG-[0-9]{6}$",
+      "description": "Deterministic identity assigned by the Registration Authority (monotone; never author-chosen)."
+    },
+    "package_id": {
+      "type": "string",
+      "pattern": "^ECP-PKG-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "evaluation_id": {
+      "type": "string",
+      "pattern": "^ECP-EVAL-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "case": {
+      "type": "object",
+      "required": ["case_id", "case_version"],
+      "additionalProperties": false,
+      "properties": {
+        "case_id": { "type": "string", "minLength": 1 },
+        "case_version": { "$ref": "#/$defs/semver" }
+      }
+    },
+    "environment_id": { "type": "string", "minLength": 1 },
+    "commitments": {
+      "type": "object",
+      "required": [
+        "algorithm",
+        "canonicalization",
+        "case",
+        "ground_truth",
+        "criterion",
+        "environment",
+        "provenance",
+        "package"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": { "const": "sha256" },
+        "canonicalization": { "const": "ECP-CANONICAL-JSON-1.0" },
+        "case": { "$ref": "#/$defs/sha256_hex" },
+        "ground_truth": { "$ref": "#/$defs/sha256_hex" },
+        "criterion": { "$ref": "#/$defs/sha256_hex" },
+        "environment": { "$ref": "#/$defs/sha256_hex" },
+        "provenance": { "$ref": "#/$defs/sha256_hex" },
+        "package": { "$ref": "#/$defs/sha256_hex" }
+      }
+    },
+    "owner_ruling_citations": {
+      "type": "object",
+      "required": ["O-01", "O-02", "O-04", "F-01a", "F-01b", "POP"],
+      "additionalProperties": false,
+      "properties": {
+        "O-01": { "type": "string", "minLength": 1 },
+        "O-02": { "type": "string", "minLength": 1 },
+        "O-04": { "type": "string", "minLength": 1 },
+        "F-01a": { "type": "string", "minLength": 1 },
+        "F-01b": { "type": "string", "minLength": 1 },
+        "POP": { "type": "string", "minLength": 1 }
+      },
+      "description": "The six rulings frozen at acceptance — an accepted record can never carry a null citation (acceptance required them)."
+    },
+    "authority": {
+      "type": "object",
+      "required": ["registrar", "decision", "decided_at"],
+      "additionalProperties": false,
+      "properties": {
+        "registrar": {
+          "type": "string",
+          "pattern": "^ECP-REGISTRAR-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "decision": { "const": "ACCEPTED" },
+        "decided_at": { "$ref": "#/$defs/iso8601_utc" }
+      }
+    },
+    "gate": {
+      "type": "object",
+      "required": ["registration_gate", "gate_id", "gate_order_id"],
+      "additionalProperties": false,
+      "properties": {
+        "registration_gate": { "const": "OPEN" },
+        "gate_id": {
+          "type": "string",
+          "pattern": "^ECP-GATE-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "gate_order_id": {
+          "type": "string",
+          "pattern": "^ECP-GATEORDER-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        }
+      },
+      "description": "Snapshot of the gate state under which acceptance occurred — acceptance is only legal while the gate is OPEN."
+    },
+    "lineage": {
+      "type": "object",
+      "required": ["event_index"],
+      "additionalProperties": false,
+      "properties": {
+        "event_index": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Index of the registration-accepted lineage event; the event carries this record's record_hash (bidirectional binding)."
+        }
+      }
+    },
+    "registered_at": { "$ref": "#/$defs/iso8601_utc" },
+    "immutability": {
+      "const": "append-only — the original record is never rewritten; corrections are new registration-amendment events; the original commitments remain independently verifiable"
+    },
+    "hash_algorithm": { "const": "sha256" },
+    "canonicalization": { "const": "ECP-CANONICAL-JSON-1.0" },
+    "protocol_version": { "$ref": "#/$defs/semver" },
+    "schema_version": { "$ref": "#/$defs/semver" },
+    "registration_hash": { "$ref": "#/$defs/sha256_hex" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "sha256_hex": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "iso8601_utc": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+    }
+  }
+}

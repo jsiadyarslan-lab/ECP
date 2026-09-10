@@ -33,6 +33,14 @@ EXAMPLE_SCHEMA_MAP = [
     ("case-readiness.example.json", "case-readiness"),
     ("readiness-run.example.json", "readiness-run"),
     ("registration-manifest.example.json", "registration-manifest"),
+    ("registration-gate-state.example.json", "registration-gate-state"),
+    ("owner-gate-order.example.json", "owner-gate-order"),
+    ("registration-package.example.json", "registration-package"),
+    ("trust-registration.example.json", "trust-registration"),
+    ("registration-amendment.example.json", "registration-amendment"),
+    ("lineage-event.example.json", "lineage-event"),
+    ("trust-store-manifest.example.json", "trust-store-manifest"),
+    ("runtime-observation.example.json", "runtime-observation"),
 ]
 
 

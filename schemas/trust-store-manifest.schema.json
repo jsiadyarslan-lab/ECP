@@ -1,0 +1,189 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ecp-protocol.org/0.7.0/trust-store-manifest.schema.json",
+  "title": "ECP Trust Store Manifest (M3-RG0 — derived index, never a trust anchor)",
+  "description": "The deterministic manifest of a protected evaluation + registration trust store (M3-RG0, 0.7.0, order §3). It indexes the three ownership-explicit zones — authoritative (registered reference truth: gate state, registration records, amendments, lineage), operational (mutable runtime state, NON-AUTHORITATIVE by construction), evidence (scientific execution evidence; reserved, no writer exists at 0.7.0) — checkpoints the gate state hash and the lineage head, and is fully re-derivable: verify_trust_store recomputes it from the underlying files and never trusts it (a derived index, never a trust anchor). manifest_hash = SHA-256 over the ECP-CANONICAL-JSON-1.0 serialization with manifest_hash removed. Real manifests live only in a private trust area; public illustrations under examples/ must be format-illustration records with real recomputable hashes.",
+  "type": "object",
+  "required": [
+    "ecp_object",
+    "trust_store_id",
+    "scope",
+    "zones",
+    "gate",
+    "lineage",
+    "generated_at",
+    "protocol_version",
+    "schema_version",
+    "manifest_hash"
+  ],
+  "properties": {
+    "ecp_object": {
+      "const": "trust-store-manifest"
+    },
+    "content_class": {
+      "enum": [
+        "review",
+        "format-illustration"
+      ],
+      "description": "'review' = real manifest material (private trust area only); 'format-illustration' = public dummy (examples/ only)."
+    },
+    "trust_store_id": {
+      "type": "string",
+      "pattern": "^ECP-TRUST-[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "scope": {
+      "enum": [
+        "development",
+        "operational"
+      ]
+    },
+    "zones": {
+      "type": "object",
+      "required": [
+        "authoritative",
+        "operational",
+        "evidence"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "authoritative": {
+          "type": "object",
+          "required": [
+            "registrations",
+            "amendments",
+            "lineage_events"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "registrations": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "amendments": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "lineage_events": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "operational": {
+          "type": "object",
+          "required": [
+            "observations"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "observations": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "ownership": {
+              "const": "mutable operational state — NON-AUTHORITATIVE: never a source of reference truth; replaceable without affecting the registered truth"
+            }
+          }
+        },
+        "evidence": {
+          "type": "object",
+          "required": [
+            "files",
+            "writer"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "files": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "writer": {
+              "const": "none (0.7.0): no evidence write path exists in M3-RG0; execution-side writes require a separate owner gate"
+            }
+          }
+        }
+      }
+    },
+    "gate": {
+      "type": "object",
+      "required": [
+        "registration_gate",
+        "model_execution_gate",
+        "scientific_results",
+        "gate_hash"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "registration_gate": {
+          "enum": [
+            "CLOSED",
+            "OPEN"
+          ]
+        },
+        "model_execution_gate": {
+          "enum": [
+            "CLOSED",
+            "OPEN"
+          ]
+        },
+        "scientific_results": {
+          "enum": [
+            "NONE",
+            "PRESENT"
+          ]
+        },
+        "gate_hash": {
+          "$ref": "#/$defs/sha256_hex"
+        }
+      }
+    },
+    "lineage": {
+      "type": "object",
+      "required": [
+        "event_count",
+        "head_event_hash"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "event_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "head_event_hash": {
+          "$ref": "#/$defs/sha256_hex"
+        }
+      }
+    },
+    "generated_at": {
+      "$ref": "#/$defs/iso8601_utc"
+    },
+    "protocol_version": {
+      "$ref": "#/$defs/semver"
+    },
+    "schema_version": {
+      "$ref": "#/$defs/semver"
+    },
+    "manifest_hash": {
+      "$ref": "#/$defs/sha256_hex"
+    },
+    "note": {
+      "type": "string",
+      "description": "Optional free-text annotation (e.g. the FORMAT ILLUSTRATION marker for public templates)."
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "sha256_hex": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "iso8601_utc": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+    }
+  }
+}

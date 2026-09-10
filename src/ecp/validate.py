@@ -43,6 +43,16 @@ SCHEMA_FILES = {
     "readiness-run": "readiness-run.schema.json",
     "owner-decision-register": "owner-decision-register.schema.json",
     "registration-manifest": "registration-manifest.schema.json",
+    # 0.7.0 additive contracts (M3-RG0 protected evaluation + registration
+    # trust layer):
+    "registration-gate-state": "registration-gate-state.schema.json",
+    "owner-gate-order": "owner-gate-order.schema.json",
+    "registration-package": "registration-package.schema.json",
+    "trust-registration": "trust-registration.schema.json",
+    "registration-amendment": "registration-amendment.schema.json",
+    "lineage-event": "lineage-event.schema.json",
+    "trust-store-manifest": "trust-store-manifest.schema.json",
+    "runtime-observation": "runtime-observation.schema.json",
 }
 
 _CACHE: dict = {}

@@ -1,0 +1,28 @@
+{
+  "ecp_object": "registration-gate-state",
+  "content_class": "format-illustration",
+  "gate_id": "ECP-GATE-EXAMPLE-0001",
+  "trust_store_id": "ECP-TRUST-EXAMPLE-0001",
+  "scope": "development",
+  "registration_gate": "CLOSED",
+  "model_execution_gate": "CLOSED",
+  "scientific_results": "NONE",
+  "basis": [
+    "ADJ-06 (ECP-OWNDEC-000004, ADOPTED — ARCHITECTURAL LAYER, IMMUTABLE): APPROVE WITH HARD PRECONDITION — no registration before the trust boundary exists and is verified",
+    "M3-RG0 order §10: infrastructure construction only — REGISTRATION = CLOSED, MODEL EXECUTION = CLOSED, SCIENTIFIC RESULTS = NONE",
+    "FORMAT ILLUSTRATION: the six Owner-bound citations stay null (unresolved, never inferred) until an owner gate order supplies them"
+  ],
+  "transition_rule": "gate transitions ONLY via an explicit owner-gate-order instrument applied through apply_owner_gate_order (scope-bound, all six Owner-bound rulings required, legality-checked) and recorded as a lineage gate-transition event; no other writer exists",
+  "owner_ruling_citations": {
+    "O-01": null,
+    "O-02": null,
+    "O-04": null,
+    "F-01a": null,
+    "F-01b": null,
+    "POP": null
+  },
+  "recorded_at": "2026-09-10T00:00:00Z",
+  "protocol_version": "0.7.0",
+  "schema_version": "0.7.0",
+  "gate_hash": "bc675d736128dff8f25a7dfe7d21cfb5f5dc0e6fa16144e9d79782d3bbc22948"
+}

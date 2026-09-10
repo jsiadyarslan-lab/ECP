@@ -1,0 +1,30 @@
+{
+  "ecp_object": "registration-amendment",
+  "content_class": "format-illustration",
+  "amendment_id": "ECP-TAMND-000001",
+  "target_registration_id": "ECP-TREG-000001",
+  "target_registration_hash": "a889f2e9c32c80a1117eab031668421d5f68e7ebd7a43d783d9b00f368a57521",
+  "amendment_kind": "environment-revision",
+  "motivation": "FORMAT ILLUSTRATION: environment pin refresh — amendments create a new event; the original record is never rewritten",
+  "replacement": {
+    "environment": {
+      "environment_id": "ENV-EXAMPLE-001",
+      "description": "public format-illustration environment template (revised)",
+      "pins": {
+        "python": "3.12",
+        "jsonschema": "4.18",
+        "ecp": "0.7.0"
+      }
+    }
+  },
+  "new_commitments": {
+    "environment": "f3fb0929d504dba39dd772c9c97bef873e29c39195ef9fb6598983be6de7bf31"
+  },
+  "lineage": {
+    "event_index": 4
+  },
+  "recorded_at": "2026-09-10T00:00:00Z",
+  "protocol_version": "0.7.0",
+  "schema_version": "0.7.0",
+  "amendment_hash": "a101b8c0248080d7d840872985d701c9816ac13dd3066645770297ad2729cbc2"
+}

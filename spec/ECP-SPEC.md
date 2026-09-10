@@ -969,3 +969,174 @@ authorization/verdict consistency, and the schema validity of every
 output. Real readiness material lives only in a private readiness area;
 the public examples are format-illustration records with real
 recomputable hashes.
+
+## 23. Protected Evaluation + Registration Trust Layer (0.7.0 / M3-RG0)
+
+0.7.0 is an **additive** bundle: the eight new trust-layer contracts are
+added (`registration-gate-state`, `owner-gate-order`,
+`registration-package`, `trust-registration`,
+`registration-amendment`, `lineage-event`, `trust-store-manifest`,
+`runtime-observation`); no earlier contract file is modified and
+0.1.x–0.6.x artifacts remain exactly as valid as they were. The layer
+implements the trust boundary that ADJ-06 (ECP-OWNDEC-000004, ADOPTED —
+ARCHITECTURAL LAYER, IMMUTABLE) makes a **hard precondition** for ever
+opening registration: *no registration, and no scientific execution,
+before the trust boundary exists and is verified*. Implementation module:
+`src/ecp/trust.py` (`ecp.trust`); CLI: the `trust-*` subcommands.
+
+### 23.1 The protected store and its three ownership-explicit zones
+
+A trust store is a root directory **outside the public repository** with
+three zones whose ownership is explicit and machine-checked (order
+M3-RG0 §3):
+
+- `authoritative/` — **registered reference truth**: the gate state
+  (`gate.json`), immutable registration records
+  (`registrations/ECP-TREG-NNNNNN.json`), append-only amendments
+  (`amendments/ECP-TAMND-NNNNNN.json`) and the hash-chained lineage
+  (`lineage/NNNNNNNN.json`). Governed-mutation-only: the Registration
+  Authority ceremony and the owner gate-order seam are the only writers;
+  there is no write path from ordinary evaluation code.
+- `operational/` — **mutable operational state**: runtime observations
+  (`runtime/ECP-OBS-*.json`), each carrying `authority_class:
+  NON-AUTHORITATIVE` and `zone: operational` by contract; the zone is
+  never a source of reference truth and may be archived or pruned
+  without affecting registered truth.
+- `evidence/` — **scientific execution evidence**: reserved; **no writer
+  exists at 0.7.0** (model execution gate CLOSED; execution cannot occur
+  merely because the infrastructure exists — any non-README file here is
+  a verification issue).
+
+`trust.json` (the `trust-store-manifest` contract) is the derived index
+over all three zones: never a trust anchor — `verify_trust_store`
+cross-checks it against the disk state and reports drift as issues.
+Writes are two-phase (temp file + atomic rename) everywhere.
+
+### 23.2 The registration gate and its only transition instrument
+
+`init_trust_store` writes the authoritative gate state as
+`REGISTRATION = CLOSED`, `MODEL EXECUTION = CLOSED`,
+`SCIENTIFIC RESULTS = NONE`, with the six Owner-bound operational
+citations (O-01/O-02/O-04/F-01a/F-01b/POP) **null — unresolved, never
+inferred**. The basis cites ADJ-06 and the M3-RG0 §10 rule verbatim.
+
+The ONLY legal gate transition is `apply_owner_gate_order` with an
+explicit `owner-gate-order` instrument. The seam validates (fail-closed;
+the gate is untouched on any rejection): schema + versions; **scope
+binding** (a development-scope order can never govern an
+operational-scope store and vice versa); duplicate `order_id` rejection;
+**ruling completeness** (all six Owner-bound rulings non-empty — an
+incomplete order is refused, never completed by inference); and
+transition legality (model execution may not open while the registration
+gate is closed; CLOSED→CLOSED no-ops and OPEN→OPEN re-opens are
+rejected; a re-open requires an explicit close first — a clean audit
+trail). On success the new gate state freezes the six citations to the
+order's values, pins `gate_order_reference` (order id + order hash) and
+a lineage `gate-transition` event is appended.
+
+### 23.3 The Registration Authority (fail-closed acceptance)
+
+`RegistrationAuthority.submit_registration` (order §4) refuses — each
+refusal recorded as a lineage `registration-refused` event, never
+silent — on: **closed gate** (checked first: the cheapest fail-closed
+exit); malformed package (schema/version); **package_hash
+non-recomputation** (altered-submission detection); Owner-bound
+citation absence or divergence from the authoritative gate (never
+merged, never reinterpreted); invalid embedded case document;
+unsealed or malformed ground-truth reference; **ground-truth
+commitment divergence** (the seam: the package never carries
+ground-truth content, only the commitment); **success-criterion
+divergence** between the package's frozen copy and the case document;
+duplicate frozen tuple (evaluation, case id, case version, environment
+id) among live registrations; and write-once violations. Acceptance
+assigns the deterministic identity `ECP-TREG-NNNNNN` (monotone,
+authority-assigned, never author-chosen), recomputes the full
+commitment set (never trusting package-supplied values), and appends
+the `registration-accepted` lineage event whose payload carries the
+record hash — bidirectional binding without circular hashing (the
+record cites the event by index; the event cites the record by hash).
+
+### 23.4 Immutable records and amendments
+
+Accepted records are write-once files; `verify_trust_store` recomputes
+`registration_hash` (self-referential, exclusion rule) and the full
+record hash for every record. Corrections are **new events**
+(`amend_registration`), never edits: the amendment document
+(`registration-amendment`) binds `target_registration_hash` to the
+EXACT original record, requires an explicit non-empty motivation, and
+may replace only **environment** or **provenance** content — case
+content and ground truth are never amendable; explicit **invalidation**
+is the only retirement path, and nothing can amend an invalidated
+registration. The original record and its commitments remain
+independently verifiable forever.
+
+### 23.5 State / reference-truth separation
+
+`store_reference_truth` answers **WHAT WAS REGISTERED** from the
+authoritative zone alone (pure, deterministic, hash-verified);
+`store_runtime_state` answers **WHAT LATER HAPPENED** from the
+operational zone alone (explicitly marked `non_authoritative`);
+`resolve_registration` returns the two answers side by side, never
+merged, with the accepting event, the amendments and the runtime
+observations listed separately. Runtime execution can never become an
+implicit source of truth for what was registered: operational documents
+carry mandatory NON-AUTHORITATIVE/zone markers, the operational writer
+cannot touch the authoritative zone, and the verifier rejects any
+operational document claiming an authoritative object type. The
+operational writer (`record_runtime_observation`) also refuses
+fabricated registration references and duplicate observation ids.
+
+### 23.6 Cryptographic commitments
+
+All commitments are deterministic SHA-256 over `ECP-CANONICAL-JSON-1.0`
+bytes (order §7): case content, ground truth, success criterion
+(wrapped as `{"success_criterion": …}` when the criterion is the case
+contract's plain string), environment, provenance, package
+(`package_hash`) and record (`registration_hash`). Self-referential
+hashes use the established exclusion mechanism
+(`hash_document_excluding`) — the document's own hash field is removed
+before hashing, never hashed populated. The commitment set is
+sufficient to detect case, ground-truth, criterion, environment,
+provenance, package and registration-record modification (all exercised
+by the test battery).
+
+### 23.7 Provenance / lineage
+
+The lineage chain is append-only and hash-chained
+(`event_hash` covers the event including `prev_event_hash`, minus its
+own field). Event kinds: `trust-init`, `gate-transition`,
+`registration-accepted`, `registration-refused`,
+`amendment-recorded`. Every accepted registration can answer, from the
+chain alone: where it originated (package id), which artifact and
+version were registered, which commitments identify it, which event
+accepted it, and whether it was subsequently amended. **No execution
+result may overwrite registration provenance**: execution-side material
+is not an event kind, has no authoritative writer, and lives (when a
+future owner gate authorizes execution) only in the evidence zone.
+
+### 23.8 Verification (order §11) and the fail-closed posture
+
+`verify_trust_store` re-derives everything from the files alone:
+manifest cross-check (derived index, drift = issues), gate state
+(schema, self-hash, OPEN-state citation completeness, and a
+**gate-history replay** over the lineage — every acceptance must fall
+inside an OPEN window and the replayed final state must equal
+`gate.json`), every record (schema, self-hash, record hash, lineage
+binding, monotone-identity discipline, duplicate control, citation
+completeness), every amendment (schema, self-hash, lineage binding,
+target binding, invalidation rules), the lineage chain (contiguity,
+chaining, per-event hashes), zone ownership markers, the evidence-zone
+writer prohibition, and the reference-truth end-to-end re-derivation.
+Every missing or contradictory mandatory trust input is an issue — the
+layer never infers.
+
+### 23.9 Scope boundary
+
+The layer is infrastructure only: it registers nothing scientific (the
+gate is CLOSED and no operational owner order exists), executes no
+model, produces no results, and creates no case authoring, statistical
+or product functionality. Real trust material lives only in a private
+trust area; the public examples are format-illustration records with
+real recomputable hashes. A successful infrastructure test in
+development scope is never an authorization to register real cases
+(order §10).
