@@ -1,0 +1,29 @@
+{
+  "ecp_object": "m3-native-registration-record",
+  "registration_id": "ECP-REG-M3-E896BEF06EAF2602-V1",
+  "registration_version": 1,
+  "case_id": "ECP-NATIVE-003",
+  "candidate_id": "ECP-CAND-000103",
+  "case_hash": "0d054c99dd5957c23b2948fbac8c59f697ea6b0f0ef074407910b0d915832711",
+  "authoring_artifact": {
+    "artifact_id": "M3-CASE-ECP-NATIVE-003-V1",
+    "content_sha256": "c30271d57c8cea67b5190d47c50ad2158ed5d961aefd412206d06770ed69fd57",
+    "store_repository": "jsiadyarslan-lab/ecp-protected-store",
+    "store_commit": "859844a96457f29e6b83d0a4224824025eb64cd9"
+  },
+  "qualification_artifact": {
+    "artifact_id": "M3-QUAL-ECP-CAND-000103-V1",
+    "content_sha256": "bee3a69a3f20980550d34806aa2495ebd88c60f37995cae5c41f14b772d793d9",
+    "decision": "ACCEPT"
+  },
+  "qualification_decision": "ACCEPT",
+  "protocol_version": "0.5.0",
+  "registration_timestamp": "2026-09-10T17:22:00Z",
+  "provenance_reference": "provenance/m3-native-corpus-manifest.json",
+  "protected_content_reference": "private store only; no protected content is exposed here",
+  "immutability": "registered case is immutable; any substantive change requires a new version and registration identity",
+  "execution_status": "NOT_EXECUTED",
+  "model_calls": 0,
+  "registration_scope": "M3 ECP-native corpus only; historical 23-case artifact excluded",
+  "registration_hash": "436bea0517883f2b8b505cbcdab471b82a6900997cfc51e62ed2096ef4be0119"
+}

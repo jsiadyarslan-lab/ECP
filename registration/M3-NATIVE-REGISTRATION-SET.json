@@ -1,0 +1,53 @@
+{
+  "ecp_object": "m3-native-registration-set",
+  "registration_set_id": "ECP-REGSET-M3-NATIVE-V1",
+  "registration_version": 1,
+  "registered_at": "2026-09-10T17:22:00Z",
+  "registrar": "M3 registration gate; explicit execution order",
+  "protocol_version": "0.5.0",
+  "case_count": 3,
+  "registered_case_ids": [
+    "ECP-NATIVE-001",
+    "ECP-NATIVE-002",
+    "ECP-NATIVE-003"
+  ],
+  "registration_ids": [
+    "ECP-REG-M3-954CD3CED679CD50-V1",
+    "ECP-REG-M3-AA4986D8E0CDBABD-V1",
+    "ECP-REG-M3-E896BEF06EAF2602-V1"
+  ],
+  "qualification_tally": {
+    "ACCEPT": 3,
+    "REJECT": 0,
+    "INCONCLUSIVE": 0,
+    "REVISE": 0
+  },
+  "protected_store": {
+    "repository": "jsiadyarslan-lab/ecp-protected-store",
+    "commit": "859844a96457f29e6b83d0a4224824025eb64cd9",
+    "manifest_sha256": "eacbec762a6ffadb11e30695c69c3181a2fbe998e406e8e045a2463a573259f5"
+  },
+  "public_private_boundary": "metadata and hashes only; hidden Ground Truth, FORMAL, derivations, and qualification internals remain private",
+  "historical_boundary": "historical JARVIS 23-case artifact preserved, not imported, not registered, not executed",
+  "execution_status": "NOT_EXECUTED",
+  "model_calls": 0,
+  "registration_records": [
+    {
+      "case_id": "ECP-NATIVE-001",
+      "registration_id": "ECP-REG-M3-954CD3CED679CD50-V1",
+      "registration_hash": "12af2512147554ff9ac9b4d81d0e87112e708220197162aa2c2b39f8b5a9dfd6"
+    },
+    {
+      "case_id": "ECP-NATIVE-002",
+      "registration_id": "ECP-REG-M3-AA4986D8E0CDBABD-V1",
+      "registration_hash": "2f755e7dd1abb073b1c87ca0690dd639148bf375194f7065461e246626cf4b8f"
+    },
+    {
+      "case_id": "ECP-NATIVE-003",
+      "registration_id": "ECP-REG-M3-E896BEF06EAF2602-V1",
+      "registration_hash": "436bea0517883f2b8b505cbcdab471b82a6900997cfc51e62ed2096ef4be0119"
+    }
+  ],
+  "immutability": "append-only registration identity; amendments require explicit new version and full re-review",
+  "registration_set_hash": "a6bfb434b1b2664381b5f67833a6fe6fd5e5228531ece13632d0d82afc932820"
+}
