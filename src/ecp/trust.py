@@ -1560,6 +1560,21 @@ def verify_trust_store(root: "str | Path") -> dict:
     # self-hash check: report as issue, do NOT return — drift check must run
     if manifest.get("manifest_hash") != hash_document_excluding(manifest, "manifest_hash"):
         issues.append("manifest: manifest_hash does not recompute")
+    # Cross-check the derived index before loading the remaining trust-store
+    # objects.  This ensures canonical manifest tampering is reported as
+    # drift even when another file is concurrently malformed or unavailable.
+    manifest_disk_counts = {
+        "registrations": len(list((root / REGISTRATIONS_DIR).glob("ECP-TREG-*.json"))),
+        "amendments": len(list((root / AMENDMENTS_DIR).glob("ECP-TAMND-*.json"))),
+        "lineage_events": len(list((root / LINEAGE_DIR).glob("*.json"))),
+    }
+    manifest_authoritative = manifest.get("zones", {}).get("authoritative", {})
+    for key, value in manifest_disk_counts.items():
+        if manifest_authoritative.get(key) != value:
+            issues.append(
+                f"manifest drift: zones.authoritative.{key} = "
+                f"{manifest_authoritative.get(key)} but disk holds {value}"
+            )
 
     # -- gate ---------------------------------------------------------------
     try:
@@ -1634,6 +1649,10 @@ def verify_trust_store(root: "str | Path") -> dict:
             record, "registration_hash"
         ):
             issues.append(f"{path.name}: registration_hash does not recompute")
+        rid = record.get("registration_id")
+        event = accepted_payloads.get(rid)
+        if event is not None and event["payload"].get("record_hash") != hash_document(record):
+            issues.append(f"{rid}: lineage event record_hash does not match the record")
         rec_issues = _validate_or_issues(record, "trust-registration")
         if rec_issues:
             issues.append(f"{path.name}: " + "; ".join(rec_issues[:3]))
@@ -1654,10 +1673,6 @@ def verify_trust_store(root: "str | Path") -> dict:
                 "write detected — records cannot appear outside the authority)"
             )
         else:
-            if event["payload"].get("record_hash") != hash_document(record):
-                issues.append(
-                    f"{rid}: lineage event record_hash does not match the record"
-                )
             if event.get("event_index") != record["lineage"]["event_index"]:
                 issues.append(f"{rid}: lineage event_index binding mismatch")
         for slot in OWNER_BOUND_SLOTS:
