@@ -201,7 +201,8 @@ class LocalGateway:
         self.store = store or ExecutionStore(config.artifact_root)
         self._pairing_code = secrets.token_urlsafe(24)
         self._pairing_expires = (clock or __import__("time").time)() + config.pairing_ttl_seconds
-        self._session_token: str | None = None
+        self._session_tokens: set[str] = set()
+        self._session_lock = threading.RLock()
         self._clock = clock or __import__("time").time
         self._httpd: ThreadingHTTPServer | None = None
 
@@ -212,12 +213,22 @@ class LocalGateway:
     def pair(self, code: str) -> str:
         if not secrets.compare_digest(str(code), self._pairing_code) or self._clock() >= self._pairing_expires:
             raise AuthorizationError("pairing code is invalid or expired")
-        self._session_token = secrets.token_urlsafe(32)
-        return self._session_token
+        token = secrets.token_urlsafe(32)
+        with self._session_lock:
+            self._session_tokens.add(token)
+        return token
 
     def authenticate(self, token: str | None) -> None:
-        if not token or self._session_token is None or not secrets.compare_digest(token, self._session_token):
+        if not token:
             raise AuthorizationError("authentication required")
+        with self._session_lock:
+            valid = token in self._session_tokens
+        if not valid:
+            raise AuthorizationError("authentication required")
+
+    def has_authenticated_sessions(self) -> bool:
+        with self._session_lock:
+            return bool(self._session_tokens)
 
     def catalog(self) -> dict[str, Any]:
         return {"evaluations": [e.safe_metadata() for e in self.evaluations.values()], "poll_interval_ms": POLL_INTERVAL_MS, "timeout_seconds": EXECUTION_TIMEOUT_SECONDS}
@@ -328,7 +339,7 @@ class LocalGateway:
                     return
                 path = urlparse(self.path).path
                 if path == "/api/v1/status":
-                    self._json(200, {"gateway": "CONNECTED", "authentication": "PAIRED" if gateway._session_token else "AUTHENTICATION_REQUIRED", "binding": "127.0.0.1", "port": gateway.config.port})
+                    self._json(200, {"gateway": "CONNECTED", "authentication": "PAIRED" if gateway.has_authenticated_sessions() else "AUTHENTICATION_REQUIRED", "binding": "127.0.0.1", "port": gateway.config.port})
                     return
                 try:
                     gateway.authenticate(self.headers.get("X-ECP-Session"))
