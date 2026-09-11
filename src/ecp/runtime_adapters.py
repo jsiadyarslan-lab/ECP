@@ -117,6 +117,8 @@ class OpenAIResponsesAdapter:
                 category = "PROVIDER_AUTHENTICATION_FAILED"
             elif status == 408 or status == 504:
                 category = "PROVIDER_TIMEOUT"
+            elif status == 429:
+                category = _rate_limit_failure_category(body)
             else:
                 category = "PROVIDER_REQUEST_FAILED"
             raise RuntimeAdapterTransportError(category)
@@ -138,8 +140,11 @@ class OpenAIResponsesAdapter:
 
 def _post_json(endpoint: str, headers: Mapping[str, str], payload: bytes, timeout: float) -> tuple[int, bytes]:
     req = urllib_request.Request(endpoint, data=payload, headers=dict(headers), method="POST")
-    with urllib_request.urlopen(req, timeout=timeout) as response:
-        return response.status, response.read()
+    try:
+        with urllib_request.urlopen(req, timeout=timeout) as response:
+            return response.status, response.read()
+    except urllib_error.HTTPError as exc:
+        return exc.code, exc.read()
 
 
 def _transport_failure_message(endpoint: str, error: BaseException) -> str:
@@ -157,6 +162,22 @@ def _transport_failure_message(endpoint: str, error: BaseException) -> str:
     if not detail:
         detail = error.__class__.__name__
     return f"PROVIDER_CONNECTION_FAILED host={host} reason={detail[:240]}"
+
+
+def _rate_limit_failure_category(body: bytes) -> str:
+    """Classify HTTP 429 using only non-secret provider error identifiers."""
+    try:
+        payload = json.loads(body.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return "PROVIDER_RATE_LIMITED"
+    error = payload.get("error") if isinstance(payload, dict) else None
+    if not isinstance(error, dict):
+        return "PROVIDER_RATE_LIMITED"
+    error_type = error.get("type")
+    error_code = error.get("code")
+    if error_type == "insufficient_quota" or error_code == "insufficient_quota":
+        return "PROVIDER_QUOTA_EXCEEDED"
+    return "PROVIDER_RATE_LIMITED"
 
 
 def _response_text(response: Any) -> str | None:
