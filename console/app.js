@@ -1,13 +1,24 @@
 (() => {
   "use strict";
   const gatewayUrl = "http://127.0.0.1:8765";
-  let session = null;
+  const sessionStorageKey = "ecp.console.session";
+  let session = sessionStorage.getItem(sessionStorageKey);
   let catalog = null;
   let current = null;
   const $ = (id) => document.getElementById(id);
   const setPill = (id, text, tone = "neutral") => { const el = $(id); el.textContent = text; el.className = `pill ${tone}`; };
   const setText = (id, text) => { $(id).textContent = text == null ? "—" : String(text); };
   const safeError = (error) => { $("error").textContent = error instanceof Error ? error.message : "Gateway request failed"; };
+  const clearSession = () => {
+    session = null;
+    sessionStorage.removeItem(sessionStorageKey);
+    $("run-button").disabled = true;
+  };
+  const requirePairing = () => {
+    clearSession();
+    setPill("gateway-state", "AUTHENTICATION REQUIRED", "warn");
+    setText("gateway-detail", "Pair with the current temporary code printed by the local gateway.");
+  };
   async function call(path, options = {}) {
     const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
     if (session) headers["X-ECP-Session"] = session;
@@ -24,9 +35,20 @@
   async function status() {
     try {
       const payload = await call("/api/v1/status");
-      if (payload.authentication !== "PAIRED") session = null;
-      setPill("gateway-state", payload.authentication === "PAIRED" ? "CONNECTED" : "AUTHENTICATION REQUIRED", payload.authentication === "PAIRED" ? "good" : "warn");
-      setText("gateway-detail", payload.authentication === "PAIRED" ? "Authenticated loopback gateway is ready." : "Gateway is running. Pair it with the short-lived code printed locally.");
+      if (!session) {
+        setPill("gateway-state", "AUTHENTICATION REQUIRED", "warn");
+        setText("gateway-detail", payload.gateway === "CONNECTED" ? "Gateway is running. Pair it with the short-lived code printed locally." : "Start the local gateway, then press PAIR.");
+        return;
+      }
+      try {
+        catalog = await call("/api/v1/catalog");
+        populate();
+        setPill("gateway-state", "CONNECTED", "good");
+        setText("gateway-detail", "Authenticated loopback gateway is ready.");
+      } catch (error) {
+        if (error.status === 401 || error.state === "AUTHENTICATION_REQUIRED") requirePairing();
+        else throw error;
+      }
     } catch (_) {
       setPill("gateway-state", "NOT REACHABLE", "bad");
       setText("gateway-detail", "Start the local gateway, then press PAIR. No external call was attempted.");
@@ -47,7 +69,7 @@
   function updateSelection() {
     if (!catalog) return;
     const evaluation = catalog.evaluations.find((item) => item.evaluation_id === $("evaluation-select").value);
-    if (!evaluation) return;
+    if (!evaluation || !session) return;
     const credential = $("credential-select");
     credential.replaceChildren(new Option(`${evaluation.credential.credential_id} · ${evaluation.credential.status}`, evaluation.credential.credential_id));
     credential.disabled = false;
@@ -64,12 +86,17 @@
       if (!code) throw new Error("Enter the temporary pairing code shown by the local gateway.");
       const payload = await call("/api/v1/pair", { method: "POST", body: JSON.stringify({ pairing_code: code }) });
       session = payload.session;
+      sessionStorage.setItem(sessionStorageKey, session);
       $("pairing-code").value = "";
       catalog = await call("/api/v1/catalog");
       populate();
       setPill("gateway-state", "CONNECTED", "good");
       setText("gateway-detail", "Authenticated loopback gateway is ready.");
-    } catch (error) { setPill("gateway-state", "ERROR", "bad"); safeError(error); }
+    } catch (error) {
+      if (error.status === 401 || error.state === "AUTHENTICATION_REQUIRED") requirePairing();
+      setPill("gateway-state", "ERROR", "bad");
+      safeError(error);
+    }
   }
   function render(record) {
     current = record;
@@ -84,6 +111,7 @@
   }
   async function run() {
     $("error").textContent = "";
+    if (!session) { requirePairing(); return; }
     $("run-button").disabled = true;
     setPill("execution-state", "RUNNING", "warn");
     const evaluation = catalog.evaluations.find((item) => item.evaluation_id === $("evaluation-select").value);
@@ -94,17 +122,15 @@
       render(record);
     } catch (error) {
       if (error.status === 401 || error.state === "AUTHENTICATION_REQUIRED") {
-        session = null;
-        setPill("gateway-state", "AUTHENTICATION REQUIRED", "warn");
-        setText("gateway-detail", "The gateway session expired or restarted. Pair again with the current temporary code.");
+        requirePairing();
         setPill("execution-state", "ERROR", "bad");
-        safeError(new Error("Gateway session expired. Pair again with the current temporary code."));
+        safeError(new Error("Gateway session expired or restarted. Pair again with the current temporary code."));
       } else {
         setPill("execution-state", "ERROR", "bad");
         safeError(error);
       }
     }
-    finally { $("run-button").disabled = false; }
+    finally { $("run-button").disabled = !session; }
   }
   $("pair-button").addEventListener("click", pair);
   $("run-button").addEventListener("click", run);
