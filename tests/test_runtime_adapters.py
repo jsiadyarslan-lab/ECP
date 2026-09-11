@@ -71,6 +71,38 @@ def test_openai_adapter_maps_provider_failures_without_response_body():
         adapter.execute(SecretLease("synthetic-secret", {}), {"request_id": "request-2"})
 
 
+def test_openai_adapter_classifies_rate_limit_without_exposing_provider_body():
+    body = json.dumps(
+        {
+            "error": {
+                "message": "sensitive provider detail",
+                "type": "rate_limit_exceeded",
+                "code": "rate_limit_exceeded",
+            }
+        }
+    ).encode()
+
+    def transport(endpoint, headers, payload, timeout):
+        return 429, body
+
+    adapter = OpenAIResponsesAdapter(model="test-model", endpoint="https://api.openai.com/v1/responses", transport=transport)
+    with pytest.raises(RuntimeAdapterTransportError, match="PROVIDER_RATE_LIMITED") as exc_info:
+        adapter.execute(SecretLease("synthetic-secret", {}), {"request_id": "request-429"})
+    assert "sensitive provider detail" not in str(exc_info.value)
+    assert "synthetic-secret" not in str(exc_info.value)
+
+
+def test_openai_adapter_classifies_insufficient_quota():
+    body = json.dumps({"error": {"type": "insufficient_quota", "code": "insufficient_quota"}}).encode()
+
+    def transport(endpoint, headers, payload, timeout):
+        return 429, body
+
+    adapter = OpenAIResponsesAdapter(model="test-model", endpoint="https://api.openai.com/v1/responses", transport=transport)
+    with pytest.raises(RuntimeAdapterTransportError, match="PROVIDER_QUOTA_EXCEEDED"):
+        adapter.execute(SecretLease("synthetic-secret", {}), {"request_id": "request-quota"})
+
+
 def test_openai_adapter_exposes_safe_transport_reason():
     def transport(endpoint, headers, payload, timeout):
         raise OSError("network unreachable")
