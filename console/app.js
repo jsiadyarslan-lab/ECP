@@ -2,7 +2,7 @@
   "use strict";
   const gatewayUrl = "http://127.0.0.1:8765";
   const sessionStorageKey = "ecp.console.session";
-  let session = sessionStorage.getItem(sessionStorageKey);
+  let session = localStorage.getItem(sessionStorageKey);
   let catalog = null;
   let current = null;
   const $ = (id) => document.getElementById(id);
@@ -11,7 +11,7 @@
   const safeError = (error) => { $("error").textContent = error instanceof Error ? error.message : "Gateway request failed"; };
   const clearSession = () => {
     session = null;
-    sessionStorage.removeItem(sessionStorageKey);
+    localStorage.removeItem(sessionStorageKey);
     $("run-button").disabled = true;
   };
   const requirePairing = () => {
@@ -19,6 +19,15 @@
     setPill("gateway-state", "AUTHENTICATION REQUIRED", "warn");
     setText("gateway-detail", "Pair with the current temporary code printed by the local gateway.");
   };
+  window.addEventListener("storage", (event) => {
+    if (event.key !== sessionStorageKey) return;
+    session = event.newValue;
+    if (!session) {
+      requirePairing();
+      return;
+    }
+    status();
+  });
   async function call(path, options = {}) {
     const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
     if (session) headers["X-ECP-Session"] = session;
@@ -86,7 +95,7 @@
       if (!code) throw new Error("Enter the temporary pairing code shown by the local gateway.");
       const payload = await call("/api/v1/pair", { method: "POST", body: JSON.stringify({ pairing_code: code }) });
       session = payload.session;
-      sessionStorage.setItem(sessionStorageKey, session);
+      localStorage.setItem(sessionStorageKey, session);
       $("pairing-code").value = "";
       catalog = await call("/api/v1/catalog");
       populate();
@@ -114,17 +123,19 @@
     if (!session) { requirePairing(); return; }
     $("run-button").disabled = true;
     setPill("execution-state", "RUNNING", "warn");
-    const evaluation = catalog.evaluations.find((item) => item.evaluation_id === $("evaluation-select").value);
-    const requestId = (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`);
-    const request = { evaluation_id: evaluation.evaluation_id, system_id: evaluation.system_id, credential_ref: $("credential-select").value, test_id: $("test-select").value, request_id: requestId };
     try {
+      catalog = await call("/api/v1/catalog");
+      populate();
+      const evaluation = catalog.evaluations.find((item) => item.evaluation_id === $("evaluation-select").value);
+      const requestId = (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`);
+      const request = { evaluation_id: evaluation.evaluation_id, system_id: evaluation.system_id, credential_ref: $("credential-select").value, test_id: $("test-select").value, request_id: requestId };
       const record = await call("/api/v1/executions", { method: "POST", body: JSON.stringify(request) });
       render(record);
     } catch (error) {
       if (error.status === 401 || error.state === "AUTHENTICATION_REQUIRED") {
         requirePairing();
         setPill("execution-state", "ERROR", "bad");
-        safeError(new Error("Gateway session expired or restarted. Pair again with the current temporary code."));
+        safeError(new Error("Gateway session expired or was replaced. Pair again with the current temporary code."));
       } else {
         setPill("execution-state", "ERROR", "bad");
         safeError(error);
