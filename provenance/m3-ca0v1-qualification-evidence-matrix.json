@@ -1,0 +1,421 @@
+{
+  "artifact_class": "NEW GOVERNANCE/RECOVERY ARTIFACT",
+  "artifact_class_note": "Created during the recovery phase CA0v1 QUALIFICATION PROVENANCE RESTORATION & AUTHORITATIVE POPULATION RE-ADJUDICATION v1. This record is NOT a historical artifact, NOT a qualification record, and NOT evidence of any historical execution; it records the investigation outcome only. No timestamp was backdated; no reconstruction was executed in this phase; no historical artifact was created, rewritten, or re-qualified.",
+  "artifact_recovery": [
+    {
+      "artifact": "CA0v1 authored case-set source",
+      "artifact_status": "FOUND",
+      "content_hash": "8144818cc37f0aa8b41d99f4a3cfacb5d5082aa1a97170fd1f61c4f86b0f425d",
+      "historical_status": "RECONSTRUCTED-BYTE-VERIFIED",
+      "identity": "ECP-M3-CA0V1-CANDIDATE-CASE-SET.md",
+      "path": "/home/z/ecp-ca0v1/source/ECP-M3-CA0V1-CANDIDATE-CASE-SET.md",
+      "provenance": "byte-identical to the contemporaneous pin (verified this session)",
+      "relationship_to_ca0v1": "authoring source of the 30-candidate pool",
+      "source": "AIR v1.1 deterministic re-derivation (scripts/ecp_ca0v1_cases_a.py + cases_b.py + ecp_ca1_ca0v1_rederive.py)"
+    },
+    {
+      "artifact": "CA0v1 provenance sidecar",
+      "artifact_status": "FOUND",
+      "content_hash": "0f4e2318a1a086aae87fcd792b64920463c70f53887e7d9138f40c3f14579e80",
+      "historical_status": "RECONSTRUCTED-BYTE-VERIFIED",
+      "identity": "provenance-sidecar.json",
+      "path": "/home/z/ecp-ca0v1/source/provenance-sidecar.json",
+      "provenance": "byte-identical to the contemporaneous pin (verified this session)",
+      "relationship_to_ca0v1": "section-3 authoring-independence record",
+      "source": "AIR v1.1 deterministic re-derivation"
+    },
+    {
+      "artifact": "CA0v1 intake report",
+      "artifact_status": "FOUND",
+      "content_hash": "fc8a35320c2a54e9cb9bafbd3fe971fc7b29c2748bd04fa3fdb4ccc16d2077a4",
+      "historical_status": "RECONSTRUCTED-BYTE-VERIFIED",
+      "identity": "intake-report.json",
+      "path": "/home/z/ecp-ca0v1/intake-report.json",
+      "provenance": "byte-identical to the contemporaneous pin; also preserved as a git-tracked evidence copy",
+      "relationship_to_ca0v1": "intake layer over the source (30 candidate hashes)",
+      "source": "AIR v1.1 re-run of the e849b13 intake engine; durable git copy in session custody (blob c19fb6d5, download/ecp-m3-air11/ca0v1-intake-report-verified.json)"
+    },
+    {
+      "artifact": "CA0v1 candidates (30)",
+      "artifact_status": "FOUND",
+      "content_hash": "per-candidate canonical content hashes recorded in the intake report and the population namespace manifest",
+      "historical_status": "RECONSTRUCTED-BYTE-VERIFIED",
+      "identity": "ECP-CAND-000101..000130",
+      "path": "/home/z/ecp-ca0v1/candidates/ECP-CAND-000101..000130.json",
+      "provenance": "30/30 triple-hash consistent this session (canonical hash == embedded == intake)",
+      "relationship_to_ca0v1": "the candidate pool itself",
+      "source": "AIR v1.1 deterministic re-derivation"
+    },
+    {
+      "artifact": "CA0v1 order reference (order text)",
+      "artifact_status": "NOT FOUND",
+      "content_hash": "2695594b70b238959b5c7ffa9180c8adb16b6a66588fdfa0eb53685d900459fd",
+      "historical_status": "ABSENT (PIN-RECORDED)",
+      "identity": "M3-CA0V1-ORDER-REFERENCE.md",
+      "path": "(originally /home/z/ecp-ca0v1/source/M3-CA0V1-ORDER-REFERENCE.md)",
+      "provenance": "pin only; the order text is not embedded in any durable artifact",
+      "relationship_to_ca0v1": "owner order under which the pool was authored",
+      "source": "hash pinned in the execution report and sidecar; text unrecoverable (AIR v1.1 hash-hunt negative)"
+    },
+    {
+      "artifact": "CA0v1 qualification artifacts (30)",
+      "artifact_status": "NOT FOUND",
+      "content_hash": "chain head f137598db60a610eaf273cfd97d98bd7ddefc886e93072d046fe3583d3e31a1b",
+      "historical_status": "ABSENT (PIN-RECORDED, RECONSTRUCTION-PROVEN)",
+      "identity": "ECP-QUAL-000101..000130 (hash-chained; chain head pinned)",
+      "path": "(originally /home/z/ecp-ca0v1/qualification/ECP-QUAL-000101..000130.json)",
+      "provenance": "pin recorded contemporaneously (report committed 2026-09-09T04:44:30Z); content proven byte-exactly reproducible on at least three occasions (CA1v1, ADJ-02, owner-operational-gate re-derivations)",
+      "relationship_to_ca0v1": "the qualification record layer for the 30-candidate pool",
+      "source": "originally produced by qualify-run ECP-QUALRUN-CA0V1-R1; absent from all durable custody (exhaustive hunt this session: filesystem + all git objects in 5 repositories)"
+    },
+    {
+      "artifact": "CA0v1 qualification run manifest",
+      "artifact_status": "NOT FOUND",
+      "content_hash": "file 0bb9eeee1c7f73b12bc0819ecb4d4ddb8c009ff0a1bf7bce9172227f32298cd6; self-referential run_hash 1678694c6f6c38075bbc064c7a7e641482419c37192ea21e49ec4cc6c588c4fe",
+      "historical_status": "ABSENT (PIN-RECORDED, RECONSTRUCTION-PROVEN)",
+      "identity": "qualification-run.json (run ECP-QUALRUN-CA0V1-R1)",
+      "path": "(originally /home/z/ecp-ca0v1/qualification-run.json)",
+      "provenance": "pin recorded contemporaneously; format durably defined by schemas/qualification-run.schema.json @ e849b13 (hash-verified); reproduction proven on the same three occasions",
+      "relationship_to_ca0v1": "the qualification run manifest for the 30-candidate pool",
+      "source": "originally produced by qualify-run ECP-QUALRUN-CA0V1-R1; absent from all durable custody (exhaustive hunt this session)"
+    }
+  ],
+  "baseline_commit": "8873cb4d545eeb3fe9e336d3d147eb1260b13101",
+  "created_at": "2026-09-11T22:12:34Z",
+  "custody_event_history": [
+    {
+      "at": "2026-09-09T04:38:30Z",
+      "event": "qualification executed (per contemporaneous report)",
+      "evidence": "ECP-M3-CA0V1-EXECUTION-REPORT.md (run ECP-QUALRUN-CA0V1-R1, ACCEPT=30)"
+    },
+    {
+      "at": "2026-09-09T04:39:30Z",
+      "event": "qualification machinery committed and pushed",
+      "evidence": "ECP commit e849b13 (still reachable; 5/5 pinned file hashes verified this session)"
+    },
+    {
+      "at": "2026-09-09T04:44:30Z",
+      "event": "executor report with all seven CA0v1 anchors committed to session custody",
+      "evidence": "session-repo commit d6c456c; report byte-identical to the live copy today (sha256 c0a58291...)"
+    },
+    {
+      "at": "between 2026-09-09T04:44:30Z and 2026-09-09T14:04:17Z",
+      "event": "custody loss D-01 #1 (environment reset; private area /home/z/ecp-ca0v1 wiped)",
+      "evidence": "CA1V1 report section A custody-event record"
+    },
+    {
+      "at": "2026-09-09T14:04:17Z",
+      "event": "byte-exact re-derivation #1 of the CA0v1 area INCLUDING the qualification layer; qualify-verify INTACT; all six anchors MATCH",
+      "evidence": "ECP-M3-CA1V1-EXECUTION-REPORT.md section A (chain head f137598d, run file 0bb9eeee, run_hash 1678694c, ACCEPT=30)"
+    },
+    {
+      "at": "2026-09-09T15:11:17Z",
+      "event": "qualification layer verified INTACT (ADJ-01 battery)",
+      "evidence": "ECP-M3-ADJ01-EXECUTION-REPORT.md"
+    },
+    {
+      "at": "2026-09-09T20:15:02Z / 20:25:01Z",
+      "event": "custody loss D-01 #2; byte-exact re-derivation #2; qualify-verify INTACT (twice)",
+      "evidence": "ECP-M3-ADJ02-EXECUTION-REPORT.md; ECP-OWNDEC-000003 finding F-03"
+    },
+    {
+      "at": "2026-09-09T21:59:00Z / 23:02:08Z / 23:23:59Z",
+      "event": "qualification layer verified INTACT (ADJ-03, ADJ-04, RG0 batteries)",
+      "evidence": "ECP-M3-ADJ03/ADJ04/RG0 execution reports"
+    },
+    {
+      "at": "2026-09-10 (owner-operational-gate sessions)",
+      "event": "custody loss D-01 #3+; byte-exact re-derivation #3 (qualification anchors 0bb9eeee / f137598d / 1678694c)",
+      "evidence": "ECP-OWNDEC-000005 / ECP-OWNDEC-000006 custody records"
+    },
+    {
+      "at": "2026-09-11T20:26:50Z",
+      "event": "partial re-derivation (source/sidecar/intake/candidates ONLY; qualification layer NOT re-derived - out of order scope)",
+      "evidence": "M3 AIR v1.1 evidence bundle (commit abde4a4); qualification layer confirmed absent"
+    },
+    {
+      "at": "2026-09-11T22:12:34Z",
+      "event": "qualification-layer absence confirmed from ALL durable custody (this investigation)",
+      "evidence": "m3_qpr_inventory.py: 21,049 files scanned; 4,176 git blobs hashed across 5 repositories; zero matches for the three qualification-layer pins"
+    }
+  ],
+  "ecp_object": "m3-ca0v1-qualification-evidence-matrix",
+  "evidence_matrix": [
+    {
+      "artifact": "/home/z/ecp-ca0v1/source/ECP-M3-CA0V1-CANDIDATE-CASE-SET.md",
+      "artifact_hash": "8144818cc37f0aa8b41d99f4a3cfacb5d5082aa1a97170fd1f61c4f86b0f425d",
+      "claim": "CA0v1 source artifact content equals sha256 8144818c...",
+      "confidence_class": "KNOWN",
+      "historical_status": "RECONSTRUCTED-BYTE-VERIFIED",
+      "provenance": "AIR v1.1 re-derivation, hash-verified this session",
+      "source": "live file + contemporaneous pin (report @ 04:44:30Z, byte-identical today)",
+      "verification_status": "VERIFIED-TODAY"
+    },
+    {
+      "artifact": "/home/z/ecp-ca0v1/source/provenance-sidecar.json",
+      "artifact_hash": "0f4e2318a1a086aae87fcd792b64920463c70f53887e7d9138f40c3f14579e80",
+      "claim": "CA0v1 provenance sidecar equals sha256 0f4e2318...",
+      "confidence_class": "KNOWN",
+      "historical_status": "RECONSTRUCTED-BYTE-VERIFIED",
+      "provenance": "AIR v1.1 re-derivation, hash-verified this session",
+      "source": "live file + contemporaneous pin",
+      "verification_status": "VERIFIED-TODAY"
+    },
+    {
+      "artifact": "/home/z/ecp-ca0v1/intake-report.json + git-tracked evidence copy",
+      "artifact_hash": "fc8a35320c2a54e9cb9bafbd3fe971fc7b29c2748bd04fa3fdb4ccc16d2077a4",
+      "claim": "CA0v1 intake report equals sha256 fc8a3532... and is a pure function of (source bytes, sidecar)",
+      "confidence_class": "KNOWN",
+      "historical_status": "RECONSTRUCTED-BYTE-VERIFIED",
+      "provenance": "AIR v1.1 engine re-run, hash-verified this session",
+      "source": "live file + git blob c19fb6d5 (session custody) + contemporaneous pin",
+      "verification_status": "VERIFIED-TODAY"
+    },
+    {
+      "artifact": "/home/z/ecp-ca0v1/candidates/*.json + intake report + namespace manifest index",
+      "artifact_hash": "30 canonical content hashes (namespace manifest candidate_index)",
+      "claim": "30 candidates ECP-CAND-000101..000130 are complete, ordered, unique, and hash-consistent",
+      "confidence_class": "KNOWN",
+      "historical_status": "RECONSTRUCTED-BYTE-VERIFIED",
+      "provenance": "30/30 triple-hash consistency verified this session",
+      "source": "live files + intake report + public provenance/m3-population-namespace-manifest.json",
+      "verification_status": "VERIFIED-TODAY"
+    },
+    {
+      "artifact": "ECP git history @ e849b13",
+      "artifact_hash": "5 pinned machinery hashes",
+      "claim": "qualification machinery at e849b13 equals the pinned hashes (authoring.py, qualification.py, three schemas)",
+      "confidence_class": "KNOWN",
+      "historical_status": "ORIGINAL (git custody)",
+      "provenance": "reachable git objects in the public repository",
+      "source": "git show e849b13:<path>, sha256-compared this session",
+      "verification_status": "VERIFIED-TODAY"
+    },
+    {
+      "artifact": "ECP-M3-CA0V1-EXECUTION-REPORT.md (committed 04:44:30Z, byte-identical today)",
+      "artifact_hash": "c0a582910d464c748f30774490f76a17d6ac49ea59b9467a0afbc46afd9a7cc7",
+      "claim": "qualify-run ECP-QUALRUN-CA0V1-R1 executed at 2026-09-09T04:38:30Z with operator ECP Foundation Executor",
+      "confidence_class": "INFERRED",
+      "historical_status": "ORIGINAL (session custody)",
+      "provenance": "contemporaneous executor-party attestation, machine-timestamped",
+      "source": "session custody git commit d6c456c",
+      "verification_status": "DOCUMENTED (same-party attestation; no independent evidence)"
+    },
+    {
+      "artifact": "execution report + CA1V1/ADJ01-04/RG0/OOG durable reports",
+      "artifact_hash": "n/a (claim about absent artifact content)",
+      "claim": "qualification decisions were ACCEPT=30 / REVISE=0 / REJECT=0 / INCONCLUSIVE=0 (30/30 ACCEPT)",
+      "confidence_class": "INFERRED",
+      "historical_status": "ABSENT (PIN-RECORDED, RECONSTRUCTION-PROVEN)",
+      "provenance": "executor-party attestation chain; artifacts absent; re-verification impossible today (re-qualification forbidden)",
+      "source": "six durable session reports, consistent across sessions",
+      "verification_status": "DOCUMENTED (same-party; reproducible content)"
+    },
+    {
+      "artifact": "the absent qualification artifact layer",
+      "artifact_hash": "chain head f137598db60a610eaf273cfd97d98bd7ddefc886e93072d046fe3583d3e31a1b",
+      "claim": "ground truth was mechanically verified for all 30 candidates (Q3 PASS x30, four deterministic semantics)",
+      "confidence_class": "INFERRED",
+      "historical_status": "ABSENT (PIN-RECORDED, RECONSTRUCTION-PROVEN)",
+      "provenance": "executor-party attestation; mechanical verification itself is deterministic and reproducible, but was not re-executed in this phase and its record layer is absent",
+      "source": "execution report section F + CA1V1 readiness battery record",
+      "verification_status": "DOCUMENTED (same-party; reproducible content)"
+    },
+    {
+      "artifact": "pins in durable documents",
+      "artifact_hash": "f137598db60a610eaf273cfd97d98bd7ddefc886e93072d046fe3583d3e31a1b",
+      "claim": "the qualification artifact chain head equals sha256 f137598d... and the run manifest equals 0bb9eeee... (run_hash 1678694c...)",
+      "confidence_class": "INFERRED",
+      "historical_status": "ABSENT (PIN-RECORDED, RECONSTRUCTION-PROVEN)",
+      "provenance": "contemporaneous pins; three independent byte-exact re-derivations reproduced these exact anchors",
+      "source": "execution report (04:44:30Z) + CA1V1 + ADJ01-04 + OOG records",
+      "verification_status": "PIN-VERIFIED, ARTIFACT-ABSENT"
+    },
+    {
+      "artifact": "re-derivation records in CA1V1/ADJ02/OOG reports + preserved recipe scripts",
+      "artifact_hash": "n/a (meta-claim)",
+      "claim": "the qualification layer is byte-exactly reconstructible from durable inputs",
+      "confidence_class": "INFERRED",
+      "historical_status": "RECONSTRUCTION-EVENTS-DOCUMENTED",
+      "provenance": "executor-party session records; recipe components independently verified durable this session (engine 5/5, candidates 30/30, scripts present)",
+      "source": "three documented re-derivations after custody losses, each qualify-verify INTACT with identical anchors",
+      "verification_status": "VERIFIED-TODAY (recipe durability) + DOCUMENTED (reconstruction events)"
+    },
+    {
+      "artifact": "exhaustive hunt result",
+      "artifact_hash": "n/a",
+      "claim": "the original (first-write) qualification artifact file objects still exist somewhere on this host or in any repository",
+      "confidence_class": "KNOWN",
+      "historical_status": "n/a",
+      "provenance": "negative search executed this session (zero matches for the three qualification-layer pins; all name hits are pytest synthetic fixtures)",
+      "source": "21,049 filesystem files + 4,176 git blobs across 5 repositories + unreachable-object trees",
+      "verification_status": "NEGATIVE-ESTABLISHED"
+    },
+    {
+      "artifact": "no provenance artifact declares any relationship in either direction",
+      "artifact_hash": "n/a",
+      "claim": "the Native population (ECP-POP-M3-NATIVE-V1) is a REPLACEMENT of, DERIVED from, or INDEPENDENT of CA0v1",
+      "confidence_class": "UNKNOWN",
+      "historical_status": "n/a",
+      "provenance": "chronology and ID-range overlap are documented facts but are NOT provenance of relationship (order section 9 fail-closed rule)",
+      "source": "native corpus manifest (declares boundary only vs the JARVIS 23-case artifact); CA0v1 records predate the native corpus and never mention it",
+      "verification_status": "UNRESOLVED"
+    },
+    {
+      "artifact": "ecp-protected-store (21 artifacts) + ECP registration records",
+      "artifact_hash": "store-manifest content_sha256 values",
+      "claim": "Native historical artifacts are unchanged",
+      "confidence_class": "KNOWN",
+      "historical_status": "ORIGINAL (protected custody)",
+      "provenance": "protected custody",
+      "source": "21/21 hash-verified this session; registration files unchanged in git",
+      "verification_status": "VERIFIED-TODAY"
+    },
+    {
+      "artifact": "JARVIS pilots/m3/m3_cases.md",
+      "artifact_hash": "cc867e9794d72b160396f3527f928cb919641812dc8ef1ae3bd7db21723bf001",
+      "claim": "JARVIS pilots/m3/m3_cases.md is unchanged (23 cases; M3-S30-LINF-01 defect preserved verbatim, unrepaired)",
+      "confidence_class": "KNOWN",
+      "historical_status": "ORIGINAL (external custody)",
+      "provenance": "READ-ONLY external reference",
+      "source": "git blob d48ee57b identical at pinned ref 14b3d5d and remote tip 0e396c86; sha256 recomputed matches the cc867e97 pin",
+      "verification_status": "VERIFIED-TODAY"
+    },
+    {
+      "artifact": "ECP git history 7420eac..8873cb4",
+      "artifact_hash": "diff = exactly the four population-governance files (+1404/-0)",
+      "claim": "UEC v1 (7420eac) and the namespace governance layer are preserved",
+      "confidence_class": "KNOWN",
+      "historical_status": "ORIGINAL (git custody)",
+      "provenance": "public repository history",
+      "source": "git diff verified this session",
+      "verification_status": "VERIFIED-TODAY"
+    }
+  ],
+  "five_gates": {
+    "gate_1_provenance": {
+      "basis": "qualification traceability PARTIALLY VERIFIED: artifact layer absent, same-party attestation only; not sufficient for an authoritative population decision",
+      "status": "PARTIAL"
+    },
+    "gate_2_scientific_fitness": {
+      "basis": "case-content layer present and byte-verified (KNOWN); qualification-outcome evidence (30/30 ACCEPT, GT mechanically verified x30) documented but artifact-absent (INFERRED); re-qualification forbidden; population size not used as a criterion",
+      "status": "PARTIAL"
+    },
+    "gate_3_integrity": {
+      "basis": "authoring/intake/candidate integrity fully machine-verified today (30/30 + pins); qualification-layer integrity not verifiable today (artifacts absent)",
+      "status": "PARTIAL"
+    },
+    "gate_4_namespace_uniqueness": {
+      "basis": "namespace-qualified identity machine-enforced; collision isolated and recorded; ambiguous-ID lookup rejected; 34/34 tests",
+      "status": "PASS"
+    },
+    "gate_5_historical_integrity": {
+      "basis": "Native / CA0v1 / JARVIS / LINF-01 / UEC v1 all verified unchanged this session",
+      "status": "PASS"
+    }
+  },
+  "historical_immutability": {
+    "ca0v1": "UNCHANGED (all recoverable content byte-identical to contemporaneous pins; no historical artifact modified)",
+    "jarvis": "UNCHANGED (READ-ONLY; m3_cases.md blob identical at both refs)",
+    "linf_01": "PRESERVED-UNREPAIRED (M3-S30-LINF-01 semantic defect confirmed present, untouched)",
+    "native": "UNCHANGED (protected-store 21/21; registration records unchanged)",
+    "uec_v1": "UNCHANGED (7420eac surfaces byte-identical at 8873cb4)"
+  },
+  "namespace_verification": {
+    "bare_lookup_policy": "lookup(candidate_id) alone is ALWAYS rejected while more than one population is registered (AmbiguousCandidateIdError)",
+    "collision_status": "COLLISION ISOLATED (exactly three divergent IDs: ECP-CAND-000101..000103; each chain individually hash-consistent)",
+    "cross_population_reuse": "VALID DISTINCT IDENTITIES (same candidate_id in different population namespaces with different content_hash)",
+    "namespace_model": "population_id + case_pack_id + case_pack_version + candidate_id verified against content_hash",
+    "tests": "tests/test_populations.py 34/34 PASS (re-run this session)"
+  },
+  "native_ca0v1_relationship": {
+    "basis": [
+      "no artifact on either side declares replacement, derivation, or independence",
+      "candidate-ID overlap (ECP-CAND-000101..000103) and chronology (CA0v1 2026-09-09, native 2026-09-10) are recorded facts but are inadmissible as relationship evidence under the order",
+      "native authoring-order pin is NULL (all-zero sha256) - secondary provenance gap recorded in AIR v1.1",
+      "native qualification IDs restart at ECP-QUAL-000100 while CA0v1 qualification IDs occupied ECP-QUAL-000101..000130 - a second ID-range overlap, also undeclared"
+    ],
+    "decision": "UNKNOWN",
+    "definition_reference": "order section 9 (fail-closed)"
+  },
+  "order_mode": "provenance recovery / historical evidence verification / scientific governance",
+  "overall_recovery_classification": "RECONSTRUCTIBLE BUT NOT HISTORICALLY RESTORED",
+  "overall_recovery_classification_basis": "The qualification result can be reproduced deterministically and its content identity to the contemporaneous pins is multiply proven, but the historical record objects (original qualification artifacts and run manifest) do not exist in any durable custody and cannot be restored as historical evidence. The authoring/intake/candidate layer is precisely identified as byte-verified recovered content (PARTIALLY RESTORED sub-layer).",
+  "phase": "CA0v1 QUALIFICATION PROVENANCE RESTORATION & AUTHORITATIVE POPULATION RE-ADJUDICATION v1",
+  "pins": {
+    "ca0v1_execution_report_doc": "c0a582910d464c748f30774490f76a17d6ac49ea59b9467a0afbc46afd9a7cc7",
+    "ca0v1_intake_report": "fc8a35320c2a54e9cb9bafbd3fe971fc7b29c2748bd04fa3fdb4ccc16d2077a4",
+    "ca0v1_order_reference": "2695594b70b238959b5c7ffa9180c8adb16b6a66588fdfa0eb53685d900459fd",
+    "ca0v1_sidecar": "0f4e2318a1a086aae87fcd792b64920463c70f53887e7d9138f40c3f14579e80",
+    "ca0v1_source": "8144818cc37f0aa8b41d99f4a3cfacb5d5082aa1a97170fd1f61c4f86b0f425d",
+    "jarvis_m3_cases": "cc867e9794d72b160396f3527f928cb919641812dc8ef1ae3bd7db21723bf001",
+    "machinery_authoring_e849b13": "8e6e408053ff11f84fb9a87a198e051adf2ecce783e89666e3342098984ff84d",
+    "machinery_qualification_e849b13": "0058f3ef1f22a9205e604cb48133b70e260832fe6fdb692b5825451406bc9910",
+    "qualification_chain_head": "f137598db60a610eaf273cfd97d98bd7ddefc886e93072d046fe3583d3e31a1b",
+    "qualification_run_file": "0bb9eeee1c7f73b12bc0819ecb4d4ddb8c009ff0a1bf7bce9172227f32298cd6",
+    "qualification_run_hash": "1678694c6f6c38075bbc064c7a7e641482419c37192ea21e49ec4cc6c588c4fe",
+    "schema_case_candidate_e849b13": "80a5260db93eb9d241f90c629b48afc50f82741fb5d28acc10a934638e697054",
+    "schema_case_qualification_e849b13": "4d29fdb7573d393a4d49ec44e61fcad2ccdbe4b2813521c698083c612211675c",
+    "schema_qualification_run_e849b13": "70dca80d2cd7a35e1670f611886afec44aaa1b7f8a3b853052d4692f61cd5e33"
+  },
+  "population_decision": "BLOCKED — NO AUTHORITATIVE POPULATION",
+  "population_decision_rule": "all five gates must be PASS; any FAIL / UNKNOWN / PARTIAL / UNRESOLVED gate blocks the decision",
+  "qualification_traceability": {
+    "basis": [
+      "machinery, inputs, run anchors, and the subsequent verification chain are proven from durable custody",
+      "the qualification artifact layer is absent and not verifiable today",
+      "execution attestation is contemporaneous and machine-anchored but same-party only",
+      "content identity of the reproducible result to the pinned historical outputs is proven (three independent byte-exact re-derivations)"
+    ],
+    "decision": "PARTIALLY VERIFIED",
+    "definition_reference": "order section 8"
+  },
+  "record_version": 1,
+  "recovery_layers": {
+    "artifact_recovery": {
+      "classification": "PARTIAL",
+      "summary": "Authoring/intake/candidate layer FOUND as byte-verified re-derivations (content identical to contemporaneous pins; original file objects were wiped by custody losses D-01). Qualification layer NOT FOUND anywhere in durable custody. Order-reference text NOT FOUND (hash pin only)."
+    },
+    "deterministic_reconstruction": {
+      "classification": "RECONSTRUCTIBLE",
+      "summary": "The qualification result is deterministically reproducible from durable inputs (engine @ e849b13 byte-verified; candidates byte-verified; prior-pool R2 re-derivation scripts preserved; pinned run timestamp 2026-09-09T04:38:30Z and operator recorded). Reconstruction proven byte-exact on at least three independent occasions after custody losses (CA1v1 six-anchor MATCH; ADJ-02; owner-operational-gate records), each with qualify-verify INTACT and identical chain head / run file / run_hash. NOT re-executed in this phase (re-qualification is forbidden by the order). RECONSTRUCTIBLE does NOT equal HISTORICALLY RESTORED."
+    },
+    "historical_execution_provenance": {
+      "classification": "PARTIALLY VERIFIED",
+      "summary": "Qualification script exists (YES, durable, hash-pinned). Qualification report exists (YES, durable, git-anchored contemporaneously). Historical qualification execution provenance-supported (PARTIALLY): contemporaneous machine-timestamped session records document the run at 2026-09-09T04:38:30Z and multiple later sessions verified byte-identical re-derivations INTACT; all attestations are executor-party; no independent evidence; no surviving execution artifacts."
+    },
+    "provenance_recovery": {
+      "classification": "PARTIALLY VERIFIED",
+      "summary": "Chain source -> CA0v1 -> qualification process: machinery layer VERIFIED (5/5 pinned file hashes at e849b13), input layer VERIFIED (30/30 candidates + source/sidecar/intake pins), run anchors durably pinned (report committed 6 minutes after the run, byte-identical today), subsequent verification chain documented across six sessions; the qualification artifact layer itself is ABSENT and the attestor is the executor party (no independent attestation exists)."
+    }
+  },
+  "repository_references": {
+    "ecp": {
+      "baseline": "8873cb4d545eeb3fe9e336d3d147eb1260b13101",
+      "branch": "main",
+      "qualification_machinery_commit": "e849b139d6e06ab27efda5d8a929e1b982971b3b",
+      "worktree": "CLEAN"
+    },
+    "ecp_ledger": {
+      "head": "b5aef6bab510c36f0debdb7575a37ac8e775bede",
+      "state": "GENESIS"
+    },
+    "ecp_protected_store": {
+      "artifacts_hash_verified": "21/21",
+      "head": "8a5b9227b50aabab09d2ea0b0fc2065427be54f8"
+    },
+    "jarvis": {
+      "access": "READ-ONLY",
+      "m3_cases_blob_identical_at_both_refs": true,
+      "m3_cases_git_blob": "d48ee57b5a5fa072d54a911a1bdaf0c5200d5aa4",
+      "pinned_reference": "14b3d5d26dbf8e8f215d8bf371bf87e4647a4de6",
+      "remote_tip_observed": "0e396c86d0df811bd77e526686921d5354d27bfb"
+    }
+  },
+  "scientific_execution_status": {
+    "credential_access": 0,
+    "m3_executions": 0,
+    "provider_calls": 0,
+    "qualification_reruns": 0
+  }
+}
