@@ -48,7 +48,7 @@ def dual_review_area(repo_root, tmp_path):
     source_text = build_source_text([CASE_A])
     source_path = tmp_path / "source" / "synthetic-test-source.md"
     source_path.parent.mkdir(parents=True)
-    source_path.write_text(source_text, encoding="utf-8")
+    source_path.write_bytes(source_text.encode("utf-8"))
     sidecar_path = tmp_path / "sidecar.json"
     sidecar_path.write_text(
         json.dumps(build_sidecar(sha256_hex(source_text.encode("utf-8")))),
@@ -66,9 +66,7 @@ def dual_review_area(repo_root, tmp_path):
     (area / "candidates" / "ECP-CAND-000001.json").write_text(
         json.dumps(dual, indent=2, sort_keys=True), encoding="utf-8"
     )
-    (area / "source" / "synthetic-test-source.md").write_text(
-        source_text, encoding="utf-8"
-    )
+    (area / "source" / "synthetic-test-source.md").write_bytes(source_text.encode("utf-8"))
     return area
 
 
@@ -305,7 +303,7 @@ def review_area_030(repo_root, tmp_path):
     source_text = build_source_text([CASE_A])
     source_path = tmp_path / "source" / "synthetic-test-source.md"
     source_path.parent.mkdir(parents=True)
-    source_path.write_text(source_text, encoding="utf-8")
+    source_path.write_bytes(source_text.encode("utf-8"))
     sidecar_path = tmp_path / "sidecar.json"
     sidecar_path.write_text(
         json.dumps(build_sidecar(sha256_hex(source_text.encode("utf-8")))),
@@ -318,9 +316,7 @@ def review_area_030(repo_root, tmp_path):
         "--out", str(area),
     )
     assert extract.returncode == 0, extract.stderr
-    (area / "source" / "synthetic-test-source.md").write_text(
-        source_text, encoding="utf-8"
-    )
+    (area / "source" / "synthetic-test-source.md").write_bytes(source_text.encode("utf-8"))
     # produce the run under the legacy profile via the module API
     import sys
 

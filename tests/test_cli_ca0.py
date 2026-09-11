@@ -27,7 +27,7 @@ def review_area(tmp_path):
     source_path = tmp_path / "source" / "synthetic-test-source.md"
     source_path.parent.mkdir(parents=True)
     source_text = build_source_text([CASE_A, CASE_B])
-    source_path.write_text(source_text, encoding="utf-8")
+    source_path.write_bytes(source_text.encode("utf-8"))
     sidecar_path = tmp_path / "sidecar.json"
     sidecar_path.write_text(
         json.dumps(build_sidecar(sha256_hex(source_text.encode("utf-8")))),
@@ -81,9 +81,7 @@ def test_cli_review_run_and_verify_roundtrip(repo_root, review_area):
     )
     assert extract.returncode == 0, extract.stderr
     # copy the source into the review area for chain verification
-    (area / "source" / "synthetic-test-source.md").write_text(
-        source_path.read_text(encoding="utf-8"), encoding="utf-8"
-    )
+    (area / "source" / "synthetic-test-source.md").write_bytes(source_path.read_bytes())
     run = _run(
         repo_root, "review-run",
         "--review-root", str(area),
@@ -109,9 +107,7 @@ def test_cli_review_verify_detects_tampering(repo_root, review_area):
     area = tmp_path / "area"
     _run(repo_root, "review-extract", "--source", str(source_path),
          "--provenance", str(sidecar_path), "--out", str(area))
-    (area / "source" / "synthetic-test-source.md").write_text(
-        source_path.read_text(encoding="utf-8"), encoding="utf-8"
-    )
+    (area / "source" / "synthetic-test-source.md").write_bytes(source_path.read_bytes())
     _run(repo_root, "review-run", "--review-root", str(area),
          "--run-id", "ECP-REVRUN-CLI", "--reviewer", "ECP Review Test Executor",
          "--at", "2026-01-03T00:00:00Z")
@@ -130,9 +126,7 @@ def test_cli_review_adjudicate_and_rerun(repo_root, review_area):
     area = tmp_path / "area"
     _run(repo_root, "review-extract", "--source", str(source_path),
          "--provenance", str(sidecar_path), "--out", str(area))
-    (area / "source" / "synthetic-test-source.md").write_text(
-        source_path.read_text(encoding="utf-8"), encoding="utf-8"
-    )
+    (area / "source" / "synthetic-test-source.md").write_bytes(source_path.read_bytes())
     # attach full registration authoring to both candidates
     from ca0_fixtures import FULL_AUTHORING
 

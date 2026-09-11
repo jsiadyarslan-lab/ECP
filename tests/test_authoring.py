@@ -96,7 +96,7 @@ def test_parse_tail_blocks_retained():
 def test_extract_rejects_sidecar_hash_mismatch(tmp_path):
     source = tmp_path / "source.md"
     text = build_source_text_v2([CASE_BLOCK_T1])
-    source.write_text(text, encoding="utf-8")
+    source.write_bytes(text.encode("utf-8"))
     sidecar = build_sidecar_v2("0" * 64)
     with pytest.raises(ExtractionError, match="does not match"):
         extract_candidates_v2(source, sidecar)
@@ -105,7 +105,7 @@ def test_extract_rejects_sidecar_hash_mismatch(tmp_path):
 def test_extract_rejects_missing_independence_block(tmp_path):
     source = tmp_path / "source.md"
     text = build_source_text_v2([CASE_BLOCK_T1])
-    source.write_text(text, encoding="utf-8")
+    source.write_bytes(text.encode("utf-8"))
     sidecar = build_sidecar_v2(sha256_hex(text.encode("utf-8")))
     del sidecar["authoring_independence"]
     with pytest.raises(ExtractionError, match="authoring_independence"):
@@ -115,7 +115,7 @@ def test_extract_rejects_missing_independence_block(tmp_path):
 def test_extract_produces_schema_valid_candidates(tmp_path):
     source = tmp_path / "source.md"
     text = build_source_text_v2([CASE_BLOCK_T1, CASE_BLOCK_P1])
-    source.write_text(text, encoding="utf-8")
+    source.write_bytes(text.encode("utf-8"))
     sidecar = build_sidecar_v2(sha256_hex(text.encode("utf-8")))
     candidates, report = extract_candidates_v2(source, sidecar)
     assert len(candidates) == 2
@@ -139,7 +139,7 @@ def test_extract_produces_schema_valid_candidates(tmp_path):
 def test_extract_is_deterministic(tmp_path):
     source = tmp_path / "source.md"
     text = build_source_text_v2([CASE_BLOCK_T1, CASE_BLOCK_P1])
-    source.write_text(text, encoding="utf-8")
+    source.write_bytes(text.encode("utf-8"))
     sidecar = build_sidecar_v2(sha256_hex(text.encode("utf-8")))
     first, _ = extract_candidates_v2(source, sidecar)
     second, _ = extract_candidates_v2(source, sidecar)
@@ -152,7 +152,7 @@ def test_extract_flags_renamed_duplicate_as_distinct_intake(tmp_path):
     structural duplicate — the intake layer never adjudicates novelty."""
     source = tmp_path / "source.md"
     text = build_source_text_v2([CASE_BLOCK_T1, CASE_BLOCK_T1_RENAMED])
-    source.write_text(text, encoding="utf-8")
+    source.write_bytes(text.encode("utf-8"))
     sidecar = build_sidecar_v2(sha256_hex(text.encode("utf-8")))
     candidates, report = extract_candidates_v2(source, sidecar)
     assert len(candidates) == 2
@@ -163,7 +163,7 @@ def test_extract_loud_failure_on_malformed_formal_json(tmp_path):
     broken = CASE_BLOCK_T1.replace('"args": ["vex", "lum"]', '"args": ["vex", "lum"', 1)
     source = tmp_path / "source.md"
     text = build_source_text_v2([broken])
-    source.write_text(text, encoding="utf-8")
+    source.write_bytes(text.encode("utf-8"))
     sidecar = build_sidecar_v2(sha256_hex(text.encode("utf-8")))
     with pytest.raises(ExtractionError, match="FORMAL"):
         extract_candidates_v2(source, sidecar)

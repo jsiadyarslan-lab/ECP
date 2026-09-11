@@ -40,7 +40,7 @@ def qualify_area(tmp_path):
     source_path = tmp_path / "source" / "synthetic-v2-source.md"
     source_path.parent.mkdir(parents=True)
     source_text = build_source_text_v2([CASE_BLOCK_T1, CASE_BLOCK_T1_RENAMED, CASE_BLOCK_X1])
-    source_path.write_text(source_text, encoding="utf-8")
+    source_path.write_bytes(source_text.encode("utf-8"))
     sidecar_path = tmp_path / "sidecar.json"
     sidecar_path.write_text(
         json.dumps(build_sidecar_v2(sha256_hex(source_text.encode("utf-8")))),

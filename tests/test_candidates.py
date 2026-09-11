@@ -85,7 +85,7 @@ def test_coverage_check_fails_on_unaccounted_content():
 def test_extraction_fails_loudly_on_coverage_failure(tmp_path):
     source = tmp_path / "bad-source.md"
     text = build_source_text([CASE_A]).replace("```text\n", "```text\nSTRAY LINE\n", 1)
-    source.write_text(text, encoding="utf-8")
+    source.write_bytes(text.encode("utf-8"))
     from ca0_fixtures import build_sidecar
 
     sidecar = build_sidecar(sha256_hex(source.read_bytes()))
@@ -95,7 +95,7 @@ def test_extraction_fails_loudly_on_coverage_failure(tmp_path):
 
 def test_extraction_fails_loudly_on_sidecar_hash_mismatch(tmp_path):
     source = tmp_path / "synthetic-test-source.md"
-    source.write_text(build_source_text([CASE_A]), encoding="utf-8")
+    source.write_bytes(build_source_text([CASE_A]).encode("utf-8"))
     from ca0_fixtures import build_sidecar
 
     sidecar = build_sidecar("0" * 64)
@@ -105,7 +105,7 @@ def test_extraction_fails_loudly_on_sidecar_hash_mismatch(tmp_path):
 
 def test_extraction_fails_on_missing_sidecar_keys(tmp_path):
     source = tmp_path / "synthetic-test-source.md"
-    source.write_text(build_source_text([CASE_A]), encoding="utf-8")
+    source.write_bytes(build_source_text([CASE_A]).encode("utf-8"))
     with pytest.raises(ExtractionError, match="missing required key"):
         extract_candidates(source, {"authored_by": {"model": "x", "provider": "y"}})
 
@@ -126,7 +126,7 @@ def test_candidate_flags_applied_per_case():
 
     with tempfile.TemporaryDirectory() as tmp:
         source_path = Path(tmp) / "synthetic-test-source.md"
-        source_path.write_text(source_text, encoding="utf-8")
+        source_path.write_bytes(source_text.encode("utf-8"))
         sidecar = build_sidecar(sha256_hex(source_text.encode("utf-8")))
         sidecar["candidate_flags"] = {"S-002": ["nondeterminate-answer-design"]}
         candidates, _ = extract_candidates(source_path, sidecar)
