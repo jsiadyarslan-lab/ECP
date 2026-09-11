@@ -168,10 +168,11 @@ def extract_fixture(cases: "list[dict]", sidecar_overrides: "dict | None" = None
     from ecp.hashing import sha256_hex
 
     source_text = build_source_text(cases)
+    source_bytes = source_text.encode("utf-8")
     with tempfile.TemporaryDirectory() as tmp:
         source_path = Path(tmp) / "synthetic-test-source.md"
-        source_path.write_text(source_text, encoding="utf-8")
-        sidecar = build_sidecar(sha256_hex(source_text.encode("utf-8")))
+        source_path.write_bytes(source_bytes)
+        sidecar = build_sidecar(sha256_hex(source_bytes))
         if sidecar_overrides:
             sidecar.update(sidecar_overrides)
         candidates, report = extract_candidates(source_path, sidecar)
