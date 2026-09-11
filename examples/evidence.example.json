@@ -12,11 +12,11 @@
     },
     "raw_output": {
       "path": "examples/artifacts/raw-output.demo.txt",
-      "sha256": "f0b5c2c2211c8d67ed15e75e656c7862d086e9245420892a7de62cd9ec582a06"
+      "sha256": "7fb2aaeaf3eef66b52db104118c30f62899f5f0df520350a94a8fcb843c0dfdf"
     },
     "execution_trace": {
       "path": "examples/artifacts/execution-trace.demo.txt",
-      "sha256": "65552b009378eae2bb8f90ff429edd047b8be302339bb741a18e768962a54ab7"
+      "sha256": "8e9557fe545147be650649d20ac9acf06bdaa3cf6e29626da4cbad06735c1ae2"
     },
     "tool_log": {
       "not_captured": true,
@@ -29,11 +29,11 @@
     },
     "system_identity": {
       "path": "examples/system.complete-system.example.json",
-      "sha256": "f243a23abb042aecf67dfb573683034b217e02a82b0b9528f3df235b8220c34d"
+      "sha256": "b94f3d6083739264a316fc83ffabbabef7edc07a80747febdfac66d2d2aa5753"
     }
   },
   "integrity": {
-    "manifest_hash": "28e7cc5779ea9d289329f2e463e7619757e9eb7d46adfe60c0356db64eeae60b",
+    "manifest_hash": "9ab87cc62397d60098591faa68ea8b7cc7c905ea38e03f877db465958ca58b8b",
     "hash_algorithm": "sha256",
     "canonicalization": "ECP-CANONICAL-JSON-1.0",
     "manifest_path": "examples/manifest.example.json"
