@@ -22,6 +22,11 @@ from urllib.parse import urlparse
 
 from .canonical import canonical_bytes
 from .credentials import CredentialError, CredentialGateway, CredentialIdentity, SecretLease, SecretRedactionFilter, safe_exception_message
+from .credential_binding import (
+    AuthorizationGrant,
+    CredentialBinding,
+    ScopedReleaseRequest,
+)
 from .hashing import hash_document
 
 DEFAULT_PORT = 8765
@@ -69,6 +74,8 @@ class AuthorizedEvaluation:
     adapter: str
     credential: CredentialIdentity
     tests: tuple[AuthorizedTest, ...]
+    credential_binding: CredentialBinding | None = None
+    authorization_grant: AuthorizationGrant | None = None
 
     def safe_metadata(self) -> dict[str, Any]:
         return {
@@ -225,6 +232,8 @@ class LocalGateway:
         test = next((item for item in evaluation.tests if item.test_id == request["test_id"]), None)
         if test is None:
             raise ConsoleError("unknown test")
+        if evaluation.credential_binding is None or evaluation.authorization_grant is None:
+            raise AuthorizationError("credential binding and authorization grant are required")
         safe_request = {key: str(request[key]) for key in ("evaluation_id", "test_id", "system_id", "credential_ref", "request_id")}
         record = self.store.create(safe_request["request_id"], safe_request)
         if record["status"] != "REQUESTED":
@@ -233,7 +242,21 @@ class LocalGateway:
         self.store.update(execution_id, status="AUTHORIZED", execution_status="RUNNING")
         lease: SecretLease | None = None
         try:
-            lease = self.credential_gateway.retrieve(evaluation.credential.credential_id, test.scope)
+            release_request = ScopedReleaseRequest(
+                request_id=safe_request["request_id"],
+                binding_id=evaluation.credential_binding.binding_id,
+                target_id=evaluation.credential_binding.target_id,
+                credential_ref=safe_request["credential_ref"],
+                purpose=test.scope,
+                scope=frozenset({test.scope}),
+                lease_seconds=60,
+                requested_at=_utc_now(),
+            )
+            lease = self.credential_gateway.release(
+                release_request,
+                evaluation.credential_binding,
+                evaluation.authorization_grant,
+            )
             adapter = self.adapters.get(evaluation.adapter)
             if adapter is None:
                 adapter = UnconfiguredAdapter()

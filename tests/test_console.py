@@ -16,6 +16,7 @@ from ecp.console import (
     ProviderAdapter,
 )
 from ecp.credentials import CredentialGateway, CredentialIdentity
+from ecp.credential_binding import AuthorizationGrant, CredentialBinding
 
 ORIGIN = "http://127.0.0.1:8766"
 
@@ -47,6 +48,16 @@ def build_gateway(tmp_path: Path, adapter=None, store=None):
         "synthetic-adapter",
         identity,
         (AuthorizedTest("test-1", "Synthetic registered test", "execute"),),
+        CredentialBinding(
+            "ECP-BINDING-CONSOLE-TEST", "ECP-REQUIREMENT-CONSOLE-TEST",
+            "ECP-SYSTEM-CONSOLE-TEST", "synthetic-provider",
+            "test-interface", "execute", "cred-1", frozenset({"execute"}),
+        ),
+        AuthorizationGrant(
+            "ECP-AUTH-CONSOLE-TEST", "ECP-BINDING-CONSOLE-TEST",
+            "ECP-SYSTEM-CONSOLE-TEST", "execute", frozenset({"execute"}),
+            "2099-01-01T00:00:00Z",
+        ),
     )
     adapter = adapter or SafeAdapter(secret)
     with socket.socket() as probe:

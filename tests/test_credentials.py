@@ -12,6 +12,31 @@ from ecp.credentials import (
     safe_exception_message,
     SecretRedactionFilter,
 )
+from ecp.credential_binding import AuthorizationGrant, CredentialBinding, ScopedReleaseRequest
+
+
+def _release(gateway, credential_id, scope, *, target_id="ECP-TARGET-TEST", purpose="t1", request_id="req"):
+    binding = CredentialBinding(
+        binding_id=f"ECP-BINDING-{request_id}",
+        requirement_id="ECP-REQUIREMENT-TEST",
+        target_id=target_id,
+        provider_id=gateway.metadata(credential_id)["provider"],
+        interface="test-interface",
+        purpose=purpose,
+        credential_ref=credential_id,
+        scope=frozenset({scope}),
+    )
+    request = ScopedReleaseRequest(
+        request_id=request_id, binding_id=binding.binding_id, target_id=target_id,
+        credential_ref=credential_id, purpose=purpose, scope=frozenset({scope}),
+        lease_seconds=60, requested_at="2026-09-11T00:00:00Z",
+    )
+    grant = AuthorizationGrant(
+        authorization_ref=f"ECP-AUTH-{request_id}", binding_id=binding.binding_id,
+        target_id=target_id, purpose=purpose, scope=frozenset({scope}),
+        expires_at="2099-01-01T00:00:00Z",
+    )
+    return gateway.release(request, binding, grant)
 
 
 def test_credential_identity_metadata_is_safe():
@@ -39,10 +64,10 @@ def test_gateway_retrieval_lifecycle():
     )
     gateway, store = CredentialGateway.for_testing({"c1": identity})
     with pytest.raises(CredentialNotFound, match="not provisioned"):
-        gateway.retrieve("c1", "execute")
+        _release(gateway, "c1", "execute", request_id="c1-missing")
 
     gateway.provision_for_testing("c1", "secret-value-123")
-    lease = gateway.retrieve("c1", "execute")
+    lease = _release(gateway, "c1", "execute", request_id="c1-missing")
     assert lease.value == "secret-value-123"
     assert lease.metadata["credential_id"] == "c1"
     assert "secret-value-123" not in repr(lease)
@@ -50,7 +75,7 @@ def test_gateway_retrieval_lifecycle():
     assert "secret-value-123" not in str(lease)
 
     with pytest.raises(CredentialScopeError):
-        gateway.retrieve("c1", "admin")
+        _release(gateway, "c1", "admin", request_id="c1-admin")
 
 
 def test_secret_store_is_not_a_public_gateway_surface():
@@ -79,7 +104,7 @@ def test_expiry_enforcement():
     gateway, store = CredentialGateway.for_testing({"expired-id": identity})
     store._write("expired-id", "1", "secret")
     with pytest.raises(CredentialExpired):
-        gateway.retrieve("expired-id", "read")
+        _release(gateway, "expired-id", "read", request_id="expired")
 
 
 def test_revocation():
@@ -93,7 +118,7 @@ def test_revocation():
     gateway.provision_for_testing("revokable", "secret")
     gateway.revoke("revokable")
     with pytest.raises(CredentialRevoked):
-        gateway.retrieve("revokable", "read")
+        _release(gateway, "revokable", "read", request_id="revoke")
     assert store._read("revokable", "1") is None
 
 
@@ -115,7 +140,7 @@ def test_rotation():
         version="2",
     )
     gateway = gateway.rotate_for_testing(i2, "v2-secret")
-    lease = gateway.retrieve("r1", "read")
+    lease = _release(gateway, "r1", "read", request_id="rotate")
     assert lease.value == "v2-secret"
     assert lease.metadata["version"] == "2"
 
@@ -145,7 +170,7 @@ def test_environment_source(monkeypatch):
         scope=frozenset(["read"]),
     )
     gateway = CredentialGateway.from_environment(identity, "ECP_TEST_KEY")
-    lease = gateway.retrieve("env-id", "read")
+    lease = _release(gateway, "env-id", "read", request_id="env")
     assert lease.value == "env-secret"
     with pytest.raises(CredentialStateError):
         gateway.provision_for_testing("env-id", "fail")
@@ -160,7 +185,7 @@ def test_serialization_safety():
     )
     gateway, store = CredentialGateway.for_testing({"s1": identity})
     gateway.provision_for_testing("s1", "secret")
-    lease = gateway.retrieve("s1", "read")
+    lease = _release(gateway, "s1", "read", request_id="serialize")
     import json
     try:
         json.dumps(lease.__dict__)
@@ -187,7 +212,7 @@ def test_provider_neutral_adapter_contract():
     )
     gateway, _ = CredentialGateway.for_testing({"adapter-id": identity})
     gateway.provision_for_testing("adapter-id", "synthetic-adapter-secret")
-    lease = gateway.retrieve("adapter-id", "invoke")
+    lease = _release(gateway, "adapter-id", "invoke", request_id="adapter")
     adapter = SyntheticAdapter()
     assert isinstance(adapter, ExternalSystemAdapter)
     assert adapter.execute(lease, {"kind": "probe"}) == {

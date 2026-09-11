@@ -16,6 +16,14 @@ import re
 from threading import RLock
 from typing import Mapping, Protocol, Sequence, runtime_checkable
 
+from .credential_binding import (
+    AuthorizationGrant,
+    AuthorizationRequired,
+    BindingScopeError,
+    CredentialBinding,
+    ScopedReleaseRequest,
+)
+
 
 class CredentialError(Exception):
     """Base class for credential-boundary failures without secret payloads."""
@@ -231,13 +239,60 @@ class CredentialGateway:
     def metadata(self, credential_id: str) -> dict[str, object]:
         return self._identity(credential_id).metadata()
 
-    def retrieve(self, credential_id: str, requested_scope: str, *, now: datetime | None = None) -> SecretLease:
-        identity = self._identity(credential_id)
-        self._check_policy(identity, requested_scope, now or datetime.now(timezone.utc))
+    def retrieve(self, *args: object, **kwargs: object) -> SecretLease:
+        """Reject the former unscoped material-release escape hatch.
+
+        Material release must use :meth:`release` with an explicit binding,
+        scoped request, and authorization grant. Keeping this method only as a
+        loud rejection makes legacy callers fail closed instead of silently
+        bypassing the Phase C boundary.
+        """
+        del args, kwargs
+        raise AuthorizationRequired(
+            "unscoped credential retrieval is disabled; use release(request, binding, authorization)"
+        )
+
+    def release(
+        self,
+        request: ScopedReleaseRequest,
+        binding: CredentialBinding,
+        authorization: AuthorizationGrant,
+        *,
+        now: datetime | None = None,
+    ) -> SecretLease:
+        """Release material only after exact binding and authorization checks.
+
+        This is a bounded local seam, not a production lease service. It does
+        not implement rotation, distributed revocation, or runtime delivery.
+        """
+        if request.binding_id != binding.binding_id:
+            raise BindingScopeError("release request and binding mismatch")
+        if request.target_id != binding.target_id:
+            raise BindingScopeError("release target and binding mismatch")
+        if request.credential_ref != binding.credential_ref:
+            raise BindingScopeError("release credential and binding mismatch")
+        if request.purpose != binding.purpose or not request.scope.issubset(binding.scope):
+            raise BindingScopeError("release purpose or scope exceeds binding")
+        if authorization.status != "GRANTED":
+            raise AuthorizationRequired("authorization grant is not active")
+        if authorization.binding_id != binding.binding_id or authorization.target_id != binding.target_id:
+            raise AuthorizationRequired("authorization grant does not match binding")
+        if authorization.purpose != request.purpose or not request.scope.issubset(authorization.scope):
+            raise AuthorizationRequired("authorization scope does not cover release")
+        current = now or datetime.now(timezone.utc)
+        if current.astimezone(timezone.utc) >= _parse_time(authorization.expires_at):
+            raise AuthorizationRequired("authorization grant has expired")
+        identity = self._identity(request.credential_ref)
+        if binding.provider_id != identity.provider:
+            raise BindingScopeError("binding provider and credential provider mismatch")
+        self._check_policy(identity, request.scope, current)
         value = self._store._read(identity.credential_id, identity.version)
         if not value:
             raise CredentialNotFound(f"credential {identity.credential_id} is not provisioned")
-        return SecretLease(value, identity.metadata())
+        metadata = {**identity.metadata(), "request_id": request.request_id,
+                    "binding_id": binding.binding_id, "authorization_ref": authorization.authorization_ref,
+                    "lease_seconds": request.lease_seconds, "one_use": request.one_use}
+        return SecretLease(value, metadata)
 
     def provision_for_testing(self, credential_id: str, secret: str) -> None:
         """Provision only into the private synthetic/test store seam."""
@@ -267,10 +322,11 @@ class CredentialGateway:
             raise CredentialNotFound(f"unknown credential {credential_id}") from exc
 
     @staticmethod
-    def _check_policy(identity: CredentialIdentity, requested_scope: str, now: datetime) -> None:
+    def _check_policy(identity: CredentialIdentity, requested_scope: str | frozenset[str], now: datetime) -> None:
         if identity.status in {"REVOKED", "EXPIRED"}:
             raise CredentialRevoked(f"credential {identity.credential_id} is unavailable")
-        if requested_scope not in identity.scope:
+        requested = {requested_scope} if isinstance(requested_scope, str) else set(requested_scope)
+        if not requested.issubset(identity.scope):
             raise CredentialScopeError(f"scope denied for credential {identity.credential_id}")
         if identity.expires_at is not None and now.astimezone(timezone.utc) >= _parse_time(identity.expires_at):
             raise CredentialExpired(f"credential {identity.credential_id} has expired")

@@ -68,6 +68,17 @@ from .credentials import (
     redact_secrets,
     safe_exception_message,
 )
+from .credential_binding import (
+    AuthorizationGrant,
+    AuthorizationRequired,
+    BindingScopeError,
+    CredentialBinding,
+    CredentialContractError,
+    CredentialDefinition,
+    CredentialRequirement,
+    ScopedReleaseRequest,
+    validate_binding,
+)
 from .targets import (
     DuplicateProvider,
     DuplicateTarget,
@@ -118,6 +129,15 @@ __all__ = [
     "SecretStore",
     "redact_secrets",
     "safe_exception_message",
+    "AuthorizationGrant",
+    "AuthorizationRequired",
+    "BindingScopeError",
+    "CredentialBinding",
+    "CredentialContractError",
+    "CredentialDefinition",
+    "CredentialRequirement",
+    "ScopedReleaseRequest",
+    "validate_binding",
     "DuplicateProvider",
     "DuplicateTarget",
     "InvalidTarget",
