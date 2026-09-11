@@ -8,6 +8,7 @@ from ecp.credentials import CredentialGateway, CredentialIdentity, SecretLease
 from ecp.runtime_adapters import (
     GeminiGenerateContentAdapter,
     OpenAIResponsesAdapter,
+    OpenRouterChatCompletionsAdapter,
     RuntimeAdapterBindingError,
     RuntimeAdapterRegistry,
     RuntimeAdapterTransportError,
@@ -122,6 +123,39 @@ def test_gemini_adapter_maps_provider_failures_safely():
     adapter = GeminiGenerateContentAdapter(model="gemini-test", endpoint="https://provider.invalid/generateContent", transport=transport)
     with pytest.raises(RuntimeAdapterTransportError, match="PROVIDER_RATE_LIMITED") as exc_info:
         adapter.execute(SecretLease("synthetic-secret", {}), {"request_id": "request-gemini-429"})
+    assert "sensitive details" not in str(exc_info.value)
+    assert "synthetic-secret" not in str(exc_info.value)
+
+
+def test_openrouter_adapter_normalizes_chat_completion_without_credential():
+    def transport(endpoint, headers, payload, timeout):
+        assert endpoint.endswith("/chat/completions")
+        assert headers["Authorization"] == "Bearer synthetic-secret"
+        request = json.loads(payload)
+        assert request["model"] == "openrouter/free"
+        assert request["stream"] is False
+        assert request["messages"][0]["role"] == "user"
+        return 200, json.dumps({"id": "gen-test", "choices": [{"message": {"role": "assistant", "content": "ECP-CONFORMANCE-OK"}}]}).encode()
+
+    adapter = OpenRouterChatCompletionsAdapter(model="openrouter/free", endpoint="https://openrouter.invalid/api/v1/chat/completions", transport=transport)
+    result = adapter.execute(SecretLease("synthetic-secret", {}), {"request_id": "request-openrouter"})
+    assert result == {
+        "provider_status": "RECEIVED",
+        "response_id": "gen-test",
+        "model": "openrouter/free",
+        "output_text": "ECP-CONFORMANCE-OK",
+        "request_id": "request-openrouter",
+    }
+    assert "synthetic-secret" not in json.dumps(result)
+
+
+def test_openrouter_adapter_maps_provider_failures_safely():
+    def transport(endpoint, headers, payload, timeout):
+        return 429, b"provider body may contain sensitive details"
+
+    adapter = OpenRouterChatCompletionsAdapter(model="openrouter/free", endpoint="https://openrouter.invalid/api/v1/chat/completions", transport=transport)
+    with pytest.raises(RuntimeAdapterTransportError, match="PROVIDER_RATE_LIMITED") as exc_info:
+        adapter.execute(SecretLease("synthetic-secret", {}), {"request_id": "request-openrouter-429"})
     assert "sensitive details" not in str(exc_info.value)
     assert "synthetic-secret" not in str(exc_info.value)
 
