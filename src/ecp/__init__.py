@@ -34,10 +34,11 @@ This package implements the repository's scientific core:
   provenance lineage, controlled access seams and full registration
   integrity verification (:mod:`ecp.trust`, M3-RG0).
 
- It deliberately contains NO model adapters, NO execution machinery, NO scoring
- logic and NO provider-specific code (see spec/ECP-SPEC.md, "Provider neutrality").
- The credential module is an infrastructure boundary only; it does not call
- providers or execute evaluated systems.
+It deliberately contains NO model adapters, NO execution machinery, NO scoring
+logic and NO provider-specific code in the public core. Provider integrations
+are extension modules imported explicitly by their integration boundary.
+The credential module is an infrastructure boundary only; it does not call
+providers or execute evaluated systems.
 """
 
 __version__ = "0.7.0"
@@ -100,20 +101,6 @@ from .adapters import (
     UnknownAdapter,
     adapter_document,
 )
-from .openai_adapter import (
-    INTEGRATION_EVALUATION_REF,
-    INTEGRATION_TEST_REF,
-    OPENAI_ADAPTER_ID,
-    OPENAI_ADAPTER_VERSION,
-    OPENAI_AUTHORIZATION_REF,
-    OPENAI_CREDENTIAL_REF,
-    OPENAI_INTERFACE,
-    OPENAI_PROVIDER_ID,
-    OPENAI_PROVIDER_VERSION,
-    integration_target,
-    openai_adapter,
-    openai_provider,
-)
 
 __all__ = [
     "__version__",
@@ -170,16 +157,4 @@ __all__ = [
     "TargetResolver",
     "UnknownAdapter",
     "adapter_document",
-    "INTEGRATION_EVALUATION_REF",
-    "INTEGRATION_TEST_REF",
-    "OPENAI_ADAPTER_ID",
-    "OPENAI_ADAPTER_VERSION",
-    "OPENAI_AUTHORIZATION_REF",
-    "OPENAI_CREDENTIAL_REF",
-    "OPENAI_INTERFACE",
-    "OPENAI_PROVIDER_ID",
-    "OPENAI_PROVIDER_VERSION",
-    "integration_target",
-    "openai_adapter",
-    "openai_provider",
 ]

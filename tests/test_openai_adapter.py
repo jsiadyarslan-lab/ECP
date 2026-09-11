@@ -19,6 +19,8 @@ from ecp import (
     validate_binding,
 )
 from ecp.openai_adapter import (
+    INTEGRATION_EVALUATION_REF,
+    INTEGRATION_TEST_REF,
     OPENAI_ADAPTER_ID,
     OPENAI_ADAPTER_VERSION,
     OPENAI_AUTHORIZATION_REF,
@@ -29,10 +31,11 @@ from ecp.openai_adapter import (
     integration_target,
     openai_adapter,
     openai_provider,
+    register_openai,
 )
 
 
-def test_openai_metadata_is_registered_and_secret_free():
+def test_openai_metadata_is_secret_free():
     provider = openai_provider()
     adapter = openai_adapter()
     assert provider["provider_id"] == OPENAI_PROVIDER_ID
@@ -46,16 +49,25 @@ def test_openai_metadata_is_registered_and_secret_free():
     assert all(key not in adapter for key in ("api_key", "token", "secret"))
 
 
+def test_openai_registration_is_explicit_and_non_global():
+    providers = ProviderRegistry()
+    adapters = AdapterRegistry()
+    register_openai(providers, adapters)
+    assert providers.get(OPENAI_PROVIDER_ID)["provider_version"] == OPENAI_PROVIDER_VERSION
+    assert adapters.get(OPENAI_ADAPTER_ID, OPENAI_ADAPTER_VERSION)["provider_id"] == OPENAI_PROVIDER_ID
+    assert ProviderRegistry().list() == []
+    assert AdapterRegistry().list() == []
+
+
 def _resolved_target(target_id="ECP-TARGET-INTEGRATION-A"):
     providers = ProviderRegistry()
-    providers.register(openai_provider())
+    adapters = AdapterRegistry()
+    register_openai(providers, adapters)
     targets = TargetRegistry(providers)
     targets.register(integration_target(
         target_id,
         configuration_ref="ECP-CONFIG-INTEGRATION-MODEL-A",
     ))
-    adapters = AdapterRegistry()
-    adapters.register(openai_adapter())
     return TargetResolver(providers, targets, adapters).resolve(target_id)
 
 
@@ -69,20 +81,34 @@ def test_openai_target_resolves_without_execution_or_credential_access():
     assert "secret" not in repr(resolved).lower()
 
 
-def test_multiple_configurations_reuse_one_adapter():
-    providers = ProviderRegistry()
-    providers.register(openai_provider())
-    targets = TargetRegistry(providers)
-    targets.register(integration_target(
+def test_integration_fixture_identities_are_operational_only():
+    target = integration_target(
         "ECP-TARGET-INTEGRATION-A",
         configuration_ref="ECP-CONFIG-INTEGRATION-MODEL-A",
+    )
+    assert target["target_id"].startswith("ECP-TARGET-INTEGRATION-")
+    assert target["system"]["system_id"].startswith("ECP-SYSTEM-INTEGRATION-")
+    assert target["system"]["configuration_ref"].startswith("ECP-CONFIG-INTEGRATION-")
+    assert target["evaluation_bindings"] == [INTEGRATION_EVALUATION_REF]
+    assert target["test_bindings"] == [INTEGRATION_TEST_REF]
+    assert target["execution_environment"]["network"] == "disabled"
+    with pytest.raises(ValueError):
+        integration_target("ECP-TARGET-SCIENTIFIC-1", configuration_ref="ECP-CONFIG-INTEGRATION-MODEL-A")
+    with pytest.raises(ValueError):
+        integration_target("ECP-TARGET-INTEGRATION-B", configuration_ref="ECP-CONFIG-SCIENTIFIC-1")
+
+
+def test_multiple_configurations_reuse_one_adapter():
+    providers = ProviderRegistry()
+    adapters = AdapterRegistry()
+    register_openai(providers, adapters)
+    targets = TargetRegistry(providers)
+    targets.register(integration_target(
+        "ECP-TARGET-INTEGRATION-A", configuration_ref="ECP-CONFIG-INTEGRATION-MODEL-A",
     ))
     targets.register(integration_target(
-        "ECP-TARGET-INTEGRATION-B",
-        configuration_ref="ECP-CONFIG-INTEGRATION-MODEL-B",
+        "ECP-TARGET-INTEGRATION-B", configuration_ref="ECP-CONFIG-INTEGRATION-MODEL-B",
     ))
-    adapters = AdapterRegistry()
-    adapters.register(openai_adapter())
     resolver = TargetResolver(providers, targets, adapters)
     assert resolver.resolve("ECP-TARGET-INTEGRATION-A").adapter_id == OPENAI_ADAPTER_ID
     assert resolver.resolve("ECP-TARGET-INTEGRATION-B").adapter_id == OPENAI_ADAPTER_ID
@@ -131,7 +157,8 @@ def test_credential_binding_and_authorization_remain_separate():
 
 def test_fail_closed_for_wrong_provider_interface_and_capability():
     providers = ProviderRegistry()
-    providers.register(openai_provider())
+    adapters = AdapterRegistry()
+    register_openai(providers, adapters)
     targets = TargetRegistry(providers)
     document = integration_target(
         "ECP-TARGET-INTEGRATION-FAIL",
@@ -139,22 +166,20 @@ def test_fail_closed_for_wrong_provider_interface_and_capability():
     )
     document["required_capabilities"] = ["vision"]
     targets.register(document)
-    adapters = AdapterRegistry()
-    adapters.register(openai_adapter())
     with pytest.raises(Exception, match="lacks required capabilities"):
         TargetResolver(providers, targets, adapters).resolve("ECP-TARGET-INTEGRATION-FAIL")
 
 
 def test_synthetic_provider_neutrality_uses_the_same_core_registries():
     providers = ProviderRegistry()
-    providers.register(openai_provider())
+    adapters = AdapterRegistry()
+    register_openai(providers, adapters)
     providers.register(provider_document(
         "ECP-PROVIDER-SYNTHETIC-B", "1.0.0", ["synthetic-interface"],
     ))
     targets = TargetRegistry(providers)
     synthetic = integration_target(
-        "ECP-TARGET-SYNTHETIC-B",
-        configuration_ref="ECP-CONFIG-SYNTHETIC-B",
+        "ECP-TARGET-SYNTHETIC-B", configuration_ref="ECP-CONFIG-SYNTHETIC-B",
     )
     synthetic["provider"] = {
         "provider_id": "ECP-PROVIDER-SYNTHETIC-B",
@@ -167,8 +192,6 @@ def test_synthetic_provider_neutrality_uses_the_same_core_registries():
         "provider_id": "ECP-PROVIDER-SYNTHETIC-B",
     }
     targets.register(synthetic)
-    adapters = AdapterRegistry()
-    adapters.register(openai_adapter())
     adapters.register(adapter_document(
         "ECP-ADAPTER-SYNTHETIC-B", "1.0.0", "ECP-PROVIDER-SYNTHETIC-B",
         "synthetic-interface", ["model-only"], ["text-generation"],
@@ -181,7 +204,6 @@ def test_no_transport_modules_are_imported_by_adapter_boundary():
     import importlib
 
     module = importlib.import_module("ecp.openai_adapter")
-
     source = open(module.__file__, encoding="utf-8").read()
     forbidden = ("requests", "httpx", "urllib", "openai", "socket", "subprocess")
     assert not any(f"import {name}" in source or f"from {name}" in source for name in forbidden)
