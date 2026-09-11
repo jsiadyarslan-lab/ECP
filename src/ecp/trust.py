@@ -1552,17 +1552,10 @@ def verify_trust_store(root: "str | Path") -> dict:
     except Exception as exc:
         issues.append(f"manifest unreadable: {exc}")
         return report()
-    # schema check (fail-closed on structural problems)
-    _m_issues = _validate_or_issues(manifest, "trust-store-manifest")
-    if _m_issues:
-        issues.append("manifest invalid: " + "; ".join(_m_issues[:3]))
-        return report()
-    # self-hash check: report as issue, do NOT return — drift check must run
-    if manifest.get("manifest_hash") != hash_document_excluding(manifest, "manifest_hash"):
-        issues.append("manifest: manifest_hash does not recompute")
-    # Cross-check the derived index before loading the remaining trust-store
-    # objects.  This ensures canonical manifest tampering is reported as
-    # drift even when another file is concurrently malformed or unavailable.
+    # Cross-check the derived index before schema validation and before loading
+    # the remaining trust-store objects. This ensures canonical manifest
+    # tampering is reported as drift even when a platform's JSON Schema
+    # validator rejects another aspect of the same document first.
     manifest_disk_counts = {
         "registrations": len(list((root / REGISTRATIONS_DIR).glob("ECP-TREG-*.json"))),
         "amendments": len(list((root / AMENDMENTS_DIR).glob("ECP-TAMND-*.json"))),
@@ -1575,6 +1568,15 @@ def verify_trust_store(root: "str | Path") -> dict:
                 f"manifest drift: zones.authoritative.{key} = "
                 f"{manifest_authoritative.get(key)} but disk holds {value}"
             )
+
+    # schema check (fail-closed on structural problems)
+    _m_issues = _validate_or_issues(manifest, "trust-store-manifest")
+    if _m_issues:
+        issues.append("manifest invalid: " + "; ".join(_m_issues[:3]))
+        return report()
+    # self-hash check: report as issue, do NOT return — drift check must run
+    if manifest.get("manifest_hash") != hash_document_excluding(manifest, "manifest_hash"):
+        issues.append("manifest: manifest_hash does not recompute")
 
     # -- gate ---------------------------------------------------------------
     try:
