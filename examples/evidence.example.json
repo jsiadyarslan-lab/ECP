@@ -33,7 +33,7 @@
     }
   },
   "integrity": {
-    "manifest_hash": "28e7cc5779ea9d289329f2e463e7619757e9eb7d46adfe60c0356db64eeae60b",
+    "manifest_hash": "0936aafb271da9070d1e7defcc6713ed8daaca98e6d05e5b9eb0b95ae9dfb7b5",
     "hash_algorithm": "sha256",
     "canonicalization": "ECP-CANONICAL-JSON-1.0",
     "manifest_path": "examples/manifest.example.json"
