@@ -179,7 +179,8 @@ def test_synthetic_provider_neutrality_uses_the_same_core_registries():
     ))
     targets = TargetRegistry(providers)
     synthetic = integration_target(
-        "ECP-TARGET-SYNTHETIC-B", configuration_ref="ECP-CONFIG-SYNTHETIC-B",
+        "ECP-TARGET-INTEGRATION-SYNTHETIC-B",
+        configuration_ref="ECP-CONFIG-INTEGRATION-SYNTHETIC-B",
     )
     synthetic["provider"] = {
         "provider_id": "ECP-PROVIDER-SYNTHETIC-B",
@@ -196,7 +197,7 @@ def test_synthetic_provider_neutrality_uses_the_same_core_registries():
         "ECP-ADAPTER-SYNTHETIC-B", "1.0.0", "ECP-PROVIDER-SYNTHETIC-B",
         "synthetic-interface", ["model-only"], ["text-generation"],
     ))
-    resolved = TargetResolver(providers, targets, adapters).resolve("ECP-TARGET-SYNTHETIC-B")
+    resolved = TargetResolver(providers, targets, adapters).resolve("ECP-TARGET-INTEGRATION-SYNTHETIC-B")
     assert resolved.adapter_id == "ECP-ADAPTER-SYNTHETIC-B"
 
 
