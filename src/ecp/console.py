@@ -42,6 +42,18 @@ class UnconfiguredAdapter(ProviderAdapter):
     provider="unconfigured"; adapter_id="unconfigured"
     def execute(self,lease:SecretLease,request:Mapping[str,str])->Mapping[str,Any]: del lease,request; raise AdapterUnavailable("no provider adapter is registered")
 
+class _DemoCredentialGateway(CredentialGateway):
+    """Expose the demo fixture's in-memory provisioning state in its catalog."""
+    def __init__(self, store, identities, provisioned):
+        super().__init__(store, identities)
+        self._demo_provisioned = provisioned
+
+    def metadata(self, credential_id):
+        metadata = super().metadata(credential_id)
+        if not self._demo_provisioned:
+            metadata["status"] = "NOT_PROVISIONED"
+        return metadata
+
 class ExecutionStore:
     def __init__(self,root:Path|None=None)->None: self.root=root; self._records={}; self._idempotency={}; self._lock=threading.RLock()
     def get(self,execution_id):
@@ -177,7 +189,8 @@ def default_gateway_config():
     origins=frozenset(filter(None,os.environ.get("ECP_CONSOLE_ALLOWED_ORIGINS",",".join(DEFAULT_CONSOLE_ORIGINS)).split(","))); port=int(os.environ.get("ECP_GATEWAY_PORT",str(DEFAULT_PORT))); root=os.environ.get("ECP_ARTIFACT_ROOT"); return GatewayConfig(origins,port,PAIRING_TTL_SECONDS,Path(root) if root else None)
 def build_demo_gateway(config=None,provision_demo_credential=True):
     identity=CredentialIdentity("credential-ref-example","example-provider","console integration",frozenset({"execute"}),status="PROVISIONED")
-    gateway,_store=CredentialGateway.for_testing({identity.credential_id:identity})
+    _base_gateway,_store=CredentialGateway.for_testing({identity.credential_id:identity})
+    gateway=_DemoCredentialGateway(_store,{identity.credential_id:identity},provision_demo_credential)
     if provision_demo_credential: gateway.provision_for_testing(identity.credential_id,secrets.token_urlsafe(32))
     binding=CredentialBinding("ECP-BINDING-CONSOLE-EXAMPLE","ECP-REQUIREMENT-CONSOLE-EXAMPLE","ECP-SYSTEM-CONSOLE-EXAMPLE","example-provider","environment-variable","execute","credential-ref-example",frozenset({"execute"}))
     grant=AuthorizationGrant("ECP-AUTH-CONSOLE-EXAMPLE","ECP-BINDING-CONSOLE-EXAMPLE","ECP-SYSTEM-CONSOLE-EXAMPLE","execute",frozenset({"execute"}),(datetime.now(timezone.utc)+timedelta(seconds=DEMO_GRANT_TTL_SECONDS)).replace(microsecond=0).isoformat().replace("+00:00","Z"))
