@@ -192,6 +192,68 @@ class GeminiGenerateContentAdapter:
         }
 
 
+class OpenRouterChatCompletionsAdapter:
+    """One controlled OpenRouter Chat Completions API conformance implementation."""
+
+    provider = "example-provider"
+    adapter_id = "example-adapter"
+
+    def __init__(
+        self,
+        *,
+        model: str,
+        endpoint: str,
+        provider: str = "ECP-PROVIDER-OPENROUTER",
+        adapter_id: str = "ECP-ADAPTER-OPENROUTER-CHAT-COMPLETIONS",
+        transport: Callable[[str, Mapping[str, str], bytes, float], tuple[int, bytes]] | None = None,
+        prompt: str = "ECP controlled conformance probe. Reply with exactly: ECP-CONFORMANCE-OK",
+    ) -> None:
+        if not model or not endpoint:
+            raise ValueError("model and endpoint are required")
+        self.model = model
+        self.endpoint = endpoint.rstrip("/")
+        self.provider = provider
+        self.adapter_id = adapter_id
+        self.prompt = prompt
+        self._transport = transport or _post_json
+
+    def execute(self, lease: Any, request: Mapping[str, str]) -> Mapping[str, Any]:
+        payload = json.dumps({
+            "model": self.model,
+            "messages": [{"role": "user", "content": self.prompt}],
+            "stream": False,
+        }).encode("utf-8")
+        headers = {"Authorization": f"Bearer {lease.value}", "Content-Type": "application/json"}
+        try:
+            status, body = self._transport(self.endpoint, headers, payload, 30.0)
+        except (OSError, urllib_error.URLError, TimeoutError) as exc:
+            raise RuntimeAdapterTransportError(_transport_failure_message(self.endpoint, exc)) from exc
+        if status < 200 or status >= 300:
+            if status in {401, 403}:
+                category = "PROVIDER_AUTHENTICATION_FAILED"
+            elif status == 408 or status == 504:
+                category = "PROVIDER_TIMEOUT"
+            elif status == 429:
+                category = "PROVIDER_RATE_LIMITED"
+            else:
+                category = "PROVIDER_REQUEST_FAILED"
+            raise RuntimeAdapterTransportError(category)
+        try:
+            response = json.loads(body.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise RuntimeAdapterTransportError("MALFORMED_PROVIDER_RESPONSE") from exc
+        output = _openrouter_response_text(response)
+        if not output:
+            raise RuntimeAdapterTransportError("MALFORMED_PROVIDER_RESPONSE")
+        return {
+            "provider_status": "RECEIVED",
+            "response_id": response.get("id") if isinstance(response, dict) else None,
+            "model": self.model,
+            "output_text": output,
+            "request_id": request["request_id"],
+        }
+
+
 def _post_json(endpoint: str, headers: Mapping[str, str], payload: bytes, timeout: float) -> tuple[int, bytes]:
     req = urllib_request.Request(endpoint, data=payload, headers=dict(headers), method="POST")
     try:
@@ -259,6 +321,23 @@ def _gemini_response_text(response: Any) -> str | None:
     return "".join(chunks).strip() or None
 
 
+def _openrouter_response_text(response: Any) -> str | None:
+    if not isinstance(response, dict):
+        return None
+    choices = response.get("choices", [])
+    chunks: list[str] = []
+    for choice in choices:
+        message = choice.get("message", {}) if isinstance(choice, dict) else {}
+        content = message.get("content") if isinstance(message, dict) else None
+        if isinstance(content, str):
+            chunks.append(content)
+        elif isinstance(content, list):
+            for part in content:
+                if isinstance(part, dict) and isinstance(part.get("text"), str):
+                    chunks.append(part["text"])
+    return "".join(chunks).strip() or None
+
+
 def openai_conformance_adapter(*, model: str | None = None, endpoint: str | None = None) -> OpenAIResponsesAdapter:
     base = endpoint or os.environ.get("OPENAI_API_BASE", "https://api.openai.com/v1").rstrip("/")
     return OpenAIResponsesAdapter(model=model or os.environ.get("ECP_CONFORMANCE_MODEL", "gpt-5-mini"), endpoint=f"{base}/responses")
@@ -270,9 +349,16 @@ def gemini_conformance_adapter(*, model: str | None = None, endpoint: str | None
     return GeminiGenerateContentAdapter(model=model_name, endpoint=f"{base}/models/{model_name}:generateContent")
 
 
+def openrouter_conformance_adapter(*, model: str | None = None, endpoint: str | None = None) -> OpenRouterChatCompletionsAdapter:
+    model_name = model or os.environ.get("ECP_OPENROUTER_MODEL", "openrouter/free")
+    base = endpoint or os.environ.get("OPENROUTER_API_BASE", "https://openrouter.ai/api/v1").rstrip("/")
+    return OpenRouterChatCompletionsAdapter(model=model_name, endpoint=f"{base}/chat/completions")
+
+
 __all__ = [
     "GeminiGenerateContentAdapter",
     "OpenAIResponsesAdapter",
+    "OpenRouterChatCompletionsAdapter",
     "RuntimeAdapterBindingError",
     "RuntimeAdapterError",
     "RuntimeAdapterRegistry",
@@ -280,4 +366,5 @@ __all__ = [
     "RuntimeAdapterUnavailable",
     "gemini_conformance_adapter",
     "openai_conformance_adapter",
+    "openrouter_conformance_adapter",
 ]
