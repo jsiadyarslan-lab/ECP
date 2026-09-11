@@ -1,0 +1,222 @@
+{
+  "ecp_object": "m3-population-namespace-manifest",
+  "record_version": 1,
+  "created_at": "2026-09-11T21:39:50Z",
+  "order_reference": {
+    "title": "M3 AUTHORITATIVE SCIENTIFIC POPULATION GOVERNANCE & NAMESPACE COLLISION CLOSURE v1",
+    "mode": "scientific artifact governance / provenance reconciliation / namespace isolation"
+  },
+  "baseline_commit": "7420eac93ff0eb11b1f0b4836296402cfdeb64da",
+  "jarvis_reference": {
+    "repository": "jsiadyarslan-lab/JARVIS",
+    "path": "pilots/m3/m3_cases.md",
+    "sha256": "cc867e9794d72b160396f3527f928cb919641812dc8ef1ae3bd7db21723bf001",
+    "case_count": 23,
+    "status": "READ-ONLY external reference artifact; NOT an ECP population; excluded by the native registration scope; contains the confirmed, preserved, unrepaired M3-S30-LINF-01 semantic defect"
+  },
+  "namespace_model": {
+    "identity_fields": [
+      "population_id",
+      "case_pack_id",
+      "case_pack_version",
+      "candidate_id",
+      "content_hash"
+    ],
+    "lookup_contract": "lookup(population_id, case_pack_id, case_pack_version, candidate_id) then verify content_hash",
+    "unqualified_lookup": "REJECTED — AMBIGUOUS_ID (fail-closed whenever multiple populations are registered, regardless of current hit count)",
+    "collision_invariant": "same namespace + same candidate_id + different content_hash = COLLISION (enforced at load time)",
+    "distinct_identity_rule": "same candidate_id + different population namespace = distinct identities (never conflated)",
+    "implementation": "src/ecp/populations.py"
+  },
+  "populations": [
+    {
+      "population_id": "ECP-POP-M3-NATIVE-V1",
+      "case_pack_id": "ECP-CASEPACK-M3-NATIVE",
+      "case_pack_version": 1,
+      "status": "HISTORICAL-PRESERVED-READ-ONLY",
+      "candidate_count": 3,
+      "candidate_id_range": [
+        "ECP-CAND-000101",
+        "ECP-CAND-000103"
+      ],
+      "candidate_index": {
+        "ECP-CAND-000101": "8e8feb011bfb8895b59fafff6091f36308393ae53bb11262fbbc6f29a9c817f5",
+        "ECP-CAND-000102": "73fbb9904cfd1c1af6eb063dcffaa8bb07dc77a9366b68960c7d5bb63ca6a7da",
+        "ECP-CAND-000103": "0d054c99dd5957c23b2948fbac8c59f697ea6b0f0ef074407910b0d915832711"
+      },
+      "provenance": {
+        "derived_from": [
+          "registration/M3-NATIVE-REGISTRATION-SUMMARY.json",
+          "provenance/m3-native-corpus-manifest.json",
+          "ecp-protected-store:objects/provenance/native-sidecar.json"
+        ],
+        "registration_set_id": "ECP-REGSET-M3-NATIVE-V1",
+        "registration_ids": [
+          "ECP-REG-M3-954CD3CED679CD50-V1",
+          "ECP-REG-M3-AA4986D8E0CDBABD-V1",
+          "ECP-REG-M3-E896BEF06EAF2602-V1"
+        ],
+        "registered_case_ids": [
+          "ECP-NATIVE-001",
+          "ECP-NATIVE-002",
+          "ECP-NATIVE-003"
+        ],
+        "registered_at": "2026-09-10T17:22:00Z",
+        "corpus_manifest": "provenance/m3-native-corpus-manifest.json",
+        "source_sha256": "1ef751de6752c3e475f3ac74d90c42ecdb748ca20213043586b6f6bda9bce458",
+        "protected_store_commit": "8a5b9227b50aabab09d2ea0b0fc2065427be54f8",
+        "authored_at": "2026-09-10T17:02:00Z",
+        "authoring_mode": "native; no model invoked",
+        "semantic_families": [
+          "relational-closure",
+          "propositional-truth-table",
+          "constraint-enumeration"
+        ],
+        "authoring_order_pin_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+        "authoring_order_pin_status": "NULL (all-zero sha256) — authoring order reference not hash-pinned (provenance gap, preserved as-is)",
+        "qualification_run_id": "M3-NATIVE-QUAL-20260910-01",
+        "qualification_decision": "ACCEPT x3 (persisted in protected store)",
+        "qualification_persistence": "PERSISTED (protected store objects/qualification/*)",
+        "timestamp_note": "artifact timestamps run ~+2h ahead of the git commit timestamps of their own registration commits (consistent UTC+2 local-time mislabelled as Z); content hashes unaffected",
+        "relationship_to_other_populations": "UNKNOWN — no declaration toward the CA0v1 30-pool; the corpus manifest declares exclusion of the historical JARVIS 23-case artifact only. This population re-used the CA0v1 candidate-ID range (authored later; IDs overlap, content differs)."
+      }
+    },
+    {
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "status": "HISTORICAL-PRESERVED-READ-ONLY",
+      "candidate_count": 30,
+      "candidate_id_range": [
+        "ECP-CAND-000101",
+        "ECP-CAND-000130"
+      ],
+      "candidate_index": {
+        "ECP-CAND-000101": "28562c5ca5bedc911f7a124e7ca31103703c5ae27df401e1c0672cf5a275ecd9",
+        "ECP-CAND-000102": "17fcf09cd9826ace859e4349fd46479417258022f9a87d180167b5a4d891d2bf",
+        "ECP-CAND-000103": "06ab98eb689fa50001e3e2dc6189e1e983706b7583264e1c897993ba96ccd598",
+        "ECP-CAND-000104": "69737cc87cd1ab8f934d4c8f347c9c17cd6cd39842446d20e22af7bc8af68057",
+        "ECP-CAND-000105": "e1468e6891121c5ef4a7b3f7894d2e524a2b64d79260b82034c4bbd0332b2af3",
+        "ECP-CAND-000106": "8cfe7c6489de605965156ecdec479179a1a6bd4ae49094ed1fef3a1dc61484fb",
+        "ECP-CAND-000107": "6b039d54864235b7cf19c4c98f4aa31a17e6704561ba3b66ff2a351678a63bc1",
+        "ECP-CAND-000108": "69a0659e95641608e4dc5f89d63cce58e3b6026e30f4acc2eadc654453186b99",
+        "ECP-CAND-000109": "ff9533bd878644b77d0c93f9d249b7f6a7af4e7b9e6614ad65b1e8fac47899d6",
+        "ECP-CAND-000110": "86d63eecd77394758c9bb71570f916a2489d8658ed727e94ce1b1490b4e8cb11",
+        "ECP-CAND-000111": "f0c37e26ca476aa76d356f228202cc03b393fe31b52a50b46cb5fa11554ac7d6",
+        "ECP-CAND-000112": "743641739dd4f820a622c88d4832995573d886cc2b7355439d30ca334e4f4b81",
+        "ECP-CAND-000113": "771af56218b1ce91933fc39201216d2943759118989893eb2ed0116b3769cf02",
+        "ECP-CAND-000114": "15306ae57c549cb2be80836d0d852db68e5cdfa0e03db250f89f8b1ade5972fc",
+        "ECP-CAND-000115": "2812c304844d64de3e3fadc0d34e3bfb304947410203401ebcdcc3d530f33ece",
+        "ECP-CAND-000116": "f9db2a4eb8734761b76ff5cc6efe3f52a675dc33588b26aef032e83c6104ecb9",
+        "ECP-CAND-000117": "dd267e6df60e4b492eeff22cd5b5038d042934132c28d025b07a97a802b7017c",
+        "ECP-CAND-000118": "54aa878927b9fa7a0bea5cce5c2fa23d9713c3c81e170124984cb2e03b5b877b",
+        "ECP-CAND-000119": "da7396057bbac3ffb998c2d8fc50d72ee4e6935848200df905940c23d62d0f77",
+        "ECP-CAND-000120": "d4d14e000e2d9cb65a6952c7f4226a3426f852fda368de1c45e03268fc86111b",
+        "ECP-CAND-000121": "a792080f64378cc8dd1f610f98f72d26c0522ae2130206824880eb750aae4c47",
+        "ECP-CAND-000122": "b08f4d07057926c65c822e0718759427226fbde2d2887d2cc3d6669957c474a8",
+        "ECP-CAND-000123": "99a53a6d194a55fae3d4240f10da81a17b50e2c349c213243699acc2799664d8",
+        "ECP-CAND-000124": "18083a49274d01b68a4cfb2a81334bee8da9a502efa33c99bd0231f2098c39e2",
+        "ECP-CAND-000125": "71c49e6f079f699fdd202775c50b6a8dd98c0b7be88224097cf2d94ba217f69c",
+        "ECP-CAND-000126": "5e5917c29ce47ce6d520de2eafea2736e43b38dfe98c68e589a518c6ff7a2525",
+        "ECP-CAND-000127": "5f79890939bdb27db230acb8df738428941bb9b5344a0dbfbd6db96c254a4dfe",
+        "ECP-CAND-000128": "043b1fec80836f4d8fd83ef8db4ee0a2779597067b6fb298f07bfa4cb5aa38f9",
+        "ECP-CAND-000129": "35cd41b5cb29e30e42aa5533705092cefed7b65947e90d0a8206b4ee20df9199",
+        "ECP-CAND-000130": "be82936dec9488d907a62f3770a16f2b7a5c86ec9526e36b879790f622170e50"
+      },
+      "provenance": {
+        "derived_from": [
+          "ecp-ca0v1/intake-report.json (private qualification area)",
+          "ecp-ca0v1/source/provenance-sidecar.json",
+          "ECP-M3-CA0V1-EXECUTION-REPORT.md (historical session report)"
+        ],
+        "source_sha256": "8144818cc37f0aa8b41d99f4a3cfacb5d5082aa1a97170fd1f61c4f86b0f425d",
+        "sidecar_sha256": "0f4e2318a1a086aae87fcd792b64920463c70f53887e7d9138f40c3f14579e80",
+        "intake_report_sha256": "fc8a35320c2a54e9cb9bafbd3fe971fc7b29c2748bd04fa3fdb4ccc16d2077a4",
+        "order_reference_sha256": "2695594b70b238959b5c7ffa9180c8adb16b6a66588fdfa0eb53685d900459fd",
+        "authored_at": "2026-09-09T03:55:45Z",
+        "authoring_mode": "executor-authored (GLM-family session agent, direct authoring; NOT-INDEPENDENT — EXECUTOR-AUTHORED, PERFORMANCE-BLIND, SYSTEM-NEUTRAL)",
+        "reasoning_families": {
+          "conditional-chaining": 5,
+          "consistency-contradiction": 5,
+          "constraint-quantitative": 5,
+          "default-exception": 5,
+          "relational-discrimination": 5,
+          "transitive-relational": 5
+        },
+        "qualification_run_id": "ECP-QUALRUN-CA0V1-R1",
+        "qualification_decision": "ACCEPT x30 / 30 (recorded)",
+        "qualification_persistence": "NOT-PERSISTED — qualification artifacts (ECP-QUAL-000101..130, qualification-run.json) are absent from all durable custody (private area wiped by environment resets); the layer is recorded in the historical session report only. Re-derivation would require a qualification rerun, which the governing order forbids in this phase.",
+        "qualification_record_pins": {
+          "chain_head_sha256": "f137598db60a610eaf273cfd97d98bd7ddefc886e93072d046fe3583d3e31a1b",
+          "run_manifest_file_sha256": "0bb9eeee1c7f73b12bc0819ecb4d4ddb8c009ff0a1bf7bce9172227f32298cd6",
+          "run_hash": "1678694c6f6c38075bbc064c7a7e641482419c37192ea21e49ec4cc6c588c4fe"
+        },
+        "relationship_to_other_populations": "UNKNOWN — no declaration toward the native corpus (the native population was authored ~27h later and re-used this pool's candidate-ID range). No replacement/supersession was ever declared by any artifact."
+      }
+    }
+  ],
+  "collision_record": {
+    "collision_detected": true,
+    "collision_type": "cross-population candidate-ID overlap with divergent content hashes (same IDs, different artifacts, both chains individually hash-consistent)",
+    "affected_candidate_ids": [
+      "ECP-CAND-000101",
+      "ECP-CAND-000102",
+      "ECP-CAND-000103"
+    ],
+    "hash_comparison": {
+      "ECP-CAND-000101": {
+        "ECP-POP-M3-CA0V1-V1": "28562c5ca5bedc911f7a124e7ca31103703c5ae27df401e1c0672cf5a275ecd9",
+        "ECP-POP-M3-NATIVE-V1": "8e8feb011bfb8895b59fafff6091f36308393ae53bb11262fbbc6f29a9c817f5"
+      },
+      "ECP-CAND-000102": {
+        "ECP-POP-M3-CA0V1-V1": "17fcf09cd9826ace859e4349fd46479417258022f9a87d180167b5a4d891d2bf",
+        "ECP-POP-M3-NATIVE-V1": "73fbb9904cfd1c1af6eb063dcffaa8bb07dc77a9366b68960c7d5bb63ca6a7da"
+      },
+      "ECP-CAND-000103": {
+        "ECP-POP-M3-CA0V1-V1": "06ab98eb689fa50001e3e2dc6189e1e983706b7583264e1c897993ba96ccd598",
+        "ECP-POP-M3-NATIVE-V1": "0d054c99dd5957c23b2948fbac8c59f697ea6b0f0ef074407910b0d915832711"
+      }
+    },
+    "first_use": "ECP-POP-M3-CA0V1-V1 authored 2026-09-09T03:55:45Z (machinery committed e849b13 2026-09-09); ECP-POP-M3-NATIVE-V1 authored 2026-09-10 (ECP registration commits fa1b6a7..6f58381, 2026-09-10) — the native population re-used the occupied ID range",
+    "isolation": "namespaces distinct; population-qualified lookup is the only resolution path; unqualified lookup rejected fail-closed (AMBIGUOUS_ID); no artifact renamed, modified, merged, or deleted"
+  },
+  "future_population_policy": "Population C (future) is a conceptual namespace only; no future population is created, registered, or reserved by this manifest.",
+  "decisions": {
+    "namespace_decision": "COLLISION ISOLATED / NAMESPACES VALID",
+    "namespace_decision_basis": [
+      "overlapping candidate IDs exist (ECP-CAND-000101..000103) across the two populations",
+      "content and hashes differ (each chain individually hash-consistent)",
+      "provenance independent (no cross-declaration; relationship UNKNOWN on both sides)",
+      "both representable in distinct namespaces (this manifest)",
+      "cross-population lookup protected (population-qualified path only)",
+      "historical IDs preserved (no renames)",
+      "collision isolated without modifying any artifact"
+    ],
+    "population_decision": "BLOCKED — NO AUTHORITATIVE POPULATION",
+    "population_decision_basis": [
+      "ECP-POP-M3-CA0V1-V1: qualification artifact layer NOT persistently present (report-recorded only) -> reproducibility/traceability of that layer NOT PASS; provenance relationship to native UNKNOWN",
+      "ECP-POP-M3-NATIVE-V1: authoring-order pin NULL (provenance gap); provenance relationship to CA0v1 UNKNOWN; scientific fitness as the M3 research population not established (scope-limited 3-case demonstration corpus per its own classification closure)",
+      "per the order's §19 criterion: any element not PASS -> BLOCKED"
+    ],
+    "criterion_status": {
+      "ECP-POP-M3-NATIVE-V1": {
+        "provenance": "UNKNOWN",
+        "scientific_fitness": "FAIL",
+        "integrity": "PASS",
+        "namespace_uniqueness": "PASS",
+        "historical_integrity": "PASS",
+        "reproducibility_traceability": "PASS"
+      },
+      "ECP-POP-M3-CA0V1-V1": {
+        "provenance": "UNKNOWN",
+        "scientific_fitness": "PASS",
+        "integrity": "PARTIAL",
+        "namespace_uniqueness": "PASS",
+        "historical_integrity": "PASS",
+        "reproducibility_traceability": "UNKNOWN"
+      }
+    },
+    "decision_discipline": "NAMESPACE DECISION and POPULATION DECISION are independent: namespace validity is NOT scientific authoritativeness, and population authoritativeness is NOT M3 execution success."
+  },
+  "immutability": "historical populations are preserved read-only; amendments require an explicit new manifest version and full re-review"
+}
