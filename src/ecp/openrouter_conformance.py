@@ -33,6 +33,13 @@ def build_openrouter_conformance_gateway(
     secret = api_key if api_key is not None else os.environ.get("OPENROUTER_API_KEY")
     if not secret:
         raise RuntimeError("OPENROUTER_API_KEY is required for the conformance execution")
+    # HTTP Authorization headers are Latin-1/ASCII constrained. Fail closed
+    # before starting the execution surface instead of leaking a low-level
+    # UnicodeEncodeError into the browser execution record.
+    try:
+        secret.encode("ascii")
+    except UnicodeEncodeError as exc:
+        raise RuntimeError("OPENROUTER_API_KEY must contain only ASCII characters") from exc
     identity = CredentialIdentity(
         OPENROUTER_CREDENTIAL_REF,
         OPENROUTER_PROVIDER_ID,
