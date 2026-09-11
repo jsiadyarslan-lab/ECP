@@ -101,6 +101,21 @@ from .adapters import (
     UnknownAdapter,
     adapter_document,
 )
+from .execution_contract import (
+    ClientExecutionIntent,
+    ContractResolutionError,
+    ContractViolation,
+    ExecutionContractResolver,
+    ExecutionNotAuthorizedError,
+    ExperimentIdentity,
+    RegisteredCaseArtifact,
+    ResolvedUniversalExecutionRequest,
+    RUNTIME_IDENTITY,
+    UniversalExecutionResult,
+    UnknownCredentialError,
+    UnknownEvaluationError,
+    UnknownTestError,
+)
 
 __all__ = [
     "__version__",
@@ -157,4 +172,17 @@ __all__ = [
     "TargetResolver",
     "UnknownAdapter",
     "adapter_document",
+    "ClientExecutionIntent",
+    "ContractResolutionError",
+    "ContractViolation",
+    "ExecutionContractResolver",
+    "ExecutionNotAuthorizedError",
+    "ExperimentIdentity",
+    "RegisteredCaseArtifact",
+    "ResolvedUniversalExecutionRequest",
+    "RUNTIME_IDENTITY",
+    "UniversalExecutionResult",
+    "UnknownCredentialError",
+    "UnknownEvaluationError",
+    "UnknownTestError",
 ]

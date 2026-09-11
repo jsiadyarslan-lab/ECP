@@ -10,6 +10,16 @@ from urllib.parse import urlparse
 from .canonical import canonical_bytes
 from .credentials import CredentialError, CredentialGateway, CredentialIdentity, CredentialNotFound, SecretLease, SecretRedactionFilter, safe_exception_message
 from .credential_binding import AuthorizationGrant, CredentialBinding, ScopedReleaseRequest
+from .execution_contract import (
+    ClientExecutionIntent,
+    ContractViolation,
+    ExecutionContractResolver,
+    ExecutionNotAuthorizedError,
+    UniversalExecutionResult,
+    UnknownCredentialError,
+    UnknownEvaluationError,
+    UnknownTestError,
+)
 from .hashing import hash_document
 from .runtime_adapters import RuntimeAdapterError, RuntimeAdapterRegistry, RuntimeAdapterTransportError, RuntimeAdapterUnavailable
 
@@ -81,10 +91,14 @@ class GatewayConfig:
     allowed_origins:frozenset[str]; port:int=DEFAULT_PORT; pairing_ttl_seconds:int=PAIRING_TTL_SECONDS; artifact_root:Path|None=None
 
 class LocalGateway:
-    def __init__(self,config,evaluations,credential_gateway,adapters=None,store=None,clock=None):
+    def __init__(self,config,evaluations,credential_gateway,adapters=None,store=None,clock=None,cases=None):
         if not config.allowed_origins: raise ValueError("at least one explicit console origin is required")
         if not 1<=config.port<=65535: raise ValueError("port must be between 1 and 65535")
         self.config=config; self.evaluations=dict(evaluations); self.credential_gateway=credential_gateway; self.adapters=adapters if isinstance(adapters, RuntimeAdapterRegistry) else RuntimeAdapterRegistry(adapters or {}); self.store=store or ExecutionStore(config.artifact_root); self._pairing_code=secrets.token_urlsafe(24); self._clock=clock or __import__("time").time; self._pairing_expires=self._clock()+config.pairing_ttl_seconds; self._session_tokens=set(); self._session_lock=threading.RLock(); self._httpd=None
+        self._contract=ExecutionContractResolver(self.evaluations,cases,self.adapters)
+
+    @property
+    def contract_resolver(self): return self._contract
     @property
     def pairing_code(self): return self._pairing_code
     def pair(self,code):
@@ -107,21 +121,24 @@ class LocalGateway:
             evaluations.append(metadata)
         return {"evaluations":evaluations,"poll_interval_ms":POLL_INTERVAL_MS,"timeout_seconds":EXECUTION_TIMEOUT_SECONDS}
     def execute(self,request):
-        _validate_request(request); evaluation=self.evaluations.get(request["evaluation_id"])
-        if evaluation is None or evaluation.system_id!=request["system_id"]: raise ConsoleError("unknown evaluation or system")
-        if evaluation.credential.credential_id!=request["credential_ref"]: raise ConsoleError("unknown credential_ref")
-        test=next((x for x in evaluation.tests if x.test_id==request["test_id"]),None)
-        if test is None: raise ConsoleError("unknown test")
-        if evaluation.credential_binding is None or evaluation.authorization_grant is None: raise ExecutionAuthorizationError("credential binding and authorization grant are required")
-        safe_request={k:str(request[k]) for k in ("evaluation_id","test_id","system_id","credential_ref","request_id")}; record=self.store.create(safe_request["request_id"],safe_request)
+        intent=ClientExecutionIntent.from_client_payload(request)
+        try: resolved=self._contract.resolve(intent)
+        except UnknownEvaluationError as exc: raise ConsoleError(str(exc)) from exc
+        except UnknownCredentialError as exc: raise ConsoleError(str(exc)) from exc
+        except UnknownTestError as exc: raise ConsoleError(str(exc)) from exc
+        except ExecutionNotAuthorizedError as exc: raise ExecutionAuthorizationError(str(exc)) from exc
+        evaluation=self.evaluations[resolved.evaluation_id]
+        safe_request=resolved.intent.identifiers(); record=self.store.create(safe_request["request_id"],safe_request)
         if record["status"]!="REQUESTED": return record
         eid=record["execution_id"]; self.store.update(eid,status="AUTHORIZED",execution_status="RUNNING"); lease=None
         try:
-            rr=ScopedReleaseRequest(request_id=safe_request["request_id"],binding_id=evaluation.credential_binding.binding_id,target_id=evaluation.credential_binding.target_id,credential_ref=safe_request["credential_ref"],purpose=test.scope,scope=frozenset({test.scope}),lease_seconds=60,requested_at=_utc_now())
-            lease=self.credential_gateway.release(rr,evaluation.credential_binding,evaluation.authorization_grant); adapter=self.adapters.resolve(evaluation.adapter,evaluation.provider); result=dict(adapter.execute(lease,safe_request)); result.pop("secret",None); result.pop("credential_value",None)
+            rr=ScopedReleaseRequest(request_id=resolved.request_id,binding_id=resolved.binding_id,target_id=evaluation.credential_binding.target_id,credential_ref=resolved.credential_ref,purpose=resolved.test_scope,scope=frozenset({resolved.test_scope}),lease_seconds=60,requested_at=_utc_now())
+            lease=self.credential_gateway.release(rr,evaluation.credential_binding,evaluation.authorization_grant); adapter=self.adapters.resolve(evaluation.adapter,evaluation.provider)
+            raw=dict(adapter.execute(lease,resolved.transport_request())); unified=UniversalExecutionResult.from_provider_payload(raw,request_id=resolved.request_id); result=unified.to_record_dict()
             self.store.update(eid,status="COMPLETED",execution_status="SUCCESS",response_status="RECEIVED",result=_safe_result(result,(lease.value,)))
-            try: self._finalize(eid,evaluation,safe_request,result,"SUCCESS",(lease.value,))
+            try: self._finalize(eid,evaluation,resolved,unified,"SUCCESS",(lease.value,))
             except Exception as exc: self.store.update(eid,status="PARTIAL_SUCCESS",evidence_status="FAILED",audit_status="FAILED",persistence_status="FAILED",failure_stage="evidence_audit_or_persistence",error=_safe_exception_message(exc,lease))
+        except ContractViolation as exc: self.store.update(eid,status="FAILED",execution_status="INVALID",response_status="NOT_RECEIVED",error_classification="CONTRACT_VIOLATION",error=_safe_exception_message(exc,lease))
         except CredentialError as exc: self.store.update(eid,status="FAILED",execution_status="INVALID",response_status="NOT_RECEIVED",error_classification="CREDENTIAL_ERROR",error=_safe_exception_message(exc,lease))
         except AdapterFailure as exc: self.store.update(eid,status="FAILED",execution_status=exc.category,response_status="NOT_RECEIVED",error_classification=exc.category,error=_safe_exception_message(exc,lease))
         except AdapterUnavailable as exc: self.store.update(eid,status="FAILED",execution_status="INCONCLUSIVE",response_status="NOT_RECEIVED",error_classification="ADAPTER_UNAVAILABLE",error=_safe_exception_message(exc,lease))
@@ -130,8 +147,10 @@ class LocalGateway:
         except RuntimeAdapterError as exc: self.store.update(eid,status="FAILED",execution_status="INCONCLUSIVE",response_status="NOT_RECEIVED",error_classification="ADAPTER_ERROR",error=_safe_exception_message(exc,lease))
         except Exception as exc: self.store.update(eid,status="FAILED",execution_status="ERROR",response_status="NOT_RECEIVED",error_classification="ADAPTER_ERROR",error=_safe_exception_message(exc,lease))
         return self.store.get(eid) or {}
-    def _finalize(self,eid,evaluation,request,result,outcome,secrets_to_redact=()):
-        suffix=eid.rsplit("-",1)[-1]; evid=f"ECP-EVID-CONSOLE-{suffix}"; audit_id=f"ECP-AUDIT-CONSOLE-{suffix}"; evidence={"ecp_object":"console-evidence","evidence_id":evid,"execution_id":eid,"evaluation_id":request["evaluation_id"],"system_id":request["system_id"],"test_id":request["test_id"],"provider":evaluation.provider,"adapter":evaluation.adapter,"credential_ref":request["credential_ref"],"outcome":outcome,"result":_safe_result(result,secrets_to_redact),"created_at":_utc_now()}; evidence["evidence_hash"]=hash_document(evidence); audit={"ecp_object":"console-audit","audit_id":audit_id,"execution_id":eid,"evidence_id":evid,"evidence_hash":evidence["evidence_hash"],"audit_status":"PENDING_HUMAN_REVIEW","created_at":_utc_now()}; persistence,location=self.store.persist(eid,evidence,audit); self.store.update(eid,status="SUCCESS" if persistence in {"PERSISTED_LOCALLY","PUSH_PENDING"} else "PARTIAL_SUCCESS",evidence_status="GENERATED",audit_status="GENERATED",persistence_status=persistence,persistence_location=location,evidence_id=evid,audit_id=audit_id)
+    def _finalize(self,eid,evaluation,resolved,unified,outcome,secrets_to_redact=()):
+        suffix=eid.rsplit("-",1)[-1]; evid=f"ECP-EVID-CONSOLE-{suffix}"; audit_id=f"ECP-AUDIT-CONSOLE-{suffix}"
+        evidence={"ecp_object":"console-evidence","evidence_id":evid,"execution_id":eid,"evaluation_id":resolved.evaluation_id,"system_id":resolved.system_id,"test_id":resolved.test_id,"provider":evaluation.provider,"adapter":evaluation.adapter,"credential_ref":resolved.credential_ref,"outcome":outcome,"result":_safe_result(unified.to_record_dict(),secrets_to_redact),"created_at":_utc_now(),"model":resolved.model_identifier,"adapter_version":resolved.adapter_version,"protocol_version":resolved.protocol_version,"case_id":resolved.experiment.case_id,"prompt_hash":resolved.experiment.prompt_hash,"prompt_reference":resolved.prompt_reference,"experiment_identity":resolved.experiment.identity_document(),"experiment_identity_hash":resolved.experiment.identity_hash()}
+        evidence["evidence_hash"]=hash_document(evidence); audit={"ecp_object":"console-audit","audit_id":audit_id,"execution_id":eid,"evidence_id":evid,"evidence_hash":evidence["evidence_hash"],"audit_status":"PENDING_HUMAN_REVIEW","created_at":_utc_now()}; persistence,location=self.store.persist(eid,evidence,audit); self.store.update(eid,status="SUCCESS" if persistence in {"PERSISTED_LOCALLY","PUSH_PENDING"} else "PARTIAL_SUCCESS",evidence_status="GENERATED",audit_status="GENERATED",persistence_status=persistence,persistence_location=location,evidence_id=evid,audit_id=audit_id)
     def make_server(self):
         gateway=self
         class Handler(BaseHTTPRequestHandler):
@@ -176,9 +195,6 @@ class LocalGateway:
         self._httpd=ThreadingHTTPServer(("127.0.0.1",self.config.port),Handler); return self._httpd
     def serve_forever(self,server=None): (server or self.make_server()).serve_forever()
 
-def _validate_request(request):
-    if set(request)!=_ALLOWED_REQUEST_KEYS: raise ConsoleError("request fields are not exactly the authorized identifiers")
-    if any(not isinstance(request[k],str) or not request[k].strip() for k in _ALLOWED_REQUEST_KEYS): raise ConsoleError("request identifiers must be non-empty strings")
 def _safe_result(result,secrets_to_redact=()):
     safe={}; redactor=SecretRedactionFilter(secrets_to_redact)
     for key,value in result.items():

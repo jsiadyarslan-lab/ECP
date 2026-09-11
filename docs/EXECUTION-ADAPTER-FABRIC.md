@@ -29,3 +29,29 @@ The credential is read from the runtime environment into the private credential 
 ## Scope boundary
 
 This implementation demonstrates architectural extensibility and one tested provider adapter. It does not claim broad provider coverage, scientific scoring, Ground Truth access, authoring, or historical-artifact modification. The first provider is a conformance implementation, not the ECP architecture.
+
+## Universal Experiment Execution Contract v1
+
+`src/ecp/execution_contract.py` completes the abstraction into a single universal execution contract so ECP can address any supported provider/model through one structure — build once, configure many, normalize once, evidence once, audit once. The enforced architectural rule: **Adapter = how to reach the provider; Model = identity/configuration of the system to run.** Changing a model identifier or model configuration never requires a new adapter; only a genuinely different provider transport contract does.
+
+The conceptual path is materialized as explicit types (it may never collapse into one request):
+
+```text
+ClientExecutionIntent
+        -> Internal Resolution (ExecutionContractResolver)
+        -> ResolvedUniversalExecutionRequest
+        -> Existing RuntimeAdapterRegistry (the single execution registry)
+        -> Provider Adapter
+        -> UniversalExecutionResult
+        -> Evidence
+        -> Audit
+```
+
+- `ClientExecutionIntent` — the complete set of values a client may control: exactly the five authorized identifiers (`evaluation_id`, `test_id`, `system_id`, `credential_ref`, `request_id`). Arbitrary prompts, model endpoints, provider transports, ground truth, or scoring semantics are rejected loudly at this boundary.
+- `ResolvedUniversalExecutionRequest` — built internally by `ExecutionContractResolver` from registered artifacts (evaluation registration, runtime adapter registration, registered case artifacts). The client cannot force resolved values. Carries the full `ExperimentIdentity`: system, provider, exact model identifier, adapter identity/version, protocol and runtime identity, configuration hash, tools/retrieval policy, and the case/prompt authority fields.
+- `RegisteredCaseArtifact` — the sole prompt authority. In the scientific path the prompt is derived only from this server-side registration; the resolved request carries `case_id`, `case_artifact_hash`, and `prompt_hash`; evidence records the prompt reference, never the protected prompt text.
+- `UniversalExecutionResult` — normalized execution/transport facts only (transport status, provider status, normalized output, response/execution metadata). Provider transport structures (`output`, `choices`, `candidates`) never leak into it, and scientific keys (ground truth, expected class, scores, adjudication) are structurally refused — execution is not an adjudicator. Scientific evaluation remains a separate downstream layer over Evidence.
+
+Boundary guarantees are enforced by tests (`tests/test_execution_contract.py`, invariants A–J): model neutrality (model substitution needs no new adapter), provider neutrality (all adapters flow through the same contract), client boundary, case authority, ground-truth isolation across all three contract types, scientific separation, evidence/audit neutrality (identical schema shape across providers), adapter boundary, and historical integrity (the contract layer writes nothing).
+
+The `LocalGateway` now executes through this contract: the HTTP payload is parsed into a `ClientExecutionIntent`, resolved internally, released through the existing credential binding/grant machinery, dispatched through the existing `RuntimeAdapterRegistry`, and normalized into a `UniversalExecutionResult` before evidence/audit generation. Evidence additionally records the contract metadata (`model`, `adapter_version`, `protocol_version`, `case_id`, `prompt_hash`, `prompt_reference`, `experiment_identity`, `experiment_identity_hash`) as flat, provider-neutral fields.
