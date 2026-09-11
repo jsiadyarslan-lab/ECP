@@ -77,11 +77,7 @@ class RuntimeAdapterRegistry:
 
 
 class OpenAIResponsesAdapter:
-    """One controlled OpenAI Responses API conformance implementation.
-
-    The API key is supplied only as a ``SecretLease`` by the execution layer.
-    The adapter stores no credential and returns a small normalized result.
-    """
+    """One controlled OpenAI Responses API conformance implementation."""
 
     provider = "example-provider"
     adapter_id = "example-adapter"
@@ -132,6 +128,64 @@ class OpenAIResponsesAdapter:
         return {
             "provider_status": "RECEIVED",
             "response_id": response.get("id") if isinstance(response, dict) else None,
+            "model": self.model,
+            "output_text": output,
+            "request_id": request["request_id"],
+        }
+
+
+class GeminiGenerateContentAdapter:
+    """One controlled Gemini generateContent conformance implementation."""
+
+    provider = "example-provider"
+    adapter_id = "example-adapter"
+
+    def __init__(
+        self,
+        *,
+        model: str,
+        endpoint: str,
+        provider: str = "ECP-PROVIDER-GEMINI",
+        adapter_id: str = "ECP-ADAPTER-GEMINI-GENERATE-CONTENT",
+        transport: Callable[[str, Mapping[str, str], bytes, float], tuple[int, bytes]] | None = None,
+        prompt: str = "ECP controlled conformance probe. Reply with exactly: ECP-CONFORMANCE-OK",
+    ) -> None:
+        if not model or not endpoint:
+            raise ValueError("model and endpoint are required")
+        self.model = model
+        self.endpoint = endpoint.rstrip("/")
+        self.provider = provider
+        self.adapter_id = adapter_id
+        self.prompt = prompt
+        self._transport = transport or _post_json
+
+    def execute(self, lease: Any, request: Mapping[str, str]) -> Mapping[str, Any]:
+        payload = json.dumps({"contents": [{"parts": [{"text": self.prompt}]}]}).encode("utf-8")
+        headers = {"x-goog-api-key": lease.value, "Content-Type": "application/json"}
+        try:
+            status, body = self._transport(self.endpoint, headers, payload, 30.0)
+        except (OSError, urllib_error.URLError, TimeoutError) as exc:
+            raise RuntimeAdapterTransportError(_transport_failure_message(self.endpoint, exc)) from exc
+        if status < 200 or status >= 300:
+            if status in {401, 403}:
+                category = "PROVIDER_AUTHENTICATION_FAILED"
+            elif status == 408 or status == 504:
+                category = "PROVIDER_TIMEOUT"
+            elif status == 429:
+                category = "PROVIDER_RATE_LIMITED"
+            else:
+                category = "PROVIDER_REQUEST_FAILED"
+            raise RuntimeAdapterTransportError(category)
+        try:
+            response = json.loads(body.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise RuntimeAdapterTransportError("MALFORMED_PROVIDER_RESPONSE") from exc
+        output = _gemini_response_text(response)
+        if not output:
+            raise RuntimeAdapterTransportError("MALFORMED_PROVIDER_RESPONSE")
+        return {
+            "provider_status": "RECEIVED",
+            "response_id": None,
             "model": self.model,
             "output_text": output,
             "request_id": request["request_id"],
@@ -193,18 +247,37 @@ def _response_text(response: Any) -> str | None:
     return "".join(chunks).strip() or None
 
 
+def _gemini_response_text(response: Any) -> str | None:
+    if not isinstance(response, dict):
+        return None
+    chunks: list[str] = []
+    for candidate in response.get("candidates", []):
+        content = candidate.get("content", {}) if isinstance(candidate, dict) else {}
+        for part in content.get("parts", []) if isinstance(content, dict) else []:
+            if isinstance(part, dict) and isinstance(part.get("text"), str):
+                chunks.append(part["text"])
+    return "".join(chunks).strip() or None
+
+
 def openai_conformance_adapter(*, model: str | None = None, endpoint: str | None = None) -> OpenAIResponsesAdapter:
-    """Build the isolated first-provider adapter from runtime configuration."""
     base = endpoint or os.environ.get("OPENAI_API_BASE", "https://api.openai.com/v1").rstrip("/")
     return OpenAIResponsesAdapter(model=model or os.environ.get("ECP_CONFORMANCE_MODEL", "gpt-5-mini"), endpoint=f"{base}/responses")
 
 
+def gemini_conformance_adapter(*, model: str | None = None, endpoint: str | None = None) -> GeminiGenerateContentAdapter:
+    model_name = model or os.environ.get("ECP_GEMINI_MODEL", "gemini-3.8-flash")
+    base = endpoint or os.environ.get("GEMINI_API_BASE", "https://generativelanguage.googleapis.com/v1beta").rstrip("/")
+    return GeminiGenerateContentAdapter(model=model_name, endpoint=f"{base}/models/{model_name}:generateContent")
+
+
 __all__ = [
+    "GeminiGenerateContentAdapter",
     "OpenAIResponsesAdapter",
     "RuntimeAdapterBindingError",
     "RuntimeAdapterError",
     "RuntimeAdapterRegistry",
     "RuntimeAdapterTransportError",
     "RuntimeAdapterUnavailable",
+    "gemini_conformance_adapter",
     "openai_conformance_adapter",
 ]
