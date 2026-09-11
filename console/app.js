@@ -9,10 +9,23 @@
   const setPill = (id, text, tone = "neutral") => { const el = $(id); el.textContent = text; el.className = `pill ${tone}`; };
   const setText = (id, text) => { $(id).textContent = text == null ? "—" : String(text); };
   const safeError = (error) => { $("error").textContent = error instanceof Error ? error.message : "Gateway request failed"; };
+  const clearCatalog = () => {
+    catalog = null;
+    current = null;
+    $("evaluation-select").replaceChildren();
+    $("evaluation-select").disabled = true;
+    $("credential-select").replaceChildren();
+    $("credential-select").disabled = true;
+    $("test-select").replaceChildren();
+    $("test-select").disabled = true;
+    $("run-button").disabled = true;
+    setPill("catalog-state", "NOT LOADED", "neutral");
+    setText("selection-detail", "Pair with the current temporary code to load the authorized evaluation catalog.");
+  };
   const clearSession = () => {
     session = null;
     localStorage.removeItem(sessionStorageKey);
-    $("run-button").disabled = true;
+    clearCatalog();
   };
   const requirePairing = () => {
     clearSession();
@@ -135,7 +148,7 @@
       if (error.status === 401 || error.state === "AUTHENTICATION_REQUIRED") {
         requirePairing();
         setPill("execution-state", "ERROR", "bad");
-        safeError(new Error("Gateway session expired or was replaced. Pair again with the current temporary code."));
+        safeError(new Error("Gateway session expired. Pair again with the current temporary code."));
       } else {
         setPill("execution-state", "ERROR", "bad");
         safeError(error);
