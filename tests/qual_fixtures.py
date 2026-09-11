@@ -50,7 +50,6 @@ VALID_ENV = {
     "answer_bearing_artifacts": "fixture: GT and formal layer stay in the private area",
 }
 
-#: A minimal valid relational-closure case (transitive chain, DERIVABLE).
 CASE_BLOCK_T1 = """CASE ID: T-001
 PROPOSED_REASONING_FAMILY: transitive-relational
 STRUCTURAL_SIGNATURE: fixture 3-entity chain, transitivity + asymmetry
@@ -107,11 +106,8 @@ SELF_REVIEW:
 - Structurally distinct: Yes
 """
 
-#: Same structure with renamed entities + relations — identical skeleton
-#: (renaming is NOT a new case, order §7).
 CASE_BLOCK_T1_RENAMED = CASE_BLOCK_T1.replace("T-001", "T-002").replace("vex", "zib").replace("lum", "pax").replace("tor", "quu").replace("taller", "older")
 
-#: A propositional case (contrapositive, CONTRADICTED).
 CASE_BLOCK_P1 = """CASE ID: P-001
 PROPOSED_REASONING_FAMILY: conditional-chaining
 STRUCTURAL_SIGNATURE: fixture 2-link chain + negated consequent, MT root query
@@ -166,8 +162,6 @@ SELF_REVIEW:
 - Structurally distinct: Yes
 """
 
-#: A WRONG-GT case: authored class DERIVABLE but the formal layer yields
-#: CONTRADICTED (cycle under transitivity + asymmetry).
 CASE_BLOCK_X1 = """CASE ID: X-001
 PROPOSED_REASONING_FAMILY: transitive-relational
 STRUCTURAL_SIGNATURE: fixture 3-entity cycle, mismatched authored class
@@ -278,92 +272,51 @@ def make_candidate(candidate_id: str = "ECP-CAND-000101", **overrides) -> dict:
         "premises": [
             {"kind": "impl", "if": ["beacon"], "then": "gate"},
             {"kind": "impl", "if": ["gate"], "then": "horn"},
-            {"kind": "impl", "if": ["horn"], "then": "bridge"},
-            {"kind": "prop_fact", "prop": "beacon", "value": True},
+            {"kind": "prop_fact", "prop": "horn", "value": True},
         ],
-        "query": {"prop": "bridge", "value": True},
-    }
-    content = {
-        "proposed_reasoning_family": "conditional-chaining",
-        "structural_signature": "fixture 3-link chain + true antecedent, forward query",
-        "premises": [
-            "If the beacon is lit, then the gate opens.",
-            "If the gate opens, then the horn sounds.",
-            "If the horn sounds, then the bridge lowers.",
-            "The beacon is lit.",
-        ],
-        "question": "Does the bridge lower? Answer with: yes, no, or cannot be determined.",
-        "intended_correct_answers": [{"value": "Yes — the bridge lowers.", "source_block": 1}],
-        "derivations": [
-            {"raw": "1. From premise 4 and premise 1: the gate opens.\n2. Thence the horn sounds; thence the bridge lowers.", "source_block": 1}
-        ],
-        "difficulty": "MEDIUM",
-        "retrieval_risk": "fixture: chained conditional shape, invented content.",
-        "ambiguity_risk": "Low (fixture).",
-        "structural_uniqueness_rationale": "fixture: three-link forward chain.",
-        "self_review": {
-            "derivable": "Yes",
-            "unique": "Yes",
-            "self_contained": "Yes",
-            "no_external_knowledge": "Yes",
-            "no_real_world_dependency": "Yes",
-            "structurally_distinct": "Yes",
-        },
-        "expected_property": "A three-step modus-ponens chain to the terminal consequent.",
-        "forbidden_shortcuts": ["Do not conclude without using the antecedent fact."],
-        "ground_truth": {"class": "DERIVABLE", "statement": "the bridge lowers"},
-        "formal": formal,
+        "query": {"prop": "beacon", "value": True},
     }
     candidate = {
         "ecp_object": "case-candidate",
-        "content_class": "review",
         "candidate_id": candidate_id,
-        "source": {
-            "case_id": "F-001",
-            "source_position": 1,
-            "source_document": {
-                "label": "fixture-source.md",
-                "sha256": "0" * 64,
-                "format": "M3-CA0V1-case-set-md-2",
+        "candidate_version": "1.0.0",
+        "case_status": "candidate",
+        "content": {
+            "case_id": "SYN-001",
+            "case_version": "1.0.0",
+            "proposed_reasoning_family": "Synthetic Propositional",
+            "structural_signature": "fixture minimal chain",
+            "premises": ["If beacon then gate", "If gate then horn", "Horn is true"],
+            "question": "Is beacon true?",
+            "intended_correct_answers": [{"value": "Yes", "source_block": 1}],
+            "derivations": [{"raw": "Beacon implies gate implies horn.", "source_block": 1}],
+            "difficulty": "SHALLOW",
+            "retrieval_risk": "Synthetic fixture.",
+            "ambiguity_risk": "Low.",
+            "structural_uniqueness_rationale": "Synthetic fixture.",
+            "self_review": {
+                "derivable": "Yes",
+                "unique": "Yes",
+                "self_contained": "Yes",
+                "no_external_knowledge": "Yes",
+                "no_real_world_entity_dependency": "Yes",
+                "structurally_distinct": "Yes",
             },
+            "formal": formal,
         },
-        "raw_block": "CASE ID: F-001\n(fixture raw block)",
+        "raw_block": "CASE ID: SYN-001",
         "provenance": {
-            "authored_by": {"model": "fixture", "provider": "test"},
-            "authored_at": "2026-09-09T00:00:00Z",
-            "information_boundary": "isolated",
-            "acquisition": {"label": "fixture", "sha256": "0" * 64, "acquired_at": "2026-09-09T00:00:00Z"},
-            "transformation_history": [
-                {"event": "fixture", "at": "2026-09-09T00:00:00Z", "evidence": "tests"}
-            ],
-            "provenance_completeness": {"status": "COMPLETE", "not_available": []},
+            "source_label": "fixture",
+            "source_sha256": "0" * 64,
+            "candidate_flags": [],
         },
         "authoring_independence": json.loads(json.dumps(VALID_INDEPENDENCE)),
-        "representation_bias_disclosure": json.loads(json.dumps(VALID_RB)),
-        "environmental_pre_check": json.loads(json.dumps(VALID_ENV)),
-        "content": content,
-        "content_hash": hash_document(content),
+        "representation_bias_disclosure": dict(VALID_RB),
+        "environmental_pre_check": dict(VALID_ENV),
         "protocol_version": "0.5.0",
         "schema_version": "0.5.0",
     }
-    for dotted_path, value in overrides.items():
-        node = candidate
-        keys = dotted_path.replace("__", ".").split(".")
-        # allow "content__formal__query" style keys for mutation convenience
-        for key in keys[:-1]:
-            node = node[key]
-        if value is _DELETE:
-            del node[keys[-1]]
-        else:
-            node[keys[-1]] = value
-    # recompute identity unless the test explicitly tampered with it
-    if overrides.get("content_hash") is None and "content_hash" not in overrides:
-        candidate["content_hash"] = hash_document(candidate["content"])
+    candidate["content_hash"] = hash_document(candidate["content"])
+    for key, value in overrides.items():
+        candidate[key] = value
     return candidate
-
-
-class _Delete:
-    """Sentinel for field deletion in overrides."""
-
-
-_DELETE = _Delete()
