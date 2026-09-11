@@ -13,12 +13,18 @@
     if (session) headers["X-ECP-Session"] = session;
     const response = await fetch(`${gatewayUrl}${path}`, { ...options, headers });
     const payload = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(payload.error || `Gateway returned ${response.status}`);
+    if (!response.ok) {
+      const error = new Error(payload.error || `Gateway returned ${response.status}`);
+      error.status = response.status;
+      error.state = payload.state;
+      throw error;
+    }
     return payload;
   }
   async function status() {
     try {
       const payload = await call("/api/v1/status");
+      if (payload.authentication !== "PAIRED") session = null;
       setPill("gateway-state", payload.authentication === "PAIRED" ? "CONNECTED" : "AUTHENTICATION REQUIRED", payload.authentication === "PAIRED" ? "good" : "warn");
       setText("gateway-detail", payload.authentication === "PAIRED" ? "Authenticated loopback gateway is ready." : "Gateway is running. Pair it with the short-lived code printed locally.");
     } catch (_) {
@@ -86,7 +92,18 @@
     try {
       const record = await call("/api/v1/executions", { method: "POST", body: JSON.stringify(request) });
       render(record);
-    } catch (error) { setPill("execution-state", "ERROR", "bad"); safeError(error); }
+    } catch (error) {
+      if (error.status === 401 || error.state === "AUTHENTICATION_REQUIRED") {
+        session = null;
+        setPill("gateway-state", "AUTHENTICATION REQUIRED", "warn");
+        setText("gateway-detail", "The gateway session expired or restarted. Pair again with the current temporary code.");
+        setPill("execution-state", "ERROR", "bad");
+        safeError(new Error("Gateway session expired. Pair again with the current temporary code."));
+      } else {
+        setPill("execution-state", "ERROR", "bad");
+        safeError(error);
+      }
+    }
     finally { $("run-button").disabled = false; }
   }
   $("pair-button").addEventListener("click", pair);
