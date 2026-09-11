@@ -14,6 +14,7 @@ from ecp.console import (
     GatewayConfig,
     LocalGateway,
     ProviderAdapter,
+    build_demo_gateway,
 )
 from ecp.credentials import CredentialGateway, CredentialIdentity
 from ecp.credential_binding import AuthorizationGrant, CredentialBinding
@@ -216,3 +217,195 @@ def test_static_ui_has_no_provider_or_secret_write_path():
     assert "secret_value" not in app.lower()
     assert "GitHub write tokens" not in html
     assert "Ground Truth" in html
+
+
+# ---------------------------------------------------------------------------
+# Focused authentication/pairing reconciliation tests.
+#
+# Regression context: POST /api/v1/executions used to return 401 even with a
+# valid paired session, because LocalGateway.execute() raised AuthorizationError
+# (mapped to 401 AUTHENTICATION_REQUIRED) when an evaluation lacked the
+# credential binding and authorization grant, and the demo gateway shipped
+# exactly such an unwired evaluation. The browser then discarded a perfectly
+# valid session and demanded re-pairing on every run. These tests pin the
+# reconciled contract: 401 is reserved for session authentication failures;
+# execution-authorization refusals are 403; a valid paired session proceeds to
+# the execution authorization layer (scoped credential release) without any
+# external provider call.
+# ---------------------------------------------------------------------------
+
+
+DEMO_REQUEST = {
+    "evaluation_id": "ECP-EVAL-CONSOLE-TEST",
+    "system_id": "ECP-SYSTEM-CONSOLE-TEST",
+    "credential_ref": "cred-1",
+    "test_id": "test-1",
+    "request_id": "auth-focused",
+}
+
+
+def _pair_over_http(gateway):
+    status, payload, _ = request(gateway, "POST", "/api/v1/pair", {"pairing_code": gateway.pairing_code})
+    assert status == 200
+    return payload["session"]
+
+
+def test_preflight_allows_execution_post(running_gateway):
+    """The browser CORS preflight for POST /api/v1/executions succeeds."""
+    gateway, _, _, _ = running_gateway
+    status, _, headers = request(gateway, "OPTIONS", "/api/v1/executions")
+    assert status == 204
+    assert "X-ECP-Session" in headers["Access-Control-Allow-Headers"]
+
+
+def test_unauthenticated_execution_post_is_401(running_gateway):
+    """Unauthenticated: POST /api/v1/executions without a session -> 401."""
+    gateway, _, _, _ = running_gateway
+    status, payload, _ = request(gateway, "POST", "/api/v1/executions", DEMO_REQUEST)
+    assert status == 401
+    assert payload["state"] == "AUTHENTICATION_REQUIRED"
+
+
+def test_invalid_session_execution_post_is_401(running_gateway):
+    """Invalid authentication: a session token that was never issued (or that
+    expired when the gateway process restarted) -> 401."""
+    gateway, _, _, _ = running_gateway
+    status, payload, _ = request(gateway, "POST", "/api/v1/executions", DEMO_REQUEST, token="not-an-issued-session-token")
+    assert status == 401
+    assert payload["state"] == "AUTHENTICATION_REQUIRED"
+
+    # An expired session (token removed from gateway memory) is the same path.
+    token = _pair_over_http(gateway)
+    with gateway._session_lock:
+        gateway._session_tokens.clear()
+    status, payload, _ = request(gateway, "POST", "/api/v1/executions", dict(DEMO_REQUEST, request_id="auth-expired"), token=token)
+    assert status == 401
+    assert payload["state"] == "AUTHENTICATION_REQUIRED"
+
+
+def test_paired_session_execution_post_is_not_401(running_gateway):
+    """Valid paired session: PAIR -> authenticated session -> POST
+    /api/v1/executions is NOT 401; the request proceeds through the execution
+    authorization layer (binding, grant, scoped release) to the registered
+    synthetic adapter. No external provider call is made."""
+    gateway, adapter, _, _ = running_gateway
+    token = _pair_over_http(gateway)
+    status, payload, _ = request(gateway, "POST", "/api/v1/executions", DEMO_REQUEST, token=token)
+    assert status != 401
+    assert status == 200
+    assert payload["status"] == "SUCCESS"
+    assert payload["execution_id"].startswith("ECP-EXEC-CONSOLE-")
+    assert adapter.calls == 1  # entered the execution pipeline; synthetic adapter only
+
+
+def test_demo_gateway_paired_session_execution_post_is_not_401(tmp_path, monkeypatch):
+    """The actual demo wiring used by `python -m ecp.console` must not return
+    401 for a valid paired session: the request passes session authentication,
+    passes the wired binding/grant checks, and enters the scoped credential
+    release layer, which fails closed when the example credential is not
+    provisioned. No external provider call is made."""
+    monkeypatch.delenv("ECP_EXAMPLE_CREDENTIAL", raising=False)
+    monkeypatch.delenv("ECP_EXAMPLE_CREDENTIAL_ENV", raising=False)
+    with socket.socket() as probe:
+        probe.bind(("127.0.0.1", 0))
+        port = probe.getsockname()[1]
+    gateway = build_demo_gateway(GatewayConfig(frozenset({ORIGIN}), port=port, artifact_root=tmp_path))
+    server = gateway.make_server()
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        token = _pair_over_http(gateway)
+        demo_request = {
+            "evaluation_id": "ECP-EVAL-CONSOLE-EXAMPLE",
+            "system_id": "ECP-SYSTEM-CONSOLE-EXAMPLE",
+            "credential_ref": "credential-ref-example",
+            "test_id": "connectivity-probe",
+            "request_id": "demo-auth-focused",
+        }
+        status, payload, _ = request(gateway, "POST", "/api/v1/executions", demo_request, token=token)
+        assert status != 401
+        assert status == 200
+        # Fail-closed terminal record from the credential release layer: proves
+        # the authenticated request passed the execution authorization wiring
+        # and reached CredentialGateway.release() without any provider call.
+        assert payload["status"] == "FAILED"
+        assert payload["error_classification"] == "CREDENTIAL_ERROR"
+        assert "not provisioned" in payload["error"]
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
+def test_demo_gateway_fail_closed_adapter_outcome(tmp_path, monkeypatch):
+    """With the example environment credential provisioned, the demo gateway
+    releases the scoped lease and reaches the fail-closed UnconfiguredAdapter,
+    which makes no external call and reports the documented
+    INCONCLUSIVE / ADAPTER_UNAVAILABLE outcome."""
+    synthetic = "ecp-example-credential-synthetic-placeholder"
+    monkeypatch.setenv("ECP_EXAMPLE_CREDENTIAL", synthetic)
+    monkeypatch.delenv("ECP_EXAMPLE_CREDENTIAL_ENV", raising=False)
+    with socket.socket() as probe:
+        probe.bind(("127.0.0.1", 0))
+        port = probe.getsockname()[1]
+    gateway = build_demo_gateway(GatewayConfig(frozenset({ORIGIN}), port=port, artifact_root=tmp_path))
+    server = gateway.make_server()
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        token = _pair_over_http(gateway)
+        demo_request = {
+            "evaluation_id": "ECP-EVAL-CONSOLE-EXAMPLE",
+            "system_id": "ECP-SYSTEM-CONSOLE-EXAMPLE",
+            "credential_ref": "credential-ref-example",
+            "test_id": "connectivity-probe",
+            "request_id": "demo-adapter-focused",
+        }
+        status, payload, _ = request(gateway, "POST", "/api/v1/executions", demo_request, token=token)
+        assert status != 401
+        assert status == 200
+        assert payload["execution_status"] == "INCONCLUSIVE"
+        assert payload["error_classification"] == "ADAPTER_UNAVAILABLE"
+        # The synthetic credential value never appears in any browser-visible record.
+        assert synthetic not in json.dumps(payload)
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
+def test_unwired_evaluation_is_403_not_401_and_session_survives(tmp_path):
+    """An evaluation registered without binding/grant is an execution-
+    authorization refusal (403 EXECUTION_AUTHORIZATION_REQUIRED), never 401:
+    the paired session is valid and keeps working for authenticated calls."""
+    identity = CredentialIdentity("cred-1", "synthetic-provider", "test", frozenset({"execute"}))
+    credentials, _ = CredentialGateway.for_testing({"cred-1": identity})
+    unwired = AuthorizedEvaluation(
+        "ECP-EVAL-CONSOLE-TEST",
+        "ECP-SYSTEM-CONSOLE-TEST",
+        "synthetic-provider",
+        "synthetic-adapter",
+        identity,
+        (AuthorizedTest("test-1", "Synthetic registered test", "execute"),),
+    )
+    with socket.socket() as probe:
+        probe.bind(("127.0.0.1", 0))
+        port = probe.getsockname()[1]
+    gateway = LocalGateway(
+        GatewayConfig(frozenset({ORIGIN}), port=port, artifact_root=tmp_path),
+        {unwired.evaluation_id: unwired},
+        credentials,
+        {"synthetic-adapter": SafeAdapter("unused")},
+    )
+    server = gateway.make_server()
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        token = _pair_over_http(gateway)
+        status, payload, _ = request(gateway, "POST", "/api/v1/executions", DEMO_REQUEST, token=token)
+        assert status == 403
+        assert payload["state"] == "EXECUTION_AUTHORIZATION_REQUIRED"
+        # The same paired session still authenticates other calls.
+        status, payload, _ = request(gateway, "GET", "/api/v1/catalog", token=token)
+        assert status == 200
+    finally:
+        server.shutdown()
+        server.server_close()

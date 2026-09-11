@@ -14,7 +14,7 @@ import secrets
 import threading
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Callable, Mapping
@@ -36,6 +36,7 @@ DEFAULT_CONSOLE_ORIGINS = (
     "http://localhost:8766",
 )
 PAIRING_TTL_SECONDS = 600
+DEMO_GRANT_TTL_SECONDS = 86400
 POLL_INTERVAL_MS = 1500
 EXECUTION_TIMEOUT_SECONDS = 120
 _ALLOWED_REQUEST_KEYS = {"evaluation_id", "test_id", "system_id", "credential_ref", "request_id"}
@@ -46,7 +47,25 @@ class ConsoleError(Exception):
 
 
 class AuthorizationError(ConsoleError):
-    pass
+    """Session authentication failure at the gateway boundary.
+
+    Reserved for missing, invalid, or expired paired-session tokens. The HTTP
+    layer maps this to 401 AUTHENTICATION_REQUIRED, which instructs the console
+    to drop the stored session and re-pair. It must never be raised for
+    execution-layer authorization refusals, or a valid paired session would be
+    discarded as if it had expired.
+    """
+
+
+class ExecutionAuthorizationError(ConsoleError):
+    """Execution-layer authorization refusal (distinct from session auth).
+
+    Raised when a registered evaluation lacks the credential binding and
+    authorization grant required to enter the scoped release path. This is a
+    failure of the execution authorization layer, not of the paired session,
+    so the HTTP layer reports it as 403 EXECUTION_AUTHORIZATION_REQUIRED and
+    the console keeps its authenticated session.
+    """
 
 
 class AdapterUnavailable(ConsoleError):
@@ -244,7 +263,7 @@ class LocalGateway:
         if test is None:
             raise ConsoleError("unknown test")
         if evaluation.credential_binding is None or evaluation.authorization_grant is None:
-            raise AuthorizationError("credential binding and authorization grant are required")
+            raise ExecutionAuthorizationError("credential binding and authorization grant are required")
         safe_request = {key: str(request[key]) for key in ("evaluation_id", "test_id", "system_id", "credential_ref", "request_id")}
         record = self.store.create(safe_request["request_id"], safe_request)
         if record["status"] != "REQUESTED":
@@ -373,6 +392,8 @@ class LocalGateway:
                         self._json(200, gateway.execute(body))
                     else:
                         self._json(404, {"error": "not found"})
+                except ExecutionAuthorizationError as exc:
+                    self._json(403, {"error": str(exc), "state": "EXECUTION_AUTHORIZATION_REQUIRED"})
                 except AuthorizationError as exc:
                     self._json(401, {"error": str(exc), "state": "AUTHENTICATION_REQUIRED"})
                 except (ConsoleError, ValueError, json.JSONDecodeError) as exc:
@@ -385,8 +406,9 @@ class LocalGateway:
         self._httpd = ThreadingHTTPServer(("127.0.0.1", self.config.port), Handler)
         return self._httpd
 
-    def serve_forever(self) -> None:
-        self.make_server().serve_forever()
+    def serve_forever(self, server: ThreadingHTTPServer | None = None) -> None:
+        httpd = server or self.make_server()
+        httpd.serve_forever()
 
 
 def _validate_request(request: Mapping[str, Any]) -> None:
@@ -430,7 +452,34 @@ def default_gateway_config() -> GatewayConfig:
 def build_demo_gateway(config: GatewayConfig | None = None) -> LocalGateway:
     identity = CredentialIdentity("credential-ref-example", "example-provider", "console integration", frozenset({"execute"}), status="PROVISIONED")
     gateway = CredentialGateway.from_environment(identity, os.environ.get("ECP_EXAMPLE_CREDENTIAL_ENV", "ECP_EXAMPLE_CREDENTIAL"))
-    evaluation = AuthorizedEvaluation("ECP-EVAL-CONSOLE-EXAMPLE", "ECP-SYSTEM-CONSOLE-EXAMPLE", "example-provider", "example-adapter", identity, (AuthorizedTest("connectivity-probe", "Registered connectivity probe", "execute"),))
+    binding = CredentialBinding(
+        "ECP-BINDING-CONSOLE-EXAMPLE",
+        "ECP-REQUIREMENT-CONSOLE-EXAMPLE",
+        "ECP-SYSTEM-CONSOLE-EXAMPLE",
+        "example-provider",
+        "environment-variable",
+        "execute",
+        "credential-ref-example",
+        frozenset({"execute"}),
+    )
+    grant = AuthorizationGrant(
+        "ECP-AUTH-CONSOLE-EXAMPLE",
+        "ECP-BINDING-CONSOLE-EXAMPLE",
+        "ECP-SYSTEM-CONSOLE-EXAMPLE",
+        "execute",
+        frozenset({"execute"}),
+        (datetime.now(timezone.utc) + timedelta(seconds=DEMO_GRANT_TTL_SECONDS)).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+    )
+    evaluation = AuthorizedEvaluation(
+        "ECP-EVAL-CONSOLE-EXAMPLE",
+        "ECP-SYSTEM-CONSOLE-EXAMPLE",
+        "example-provider",
+        "example-adapter",
+        identity,
+        (AuthorizedTest("connectivity-probe", "Registered connectivity probe", "execute"),),
+        binding,
+        grant,
+    )
     return LocalGateway(config or default_gateway_config(), {evaluation.evaluation_id: evaluation}, gateway, {"example-adapter": UnconfiguredAdapter()})
 
 
@@ -445,14 +494,20 @@ def main(argv: list[str] | None = None) -> int:
     if args.artifact_root is not None:
         config.artifact_root = Path(args.artifact_root)
     gateway = build_demo_gateway(config)
+    # Bind the loopback port BEFORE printing the pairing code: the printed code
+    # is the pairing credential delivery, so it must only be shown by a gateway
+    # that is actually listening. If the port is occupied (for example by a
+    # stale gateway process), this fails loudly instead of printing a code that
+    # no live gateway will accept.
+    server = gateway.make_server()
     print(f"ECP Local Gateway listening on 127.0.0.1:{config.port}")
     print(f"PAIRING CODE (expires in {config.pairing_ttl_seconds}s): {gateway.pairing_code}")
     print("Allowed origins: " + ", ".join(sorted(config.allowed_origins)))
-    gateway.serve_forever()
+    gateway.serve_forever(server)
     return 0
 
 
-__all__ = ["AdapterFailure", "AdapterUnavailable", "AuthorizedEvaluation", "AuthorizedTest", "ExecutionStore", "GatewayConfig", "LocalGateway", "ProviderAdapter", "build_demo_gateway", "default_gateway_config"]
+__all__ = ["AdapterFailure", "AdapterUnavailable", "AuthorizedEvaluation", "AuthorizedTest", "ExecutionAuthorizationError", "ExecutionStore", "GatewayConfig", "LocalGateway", "ProviderAdapter", "build_demo_gateway", "default_gateway_config"]
 
 if __name__ == "__main__":
     raise SystemExit(main())

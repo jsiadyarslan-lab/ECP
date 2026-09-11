@@ -18,6 +18,8 @@ This repository now contains a **controlled local-console scaffold** for the fut
 
 The gateway binds to `127.0.0.1` only. A short-lived pairing code is generated at startup, printed to the local terminal, held in memory, and expires after ten minutes by default. Pairing creates an in-memory session token. The token is not written to the repository, embedded in the static UI, or persisted in artifacts. The gateway accepts requests only from the explicit `ECP_CONSOLE_ALLOWED_ORIGINS` allowlist.
 
+`POST /api/v1/executions` distinguishes two failure classes. HTTP 401 (`AUTHENTICATION_REQUIRED`) is reserved exclusively for session authentication failures: a missing, invalid, or expired paired session. Execution-authorization refusals — a registered evaluation that lacks the credential binding and authorization grant required by the scoped release path — are reported as HTTP 403 (`EXECUTION_AUTHORIZATION_REQUIRED`) so the console keeps its valid paired session instead of discarding it. An authenticated request for a fully wired evaluation proceeds into the execution authorization layer (binding, grant, scoped `CredentialGateway` release) and returns a terminal execution record; the shipped example evaluation is wired with a non-secret control-plane binding and grant that carry no credential material.
+
 The default origins are the GitHub Pages origin and a local static-console origin on port `8766`. The port is fixed at `8765` by default and can be changed only with `ECP_GATEWAY_PORT`. The gateway refuses non-loopback binding by construction.
 
 ## Lifecycle
