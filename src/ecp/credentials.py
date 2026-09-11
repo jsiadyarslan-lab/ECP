@@ -232,6 +232,12 @@ class CredentialGateway:
         return cls(EnvironmentSecretStore(variable_name), {identity.credential_id: identity})
 
     @classmethod
+    def from_windows(cls, identity: CredentialIdentity, namespace: str = "ECP") -> "CredentialGateway":
+        """Construct the governed gateway over Windows Credential Manager."""
+        from .windows_credentials import WindowsCredentialStore
+        return cls(WindowsCredentialStore(namespace), {identity.credential_id: identity})
+
+    @classmethod
     def for_testing(cls, identities: Mapping[str, CredentialIdentity]) -> tuple["CredentialGateway", _MemorySecretStore]:
         store = _MemorySecretStore()
         return cls(store, identities), store

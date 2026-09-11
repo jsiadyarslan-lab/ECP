@@ -79,6 +79,7 @@ from .credential_binding import (
     ScopedReleaseRequest,
     validate_binding,
 )
+from .windows_credentials import WindowsCredentialStore
 from .targets import (
     DuplicateProvider,
     DuplicateTarget,
@@ -138,6 +139,7 @@ __all__ = [
     "CredentialRequirement",
     "ScopedReleaseRequest",
     "validate_binding",
+    "WindowsCredentialStore",
     "DuplicateProvider",
     "DuplicateTarget",
     "InvalidTarget",

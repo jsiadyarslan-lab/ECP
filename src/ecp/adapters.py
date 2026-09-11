@@ -18,6 +18,7 @@ from .targets import (
     _contains_secret_key,
 )
 from .validate import validate_document
+from .credential_binding import BindingScopeError, CredentialBinding
 
 
 class AdapterError(ValueError):
@@ -106,6 +107,16 @@ class ResolvedTarget:
     system_kind: str
     verified_capabilities: tuple[str, ...]
     resolution_status: str = "resolved"
+    authorization_ref: str | None = None
+
+    def assert_binding(self, binding: CredentialBinding) -> None:
+        """Enforce that this resolved target matches the release binding."""
+        if self.target_id != binding.target_id:
+            raise BindingScopeError("resolved target and binding target mismatch")
+        if self.provider_id != binding.provider_id:
+            raise BindingScopeError("resolved target and binding provider mismatch")
+        if self.provider_interface != binding.interface:
+            raise BindingScopeError("resolved target and binding interface mismatch")
 
 
 class TargetResolver:
@@ -150,9 +161,20 @@ class TargetResolver:
                 adapter_version=adapter["adapter_version"],
                 system_kind=system_kind,
                 verified_capabilities=required,
+                authorization_ref=target.get("authorization_ref"),
             )
         except (InvalidTarget, UnknownAdapter, UnknownProvider) as exc:
             raise ResolutionError(str(exc)) from exc
+
+    def resolve_for_binding(self, target_id: str, binding: CredentialBinding,
+                            target_version: str | None = None) -> ResolvedTarget:
+        """Resolve a target and fail closed unless its binding matches."""
+        resolved = self.resolve(target_id, target_version)
+        target = self.targets.get(target_id, target_version)
+        if target.get("credential_ref") != binding.credential_ref:
+            raise BindingScopeError("resolved target and binding credential mismatch")
+        resolved.assert_binding(binding)
+        return resolved
 
 
 __all__ = [
