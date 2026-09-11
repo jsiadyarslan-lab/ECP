@@ -1539,14 +1539,27 @@ def verify_trust_store(root: "str | Path") -> dict:
         return base
 
     # -- manifest ----------------------------------------------------------
+    # Read the manifest raw first (without hash verification) so that
+    # a canonically-recomputed tampered manifest_hash does not prevent
+    # us from reaching the drift cross-check below.  We then separately
+    # verify the self-hash and report it as an issue rather than raising.
+    manifest_path = root / MANIFEST_FILE
+    if not manifest_path.is_file():
+        issues.append(f"manifest unreadable: no trust store manifest at {manifest_path}")
+        return report()
     try:
-        manifest = load_trust_manifest(root)
-    except TrustInvalid as exc:
+        manifest = _load_json(manifest_path)
+    except Exception as exc:
         issues.append(f"manifest unreadable: {exc}")
         return report()
-    except Exception as exc:  # pragma: no cover - defensive
-        issues.append(f"manifest unreadable: {exc}")
+    # schema check (fail-closed on structural problems)
+    _m_issues = _validate_or_issues(manifest, "trust-store-manifest")
+    if _m_issues:
+        issues.append("manifest invalid: " + "; ".join(_m_issues[:3]))
         return report()
+    # self-hash check: report as issue, do NOT return — drift check must run
+    if manifest.get("manifest_hash") != hash_document_excluding(manifest, "manifest_hash"):
+        issues.append("manifest: manifest_hash does not recompute")
 
     # -- gate ---------------------------------------------------------------
     try:
@@ -1613,12 +1626,18 @@ def verify_trust_store(root: "str | Path") -> dict:
         except Exception:
             issues.append(f"{path.name}: unreadable JSON")
             continue
+        # hash integrity check FIRST — must not be hidden by a schema-fail
+        # continue; the record may fail schema due to non-canonical encoding
+        # written by a test/tool, but the tamper-detection message must still
+        # appear.
+        if record.get("registration_hash") != hash_document_excluding(
+            record, "registration_hash"
+        ):
+            issues.append(f"{path.name}: registration_hash does not recompute")
         rec_issues = _validate_or_issues(record, "trust-registration")
         if rec_issues:
             issues.append(f"{path.name}: " + "; ".join(rec_issues[:3]))
             continue
-        if record["registration_hash"] != hash_document_excluding(record, "registration_hash"):
-            issues.append(f"{path.name}: registration_hash does not recompute")
         rid = record["registration_id"]
         if rid != path.stem:
             issues.append(f"{path.name}: registration_id/file name mismatch ({rid})")
