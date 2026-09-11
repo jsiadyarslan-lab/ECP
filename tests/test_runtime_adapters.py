@@ -6,6 +6,7 @@ from ecp.console import AuthorizedEvaluation, AuthorizedTest, GatewayConfig, Loc
 from ecp.credential_binding import AuthorizationGrant, CredentialBinding
 from ecp.credentials import CredentialGateway, CredentialIdentity, SecretLease
 from ecp.runtime_adapters import (
+    GeminiGenerateContentAdapter,
     OpenAIResponsesAdapter,
     RuntimeAdapterBindingError,
     RuntimeAdapterRegistry,
@@ -72,15 +73,7 @@ def test_openai_adapter_maps_provider_failures_without_response_body():
 
 
 def test_openai_adapter_classifies_rate_limit_without_exposing_provider_body():
-    body = json.dumps(
-        {
-            "error": {
-                "message": "sensitive provider detail",
-                "type": "rate_limit_exceeded",
-                "code": "rate_limit_exceeded",
-            }
-        }
-    ).encode()
+    body = json.dumps({"error": {"message": "sensitive provider detail", "type": "rate_limit_exceeded", "code": "rate_limit_exceeded"}}).encode()
 
     def transport(endpoint, headers, payload, timeout):
         return 429, body
@@ -101,6 +94,36 @@ def test_openai_adapter_classifies_insufficient_quota():
     adapter = OpenAIResponsesAdapter(model="test-model", endpoint="https://api.openai.com/v1/responses", transport=transport)
     with pytest.raises(RuntimeAdapterTransportError, match="PROVIDER_QUOTA_EXCEEDED"):
         adapter.execute(SecretLease("synthetic-secret", {}), {"request_id": "request-quota"})
+
+
+def test_gemini_adapter_normalizes_generate_content_response_without_credential():
+    def transport(endpoint, headers, payload, timeout):
+        assert endpoint.endswith("/models/gemini-test:generateContent")
+        assert headers["x-goog-api-key"] == "synthetic-secret"
+        assert json.loads(payload)["contents"][0]["parts"][0]["text"]
+        return 200, json.dumps({"candidates": [{"content": {"parts": [{"text": "ECP-CONFORMANCE-OK"}]}}]}).encode()
+
+    adapter = GeminiGenerateContentAdapter(model="gemini-test", endpoint="https://provider.invalid/v1beta/models/gemini-test:generateContent", transport=transport)
+    result = adapter.execute(SecretLease("synthetic-secret", {}), {"request_id": "request-gemini"})
+    assert result == {
+        "provider_status": "RECEIVED",
+        "response_id": None,
+        "model": "gemini-test",
+        "output_text": "ECP-CONFORMANCE-OK",
+        "request_id": "request-gemini",
+    }
+    assert "synthetic-secret" not in json.dumps(result)
+
+
+def test_gemini_adapter_maps_provider_failures_safely():
+    def transport(endpoint, headers, payload, timeout):
+        return 429, b"provider body may contain sensitive details"
+
+    adapter = GeminiGenerateContentAdapter(model="gemini-test", endpoint="https://provider.invalid/generateContent", transport=transport)
+    with pytest.raises(RuntimeAdapterTransportError, match="PROVIDER_RATE_LIMITED") as exc_info:
+        adapter.execute(SecretLease("synthetic-secret", {}), {"request_id": "request-gemini-429"})
+    assert "sensitive details" not in str(exc_info.value)
+    assert "synthetic-secret" not in str(exc_info.value)
 
 
 def test_openai_adapter_exposes_safe_transport_reason():
