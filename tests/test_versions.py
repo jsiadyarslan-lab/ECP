@@ -1,4 +1,4 @@
-"""Explicit version-compatibility tests (0.3.0 → … → 0.7.0 additive bundle).
+"""Explicit version-compatibility tests (0.3.0 → … → 0.8.0 additive bundle).
 
 0.1.x through 0.6.x artifacts are NOT silently reinterpreted and NOT
 invalidated: the matrix in ecp.versions is the single normative statement of
@@ -22,6 +22,7 @@ from ecp.versions import (
     V050_CONTRACTS,
     V060_CONTRACTS,
     V070_CONTRACTS,
+    V080_CONTRACTS,
     allowed_schema_versions,
     version_issues,
 )
@@ -36,8 +37,9 @@ def test_matrix_covers_all_known_object_types():
         | set(V050_CONTRACTS)
         | set(V060_CONTRACTS)
         | set(V070_CONTRACTS)
+        | set(V080_CONTRACTS)
     )
-    assert len(SCHEMA_VERSIONS) == 31
+    assert len(SCHEMA_VERSIONS) == 33
 
 
 def test_v010_contracts_accept_all_bundle_versions():

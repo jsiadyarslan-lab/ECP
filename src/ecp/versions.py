@@ -117,6 +117,14 @@ V070_CONTRACTS = (
     "runtime-observation",
 )
 
+# Object types introduced by the generic external target control-plane
+# foundation. These are operational metadata contracts, not scientific
+# registration or execution-result contracts.
+V080_CONTRACTS = (
+    "provider",
+    "target",
+)
+
 #: Per-object-type accepted ``schema_version`` values.
 SCHEMA_VERSIONS: dict = {
     **{name: ("0.1.0", "0.2.0", "0.3.0", "0.4.0", "0.5.0", "0.6.0", "0.7.0") for name in V010_CONTRACTS},
@@ -126,6 +134,7 @@ SCHEMA_VERSIONS: dict = {
     **{name: ("0.5.0", "0.6.0", "0.7.0") for name in V050_CONTRACTS},
     **{name: ("0.6.0", "0.7.0") for name in V060_CONTRACTS},
     **{name: ("0.7.0",) for name in V070_CONTRACTS},
+    **{name: ("0.8.0",) for name in V080_CONTRACTS},
 }
 
 #: Accepted ``protocol_version`` values for every artifact (protocol axis is

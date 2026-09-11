@@ -68,6 +68,16 @@ from .credentials import (
     redact_secrets,
     safe_exception_message,
 )
+from .targets import (
+    DuplicateProvider,
+    DuplicateTarget,
+    InvalidTarget,
+    ProviderRegistry,
+    TargetRegistry,
+    UnknownProvider,
+    provider_document,
+    target_hash,
+)
 
 __all__ = [
     "__version__",
@@ -98,4 +108,12 @@ __all__ = [
     "SecretStore",
     "redact_secrets",
     "safe_exception_message",
+    "DuplicateProvider",
+    "DuplicateTarget",
+    "InvalidTarget",
+    "ProviderRegistry",
+    "TargetRegistry",
+    "UnknownProvider",
+    "provider_document",
+    "target_hash",
 ]

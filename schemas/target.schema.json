@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ecp-protocol.org/0.8.0/target.schema.json",
+  "title": "ECP External Target",
+  "description": "Provider-neutral operational target metadata. References are not credentials, authorization decisions, scientific results, or evidence.",
+  "type": "object",
+  "required": ["ecp_object", "target_id", "target_version", "system", "provider", "adapter", "credential_ref", "authorization_ref", "evaluation_bindings", "test_bindings", "execution_environment"],
+  "properties": {
+    "ecp_object": { "const": "target" },
+    "target_id": { "type": "string", "pattern": "^ECP-TARGET-[A-Za-z0-9][A-Za-z0-9._:-]*$" },
+    "target_version": { "$ref": "#/$defs/semver" },
+    "system": {
+      "type": "object",
+      "required": ["system_id", "system_version", "system_kind"],
+      "properties": {
+        "system_id": { "type": "string", "pattern": "^ECP-SYSTEM-[A-Za-z0-9][A-Za-z0-9._:-]*$" },
+        "system_version": { "$ref": "#/$defs/semver" },
+        "system_kind": { "enum": ["model-only", "complete-system", "agent", "hybrid", "non-llm"] },
+        "configuration_ref": { "type": ["string", "null"], "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "provider": {
+      "type": "object",
+      "required": ["provider_id", "provider_version", "interface"],
+      "properties": {
+        "provider_id": { "type": "string", "pattern": "^ECP-PROVIDER-[A-Za-z0-9][A-Za-z0-9._:-]*$" },
+        "provider_version": { "$ref": "#/$defs/semver" },
+        "interface": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "adapter": {
+      "type": "object",
+      "required": ["adapter_id", "adapter_version", "provider_id"],
+      "properties": {
+        "adapter_id": { "type": "string", "pattern": "^ECP-ADAPTER-[A-Za-z0-9][A-Za-z0-9._:-]*$" },
+        "adapter_version": { "$ref": "#/$defs/semver" },
+        "provider_id": { "type": "string", "pattern": "^ECP-PROVIDER-[A-Za-z0-9][A-Za-z0-9._:-]*$" }
+      },
+      "additionalProperties": false
+    },
+    "ref": { "type": "string", "pattern": "^ECP-[A-Z0-9][A-Z0-9._:-]*$" },
+    "binding": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/ref" },
+      "uniqueItems": true
+    },
+    "execution_environment": {
+      "type": "object",
+      "required": ["environment_id", "runtime_version", "network"],
+      "properties": {
+        "environment_id": { "type": "string", "minLength": 1 },
+        "runtime_version": { "type": "string", "minLength": 1 },
+        "network": { "enum": ["enabled", "disabled", "controlled"] }
+      },
+      "additionalProperties": false
+    },
+    "credential_ref": { "$ref": "#/$defs/ref" },
+    "authorization_ref": { "$ref": "#/$defs/ref" },
+    "evaluation_bindings": { "$ref": "#/$defs/binding" },
+    "test_bindings": { "$ref": "#/$defs/binding" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "ref": { "type": "string", "pattern": "^ECP-[A-Z0-9][A-Z0-9._:-]*$" },
+    "binding": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/ref" },
+      "uniqueItems": true
+    },
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    }
+  }
+}

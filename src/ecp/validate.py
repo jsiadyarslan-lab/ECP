@@ -53,6 +53,9 @@ SCHEMA_FILES = {
     "lineage-event": "lineage-event.schema.json",
     "trust-store-manifest": "trust-store-manifest.schema.json",
     "runtime-observation": "runtime-observation.schema.json",
+    # Phase A generic external target control-plane contracts.
+    "provider": "provider.schema.json",
+    "target": "target.schema.json",
 }
 
 _CACHE: dict = {}
