@@ -52,6 +52,7 @@ def test_v010_contracts_accept_all_bundle_versions():
             "0.5.0",
             "0.6.0",
             "0.7.0",
+            "0.8.0",
         ), name
 
 
@@ -64,32 +65,33 @@ def test_v020_contracts_accept_020_through_070():
             "0.5.0",
             "0.6.0",
             "0.7.0",
+            "0.8.0",
         ), name
 
 
 def test_v030_contracts_accept_030_through_070():
     for name in V030_CONTRACTS:
-        assert allowed_schema_versions(name) == ("0.3.0", "0.4.0", "0.5.0", "0.6.0", "0.7.0"), name
+        assert allowed_schema_versions(name) == ("0.3.0", "0.4.0", "0.5.0", "0.6.0", "0.7.0", "0.8.0"), name
 
 
 def test_v040_contracts_accept_040_through_070():
     for name in V040_CONTRACTS:
-        assert allowed_schema_versions(name) == ("0.4.0", "0.5.0", "0.6.0", "0.7.0"), name
+        assert allowed_schema_versions(name) == ("0.4.0", "0.5.0", "0.6.0", "0.7.0", "0.8.0"), name
 
 
 def test_v050_contracts_accept_050_through_070():
     for name in V050_CONTRACTS:
-        assert allowed_schema_versions(name) == ("0.5.0", "0.6.0", "0.7.0"), name
+        assert allowed_schema_versions(name) == ("0.5.0", "0.6.0", "0.7.0", "0.8.0"), name
 
 
 def test_v060_contracts_accept_060_and_070():
     for name in V060_CONTRACTS:
-        assert allowed_schema_versions(name) == ("0.6.0", "0.7.0"), name
+        assert allowed_schema_versions(name) == ("0.6.0", "0.7.0", "0.8.0"), name
 
 
 def test_v070_contracts_accept_only_070():
     for name in V070_CONTRACTS:
-        assert allowed_schema_versions(name) == ("0.7.0",), name
+        assert allowed_schema_versions(name) == ("0.7.0", "0.8.0"), name
 
 
 def test_unknown_object_type_falls_back_to_union():

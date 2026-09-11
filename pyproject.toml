@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ecp-protocol"
-version = "0.4.0"
+version = "0.7.0"
 description = "ECP - Evidentiary Evaluation Protocol: provider-neutral foundation for cross-system evidentiary evaluation of AI systems."
 readme = "README.md"
 requires-python = ">=3.10"

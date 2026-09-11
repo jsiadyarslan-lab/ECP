@@ -37,13 +37,13 @@ def verify_protocol_compatibility(
     (``ecp.versions.PROTOCOL_VERSIONS`` / per-object-type accepted
     ``schema_version`` sets).
     """
-    from .versions import PROTOCOL_VERSIONS, version_issues
+    from .versions import allowed_schema_versions, version_issues
 
     identity = identity or load_identity()
     issues = version_issues(document)
     # The identity itself pins the CURRENT bundle; cross-check that the
     # repository is in a state this tooling understands.
-    if identity.get("schema_version") not in PROTOCOL_VERSIONS:
+    if identity.get("schema_version") not in allowed_schema_versions("protocol"):
         issues.append(
             f"identity: repository pins unsupported schema_version "
             f"{identity.get('schema_version')!r}"

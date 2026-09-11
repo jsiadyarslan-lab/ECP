@@ -20,9 +20,9 @@ def test_cli_identity(repo_root):
     assert result.returncode == 0
     document = json.loads(result.stdout)
     assert document["protocol_name"] == "ECP"
-    # 0.7.0 (M3-RG0 additive bundle: trust-layer contracts)
+    # Protocol identity remains 0.7.0; official schema bundle is 0.8.0.
     assert document["protocol_version"] == "0.7.0"
-    assert document["schema_version"] == "0.7.0"
+    assert document["schema_version"] == "0.8.0"
 
 
 def test_cli_validate_valid_document(repo_root):

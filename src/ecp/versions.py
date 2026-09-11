@@ -1,4 +1,4 @@
-"""Explicit protocol/schema version compatibility (0.3.0 → 0.4.0 → 0.5.0 → 0.6.0 → 0.7.0 additive).
+"""Explicit protocol/schema version compatibility through the 0.8.0 bundle.
 
 O8 (M3-R1 architecture decision, owner-approved) advanced the schema bundle
 to 0.2.0 by ADDING two new object contracts (``ledger-entry``,
@@ -46,6 +46,9 @@ Rules (normative, see spec §18–§22):
     owner-gate-order/registration-package/trust-registration/
     registration-amendment/lineage-event/trust-store-manifest/
     runtime-observation — the M3-RG0 trust layer) accept only ``0.7.0``.
+  - the 0.8.0 operational bundle adds provider/target/adapter contracts;
+    unchanged contracts from earlier bundles also accept ``0.8.0`` through
+    this explicit matrix. This does not add ``0.8.0`` to the protocol axis.
 
 Anything outside these sets is a compatibility violation (an issue, not an
 exception — the caller decides severity). There is still no implicit
@@ -128,13 +131,13 @@ V080_CONTRACTS = (
 
 #: Per-object-type accepted ``schema_version`` values.
 SCHEMA_VERSIONS: dict = {
-    **{name: ("0.1.0", "0.2.0", "0.3.0", "0.4.0", "0.5.0", "0.6.0", "0.7.0") for name in V010_CONTRACTS},
-    **{name: ("0.2.0", "0.3.0", "0.4.0", "0.5.0", "0.6.0", "0.7.0") for name in V020_CONTRACTS},
-    **{name: ("0.3.0", "0.4.0", "0.5.0", "0.6.0", "0.7.0") for name in V030_CONTRACTS},
-    **{name: ("0.4.0", "0.5.0", "0.6.0", "0.7.0") for name in V040_CONTRACTS},
-    **{name: ("0.5.0", "0.6.0", "0.7.0") for name in V050_CONTRACTS},
-    **{name: ("0.6.0", "0.7.0") for name in V060_CONTRACTS},
-    **{name: ("0.7.0",) for name in V070_CONTRACTS},
+    **{name: ("0.1.0", "0.2.0", "0.3.0", "0.4.0", "0.5.0", "0.6.0", "0.7.0", "0.8.0") for name in V010_CONTRACTS},
+    **{name: ("0.2.0", "0.3.0", "0.4.0", "0.5.0", "0.6.0", "0.7.0", "0.8.0") for name in V020_CONTRACTS},
+    **{name: ("0.3.0", "0.4.0", "0.5.0", "0.6.0", "0.7.0", "0.8.0") for name in V030_CONTRACTS},
+    **{name: ("0.4.0", "0.5.0", "0.6.0", "0.7.0", "0.8.0") for name in V040_CONTRACTS},
+    **{name: ("0.5.0", "0.6.0", "0.7.0", "0.8.0") for name in V050_CONTRACTS},
+    **{name: ("0.6.0", "0.7.0", "0.8.0") for name in V060_CONTRACTS},
+    **{name: ("0.7.0", "0.8.0") for name in V070_CONTRACTS},
     **{name: ("0.8.0",) for name in V080_CONTRACTS},
 }
 

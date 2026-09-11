@@ -24,12 +24,26 @@ for the ECP foundation objects:
 | `case-amendment.schema.json` | `case-amendment` | **0.4.0 (new, M3-CA0-A)** | adjudication layer — versioned case amendment with the two-phase representation-bias disclosure (draft_hash + amendment_hash) |
 | `case-qualification.schema.json` | `case-qualification` | **0.5.0 (new, M3-CA0 v1)** | qualification layer — deterministic four-state artifact (ACCEPT/REVISE/REJECT/INCONCLUSIVE, private qualification area only) |
 | `qualification-run.schema.json` | `qualification-run` | **0.5.0 (new, M3-CA0 v1)** | qualification layer — run manifest (determinism re-derivable; mechanical ground-truth verification) |
+| `provider.schema.json` | `provider` | **0.8.0 (new, generic target control-plane)** | operational metadata — provider identity and declared interfaces |
+| `target.schema.json` | `target` | **0.8.0 (new, generic target control-plane)** | operational metadata — target bindings and references only |
+| `adapter.schema.json` | `adapter` | **0.8.0 (new, provider-neutral resolution)** | operational metadata — adapter capability contract only |
 
 Notes:
 
 - The `$id` values are **stable identifiers**, not fetchable URLs.
 - The schema bundle version is pinned in the repository-root `ECP-IDENTITY.json`
-  (`schema_version`). Every schema change requires a schema-version bump.
+  (`schema_version`). Every schema change requires a schema-version bump. The
+  authoritative identity currently declares `schema_version: 0.8.0`.
+- Version authority is separated explicitly: `protocol_version` identifies
+  protocol semantics (`0.7.0`), `repository_version` and the package version
+  identify the repository/software release (`0.7.0`), and `schema_version`
+  identifies the complete schema bundle (`0.8.0`). The 0.8.0 provider/target/
+  adapter contracts are additive operational metadata and do not by themselves
+  imply protocol version 0.8.0.
+- The 0.7.0 protocol and 0.8.0 schema bundle have no automatic compatibility
+  relationship beyond the explicit per-object compatibility matrix in
+  `src/ecp/versions.py`. Version-number equality or ordering never authorizes
+  fallback, substitution, upgrade, downgrade, or compatibility inference.
 - The 0.2.0, 0.3.0, 0.4.0 and 0.5.0 bundles are **additive**: the ten 0.1.0 contract
   files are unchanged; the two 0.2.0 contracts (ledger-entry,
   store-manifest) implement the R1-I minimal coupled foundation (protected
