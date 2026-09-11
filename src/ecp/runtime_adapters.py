@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from typing import Any, Callable, Mapping
 from urllib import error as urllib_error
 from urllib import request as urllib_request
+from urllib.parse import urlparse
 
 
 class RuntimeAdapterError(Exception):
@@ -110,7 +111,7 @@ class OpenAIResponsesAdapter:
         try:
             status, body = self._transport(self.endpoint, headers, payload, 30.0)
         except (OSError, urllib_error.URLError, TimeoutError) as exc:
-            raise RuntimeAdapterTransportError("provider connection failed") from exc
+            raise RuntimeAdapterTransportError(_transport_failure_message(self.endpoint, exc)) from exc
         if status < 200 or status >= 300:
             if status in {401, 403}:
                 category = "PROVIDER_AUTHENTICATION_FAILED"
@@ -139,6 +140,23 @@ def _post_json(endpoint: str, headers: Mapping[str, str], payload: bytes, timeou
     req = urllib_request.Request(endpoint, data=payload, headers=dict(headers), method="POST")
     with urllib_request.urlopen(req, timeout=timeout) as response:
         return response.status, response.read()
+
+
+def _transport_failure_message(endpoint: str, error: BaseException) -> str:
+    """Return actionable transport diagnostics without request secrets."""
+    parsed = urlparse(endpoint)
+    host = parsed.hostname or "unknown-host"
+    reason = getattr(error, "reason", None)
+    if isinstance(reason, BaseException):
+        detail = str(reason)
+    elif reason is not None:
+        detail = str(reason)
+    else:
+        detail = str(error)
+    detail = detail.replace("\r", " ").replace("\n", " ").strip()
+    if not detail:
+        detail = error.__class__.__name__
+    return f"PROVIDER_CONNECTION_FAILED host={host} reason={detail[:240]}"
 
 
 def _response_text(response: Any) -> str | None:
