@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ecp-protocol.org/0.8.0/adapter.schema.json",
+  "title": "ECP Provider-Neutral Adapter Contract",
+  "description": "Registered adapter capability metadata only. No transport, execution, authorization, or credential material.",
+  "type": "object",
+  "required": ["ecp_object", "adapter_id", "adapter_version", "provider_id", "provider_interface", "supported_system_kinds", "supported_capabilities", "status"],
+  "properties": {
+    "ecp_object": { "const": "adapter" },
+    "adapter_id": { "type": "string", "pattern": "^ECP-ADAPTER-[A-Za-z0-9][A-Za-z0-9._:-]*$" },
+    "adapter_version": { "$ref": "#/$defs/semver" },
+    "provider_id": { "type": "string", "pattern": "^ECP-PROVIDER-[A-Za-z0-9][A-Za-z0-9._:-]*$" },
+    "provider_interface": { "type": "string", "minLength": 1 },
+    "supported_system_kinds": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "enum": ["model-only", "complete-system", "agent", "hybrid", "non-llm"] },
+      "uniqueItems": true
+    },
+    "supported_capabilities": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "status": { "enum": ["active", "inactive", "deprecated"] },
+    "description": { "type": "string" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    }
+  }
+}

@@ -78,6 +78,16 @@ from .targets import (
     provider_document,
     target_hash,
 )
+from .adapters import (
+    AdapterError,
+    AdapterRegistry,
+    DuplicateAdapter,
+    ResolutionError,
+    ResolvedTarget,
+    TargetResolver,
+    UnknownAdapter,
+    adapter_document,
+)
 
 __all__ = [
     "__version__",
@@ -116,4 +126,12 @@ __all__ = [
     "UnknownProvider",
     "provider_document",
     "target_hash",
+    "AdapterError",
+    "AdapterRegistry",
+    "DuplicateAdapter",
+    "ResolutionError",
+    "ResolvedTarget",
+    "TargetResolver",
+    "UnknownAdapter",
+    "adapter_document",
 ]

@@ -60,6 +60,11 @@
     "authorization_ref": { "$ref": "#/$defs/ref" },
     "evaluation_bindings": { "$ref": "#/$defs/binding" },
     "test_bindings": { "$ref": "#/$defs/binding" }
+    ,"required_capabilities": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    }
   },
   "additionalProperties": false,
   "$defs": {

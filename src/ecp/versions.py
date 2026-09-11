@@ -123,6 +123,7 @@ V070_CONTRACTS = (
 V080_CONTRACTS = (
     "provider",
     "target",
+    "adapter",
 )
 
 #: Per-object-type accepted ``schema_version`` values.

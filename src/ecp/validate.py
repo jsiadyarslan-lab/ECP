@@ -56,6 +56,7 @@ SCHEMA_FILES = {
     # Phase A generic external target control-plane contracts.
     "provider": "provider.schema.json",
     "target": "target.schema.json",
+    "adapter": "adapter.schema.json",
 }
 
 _CACHE: dict = {}
