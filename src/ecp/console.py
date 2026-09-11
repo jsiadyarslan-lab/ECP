@@ -11,6 +11,7 @@ from .canonical import canonical_bytes
 from .credentials import CredentialError, CredentialGateway, CredentialIdentity, CredentialNotFound, SecretLease, SecretRedactionFilter, safe_exception_message
 from .credential_binding import AuthorizationGrant, CredentialBinding, ScopedReleaseRequest
 from .hashing import hash_document
+from .runtime_adapters import RuntimeAdapterError, RuntimeAdapterRegistry, RuntimeAdapterTransportError, RuntimeAdapterUnavailable
 
 DEFAULT_PORT=8765
 DEFAULT_CONSOLE_ORIGINS=("https://jsiadyarslan-lab.github.io","http://127.0.0.1:8766","http://localhost:8766")
@@ -83,7 +84,7 @@ class LocalGateway:
     def __init__(self,config,evaluations,credential_gateway,adapters=None,store=None,clock=None):
         if not config.allowed_origins: raise ValueError("at least one explicit console origin is required")
         if not 1<=config.port<=65535: raise ValueError("port must be between 1 and 65535")
-        self.config=config; self.evaluations=dict(evaluations); self.credential_gateway=credential_gateway; self.adapters=dict(adapters or {}); self.store=store or ExecutionStore(config.artifact_root); self._pairing_code=secrets.token_urlsafe(24); self._clock=clock or __import__("time").time; self._pairing_expires=self._clock()+config.pairing_ttl_seconds; self._session_tokens=set(); self._session_lock=threading.RLock(); self._httpd=None
+        self.config=config; self.evaluations=dict(evaluations); self.credential_gateway=credential_gateway; self.adapters=adapters if isinstance(adapters, RuntimeAdapterRegistry) else RuntimeAdapterRegistry(adapters or {}); self.store=store or ExecutionStore(config.artifact_root); self._pairing_code=secrets.token_urlsafe(24); self._clock=clock or __import__("time").time; self._pairing_expires=self._clock()+config.pairing_ttl_seconds; self._session_tokens=set(); self._session_lock=threading.RLock(); self._httpd=None
     @property
     def pairing_code(self): return self._pairing_code
     def pair(self,code):
@@ -117,13 +118,16 @@ class LocalGateway:
         eid=record["execution_id"]; self.store.update(eid,status="AUTHORIZED",execution_status="RUNNING"); lease=None
         try:
             rr=ScopedReleaseRequest(request_id=safe_request["request_id"],binding_id=evaluation.credential_binding.binding_id,target_id=evaluation.credential_binding.target_id,credential_ref=safe_request["credential_ref"],purpose=test.scope,scope=frozenset({test.scope}),lease_seconds=60,requested_at=_utc_now())
-            lease=self.credential_gateway.release(rr,evaluation.credential_binding,evaluation.authorization_grant); adapter=self.adapters.get(evaluation.adapter) or UnconfiguredAdapter(); result=dict(adapter.execute(lease,safe_request)); result.pop("secret",None); result.pop("credential_value",None)
+            lease=self.credential_gateway.release(rr,evaluation.credential_binding,evaluation.authorization_grant); adapter=self.adapters.resolve(evaluation.adapter,evaluation.provider); result=dict(adapter.execute(lease,safe_request)); result.pop("secret",None); result.pop("credential_value",None)
             self.store.update(eid,status="COMPLETED",execution_status="SUCCESS",response_status="RECEIVED",result=_safe_result(result,(lease.value,)))
             try: self._finalize(eid,evaluation,safe_request,result,"SUCCESS",(lease.value,))
             except Exception as exc: self.store.update(eid,status="PARTIAL_SUCCESS",evidence_status="FAILED",audit_status="FAILED",persistence_status="FAILED",failure_stage="evidence_audit_or_persistence",error=_safe_exception_message(exc,lease))
         except CredentialError as exc: self.store.update(eid,status="FAILED",execution_status="INVALID",response_status="NOT_RECEIVED",error_classification="CREDENTIAL_ERROR",error=_safe_exception_message(exc,lease))
         except AdapterFailure as exc: self.store.update(eid,status="FAILED",execution_status=exc.category,response_status="NOT_RECEIVED",error_classification=exc.category,error=_safe_exception_message(exc,lease))
         except AdapterUnavailable as exc: self.store.update(eid,status="FAILED",execution_status="INCONCLUSIVE",response_status="NOT_RECEIVED",error_classification="ADAPTER_UNAVAILABLE",error=_safe_exception_message(exc,lease))
+        except RuntimeAdapterUnavailable as exc: self.store.update(eid,status="FAILED",execution_status="INCONCLUSIVE",response_status="NOT_RECEIVED",error_classification="ADAPTER_UNAVAILABLE",error=_safe_exception_message(exc,lease))
+        except RuntimeAdapterTransportError as exc: self.store.update(eid,status="FAILED",execution_status="INCONCLUSIVE",response_status="NOT_RECEIVED",error_classification=str(exc),error=_safe_exception_message(exc,lease))
+        except RuntimeAdapterError as exc: self.store.update(eid,status="FAILED",execution_status="INCONCLUSIVE",response_status="NOT_RECEIVED",error_classification="ADAPTER_ERROR",error=_safe_exception_message(exc,lease))
         except Exception as exc: self.store.update(eid,status="FAILED",execution_status="ERROR",response_status="NOT_RECEIVED",error_classification="ADAPTER_ERROR",error=_safe_exception_message(exc,lease))
         return self.store.get(eid) or {}
     def _finalize(self,eid,evaluation,request,result,outcome,secrets_to_redact=()):
