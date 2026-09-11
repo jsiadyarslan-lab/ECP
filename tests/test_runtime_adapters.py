@@ -71,6 +71,15 @@ def test_openai_adapter_maps_provider_failures_without_response_body():
         adapter.execute(SecretLease("synthetic-secret", {}), {"request_id": "request-2"})
 
 
+def test_openai_adapter_exposes_safe_transport_reason():
+    def transport(endpoint, headers, payload, timeout):
+        raise OSError("network unreachable")
+
+    adapter = OpenAIResponsesAdapter(model="test-model", endpoint="https://api.openai.com/v1/responses", transport=transport)
+    with pytest.raises(RuntimeAdapterTransportError, match=r"PROVIDER_CONNECTION_FAILED host=api\.openai\.com reason=network unreachable"):
+        adapter.execute(SecretLease("synthetic-secret", {}), {"request_id": "request-3"})
+
+
 def test_gateway_uses_runtime_registry_and_preserves_safe_record(tmp_path):
     identity = CredentialIdentity("cred-runtime", "provider-a", "test", frozenset({"execute"}))
     credentials, _store = CredentialGateway.for_testing({identity.credential_id: identity})
