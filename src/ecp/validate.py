@@ -59,6 +59,10 @@ SCHEMA_FILES = {
     "adapter": "adapter.schema.json",
     # Universal target onboarding fabric record (0.8.0 bundle, additive).
     "onboarding-record": "onboarding-record.schema.json",
+    # M3-ELR registration package contract (0.8.0 bundle, additive;
+    # reconstructed 2026-09-13 after custody loss — pre-execution,
+    # outcome-blind).
+    "m3-registration-package": "m3-registration-package.schema.json",
 }
 
 _CACHE: dict = {}

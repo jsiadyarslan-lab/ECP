@@ -130,6 +130,7 @@ V080_CONTRACTS = (
     "target",
     "adapter",
     "onboarding-record",
+    "m3-registration-package",
 )
 
 #: Per-object-type accepted ``schema_version`` values.

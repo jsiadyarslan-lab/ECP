@@ -1,0 +1,155 @@
+{
+  "boundary_checks": {
+    "case_selection_after_outcomes": false,
+    "credentials_accessed": 0,
+    "ground_truth_accessed": false,
+    "model_calls": 0,
+    "scientific_executions": 0,
+    "target_system_calls": 0
+  },
+  "candidates": [
+    {
+      "adapter_id": "ECP-ADAPTER-OPENROUTER-CHAT-COMPLETIONS",
+      "adapter_version": "1.0.0",
+      "api_interface": "openrouter-chat-completions-api (POST /api/v1/chat/completions, OpenAI-compatible dialect)",
+      "api_interface_version": "chat-completions v1",
+      "authorization_state": "mechanism OPERATIONAL (scoped binding + grant + fail-closed release, regression-proven); live credential custody is an owner-side input supplied at execution launch and never enters any record",
+      "candidate_id": "M3-ELR-TCAND-001",
+      "conformance_evidence": "ECP-EXEC-CONSOLE-6f73b46447ab4f4da9f1bb2e68f4b2d6 (real external OpenRouter round trip via session credential ECP-SESSION-CREDENTIAL-2410E4E56D6D4E30, 2026-09-12T02:33:29Z, provider response gen-1789180407-…): CONFORMANCE ONLY — not a scientific result, never relabeled",
+      "credential_ref": "ECP-M3-ELR-CREDENTIAL-OPENROUTER",
+      "eligibility_evidence": {
+        "evidence_preservation": "adapter emits transport attribution; evidence/audit bundles persisted per execution",
+        "execution_controls": "five-identifier intent contract; scoped credential release; frozen adapter model (no switching)",
+        "explicit_system_boundary": "model-only, L1 (raw model API)",
+        "gt_isolation": "sealed GT absent from the execution environment (boundary-scan enforced)",
+        "identifiable_version": "exact model identifier pinned; provider generation IDs observed in the proven execution",
+        "model_provider_identity": "provider + exact identifier + interface recorded",
+        "prompt_configuration_identity": "registered case presentations, hash-bound; no system prompt (declared)",
+        "reproducible_environment": "adapter + endpoint + frozen configuration reconstructable",
+        "reproducible_io": "temperature 0.0 + max_tokens 1024 frozen; provider nondeterminism declared and bounded",
+        "retrieval_boundary": "NONE (declared)",
+        "runtime_identity": "ECP-RUNTIME-LOCAL-GATEWAY-1, python>=3.10",
+        "tool_boundary": "NONE (enumerated: no tools)"
+      },
+      "eligibility_status": "ADMITTED",
+      "exact_model_api_identifier": "inclusionai/ling-3.0-flash-sante:free (exact OpenRouter model identifier; NOT the openrouter/free router alias)",
+      "execution_environment": {
+        "environment_id": "ecp-m3-elr-external-execution",
+        "network": "controlled (single declared HTTPS endpoint)",
+        "runtime_version": "python>=3.10 (ECP local gateway, loopback 127.0.0.1)"
+      },
+      "external_services": [
+        "https://openrouter.ai/api/v1/chat/completions"
+      ],
+      "independence_basis": [
+        "system lineage: InclusionAI Ling 3.0 Flash served via OpenRouter — outside ECP/JARVIS lineage (dim A)",
+        "case selection: performed by qualification/registration only, no target-side participation (dim B/F)",
+        "evaluation ownership: ECP-side, protocol-controlled (dim C)",
+        "information access: the target receives only the registered case presentation (dim F)",
+        "ground-truth access: none — sealed GT lives in the private qualification area, absent from the execution environment (M3-THREAT-INDEPENDENCE.md §3 criterion 12)",
+        "benchmark access: none — no retrieval, no tools, no network beyond the single chat-completions endpoint",
+        "execution control: the ECP local gateway enforces the registered intent contract and frozen adapter configuration",
+        "no author-model overlap: InclusionAI Ling is outside the GLM family that authored the CA0v1 pool (O-03 consequence recorded)"
+      ],
+      "independence_classification": "EXTERNAL-INDEPENDENT",
+      "model_identifier": "inclusionai/ling-3.0-flash-sante:free",
+      "provider": "ECP-PROVIDER-OPENROUTER",
+      "provider_organization": "OpenRouter",
+      "retrieval_configuration": "NONE",
+      "runtime_adapter": "OpenRouterChatCompletionsAdapter (src/ecp/runtime_adapters.py)",
+      "runtime_identity": "ECP-RUNTIME-LOCAL-GATEWAY-1",
+      "system_id": "ECP-SYSTEM-M3-ELR-001",
+      "system_prompt_identity": "NONE (declared; the registered case presentation embeds the authored answer-format instruction)",
+      "tools_configuration": "NONE"
+    },
+    {
+      "adapter_id": "ECP-ADAPTER-REE-ZAI-CHAT-COMPLETIONS",
+      "api_interface": "chat-completions (OpenAI-compatible dialect via the REE-ZAI gateway)",
+      "authorization_state": "not wired for scientific evaluation in this phase",
+      "candidate_id": "M3-ELR-TCAND-002",
+      "conformance_evidence": "ECP-EXEC-CONSOLE-565f08d4ccdf4bdfbbe936032ae62828 (real external call, 2026-09-12T01:07:11Z, response id 20260912090710d7a6ced50a6c430f): CONFORMANCE ONLY",
+      "credential_ref": "owner-supplied at execution launch",
+      "eligibility_status": "NOT ADMITTED (pending owner O-03 disposition)",
+      "exact_model_api_identifier": "glm-4-plus",
+      "independence_basis": [
+        "external to ECP/JARVIS lineage, BUT GLM-family: the CA0v1 case pool was authored by a GLM-family session executor agent (declared author-model overlap, ECP-ADJ-000003 UPHOLD-OPEN)",
+        "M3-THREAT-INDEPENDENCE.md §8.4 requires an explicit owner disposition (EXCLUDE / DISCLOSE+RETAIN / REQUIRE INDEPENDENT EVALUATION / OTHER EXPLICIT) at system-selection time; O-03 REMAINS-OPEN — the disposition is an owner decision and is NOT made here"
+      ],
+      "independence_classification": "EXTERNAL-PROVIDER / O-03-DISPOSITION-REQUIRED",
+      "model_identifier": "glm-4-plus",
+      "provider": "ECP-PROVIDER-ZAI-GATEWAY",
+      "provider_organization": "Z.ai gateway (REE-ZAI chat-completions dialect)",
+      "runtime_identity": "ECP-RUNTIME-LOCAL-GATEWAY-1"
+    },
+    {
+      "candidate_id": "M3-ELR-TCAND-003",
+      "eligibility_status": "INELIGIBLE",
+      "exclusion_reason": "moving alias / automatic router — cannot pin exact model identity (order §11); the prior conformance execution on this identifier must not be used as the scientific model identity",
+      "independence_classification": "INELIGIBLE",
+      "model_identifier": "openrouter/free",
+      "provider": "ECP-PROVIDER-OPENROUTER"
+    },
+    {
+      "candidate_id": "M3-ELR-TCAND-004",
+      "eligibility_status": "INELIGIBLE",
+      "exclusion_reason": "synthetic offline demonstration adapter — not an external AI system",
+      "independence_classification": "INELIGIBLE",
+      "model_identifier": "offline-demo-model-1",
+      "provider": "ECP-PROVIDER-DEMO-OFFLINE"
+    },
+    {
+      "candidate_id": "M3-ELR-TCAND-005",
+      "eligibility_status": "NOT CONFIGURED — ELIGIBLE-IN-PRINCIPLE PENDING OWNER PROVISIONING",
+      "exclusion_reason": "no owner-supplied direct credential and no frozen model/configuration (ESV-G0 record; path A of the provisioning readiness record); admissible via amendment once provisioned",
+      "independence_classification": "EXTERNAL-INDEPENDENT CANDIDATE (provider lineage)",
+      "model_identifier": "no model selected; official Responses API model family",
+      "provider": "ECP-PROVIDER-OPENAI",
+      "provider_organization": "OpenAI"
+    },
+    {
+      "candidate_id": "M3-ELR-TCAND-006",
+      "eligibility_status": "NOT CONFIGURED — ELIGIBLE-IN-PRINCIPLE PENDING OWNER PROVISIONING",
+      "exclusion_reason": "no owner-supplied direct credential and no frozen model/configuration (ESV-G0 record)",
+      "independence_classification": "EXTERNAL-INDEPENDENT CANDIDATE (provider lineage)",
+      "model_identifier": "no model selected; official Messages API model family",
+      "provider": "ECP-PROVIDER-ANTHROPIC",
+      "provider_organization": "Anthropic"
+    },
+    {
+      "candidate_id": "M3-ELR-TCAND-007",
+      "eligibility_status": "NOT CONFIGURED — ELIGIBLE-IN-PRINCIPLE PENDING OWNER PROVISIONING",
+      "exclusion_reason": "no owner-supplied direct credential and no frozen model/configuration (ESV-G0 record)",
+      "independence_classification": "EXTERNAL-INDEPENDENT CANDIDATE (provider lineage)",
+      "model_identifier": "no model selected; official Gemini API model family",
+      "provider": "ECP-PROVIDER-GEMINI",
+      "provider_organization": "Google"
+    },
+    {
+      "candidate_id": "M3-ELR-TCAND-008",
+      "eligibility_status": "INELIGIBLE",
+      "exclusion_reason": "gateway-mediated routing and immutable model/runtime snapshot not established (ESV-G0 path D); no controlled evidence boundary can be asserted",
+      "independence_classification": "INELIGIBLE",
+      "model_identifier": "catalog IDs observed (gpt-5 family, gemini-3 previews)",
+      "provider": "Manus OpenAI-compatible gateway"
+    }
+  ],
+  "conformance_executions_are_not_scientific_results": true,
+  "content_class": "registration",
+  "discovery_basis": "in-repo proven execution evidence (local-browser-artifacts/external-executions), the ESV-G0 discovery and provisioning records, and the universal provider/model discovery fabric surface (src/ecp/discovery.py)",
+  "discovery_mode": "SYSTEM DISCOVERY, NOT PERFORMANCE TESTING (order §9): enumeration of the external AI systems that can be scientifically evaluated through the already-built ECP fabric, completed BEFORE any scientific outcome (zero outcome data exists project-wide)",
+  "ecp_object": "m3-target-discovery-record",
+  "jarvis_internal_candidates": [],
+  "jarvis_note": "JARVIS is Stratum B (secondary, operational-applicability) and is NOT the target of this phase (order §0); no JARVIS-internal candidate is enumerated for the primary external stratum",
+  "order_reference": {
+    "branch": "main",
+    "repository": "jsiadyarslan-lab/ECP",
+    "sections": "9-12 (external target discovery, independence classification, model identity pinning, provider reuse)",
+    "title": "M3 REAL EXTERNAL LOGICAL REASONING EVALUATION — READINESS, TARGET BINDING & REGISTRATION v1"
+  },
+  "protocol_version": "0.7.0",
+  "record_hash": "a3a6967c2a8133a4d7a47b19fb0903373f48f14079aeb8c4b6c73e56e9cee795",
+  "record_id": "M3-ELR-TARGET-DISCOVERY-V1",
+  "record_version": 1,
+  "recorded_at": "2026-09-12T21:37:33Z",
+  "selection_discipline": "system selection completed before observing scientific outcomes; no admission-time material references expected performance (M3-THREAT-INDEPENDENCE.md §3 admission rule); the executor does not select systems because they appear likely to produce favorable results"
+}

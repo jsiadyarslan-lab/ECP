@@ -1,0 +1,820 @@
+{
+  "answer_space_distribution": {
+    "BINARY": 5,
+    "TERNARY": 21,
+    "VALUE": 4
+  },
+  "answer_space_metadata": {
+    "note": "aggregate public metadata; per-case keys are sealed ground truth carried only as gt_commitment (SHA-256 over canonical {ground_truth, intended_correct_answers, derivations})",
+    "ternary_key_distribution": {
+      "CANNOT-DETERMINE": 7,
+      "NO": 6,
+      "YES": 8
+    }
+  },
+  "cases": [
+    {
+      "answer_space": "TERNARY",
+      "candidate_id": "ECP-CAND-000101",
+      "case_id": "ECP-CASE-M3-ELR-001",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "28562c5ca5bedc911f7a124e7ca31103703c5ae27df401e1c0672cf5a275ecd9",
+      "gt_commitment": "2a33826861481c930a52b28535ba8c0c6f186ed271c569a3ed69eb3be4b4ed58",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "MEDIUM",
+      "reasoning_family": "transitive-relational",
+      "test_id": "ECP-TEST-M3-ELR-001"
+    },
+    {
+      "answer_space": "TERNARY",
+      "candidate_id": "ECP-CAND-000102",
+      "case_id": "ECP-CASE-M3-ELR-002",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "17fcf09cd9826ace859e4349fd46479417258022f9a87d180167b5a4d891d2bf",
+      "gt_commitment": "b59b4e5e8ecc8ed2e5faf0f71eb6eae41d66e06477efaad1f908c2a76312e008",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "SHALLOW",
+      "reasoning_family": "transitive-relational",
+      "test_id": "ECP-TEST-M3-ELR-002"
+    },
+    {
+      "answer_space": "TERNARY",
+      "candidate_id": "ECP-CAND-000103",
+      "case_id": "ECP-CASE-M3-ELR-003",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "06ab98eb689fa50001e3e2dc6189e1e983706b7583264e1c897993ba96ccd598",
+      "gt_commitment": "2344dd34079e826385e247ea6e5a757733101f2c4d189d38c5eab9175b0617ff",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "MEDIUM",
+      "reasoning_family": "transitive-relational",
+      "test_id": "ECP-TEST-M3-ELR-003"
+    },
+    {
+      "answer_space": "TERNARY",
+      "candidate_id": "ECP-CAND-000104",
+      "case_id": "ECP-CASE-M3-ELR-004",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "69737cc87cd1ab8f934d4c8f347c9c17cd6cd39842446d20e22af7bc8af68057",
+      "gt_commitment": "78b2fe920a132db9f688c8f579b1a54abcec497b66144e9d0d76a59525ad06ab",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "MEDIUM",
+      "reasoning_family": "transitive-relational",
+      "test_id": "ECP-TEST-M3-ELR-004"
+    },
+    {
+      "answer_space": "TERNARY",
+      "candidate_id": "ECP-CAND-000105",
+      "case_id": "ECP-CASE-M3-ELR-005",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "e1468e6891121c5ef4a7b3f7894d2e524a2b64d79260b82034c4bbd0332b2af3",
+      "gt_commitment": "b4b9c4c8ed2164e91e0844ea1ec10ee0429901901f648a0884d4ba45e5d831e2",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "DEEP",
+      "reasoning_family": "transitive-relational",
+      "test_id": "ECP-TEST-M3-ELR-005"
+    },
+    {
+      "answer_space": "TERNARY",
+      "candidate_id": "ECP-CAND-000106",
+      "case_id": "ECP-CASE-M3-ELR-006",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "8cfe7c6489de605965156ecdec479179a1a6bd4ae49094ed1fef3a1dc61484fb",
+      "gt_commitment": "f3e271a7ac143ce658d4981fbb482cec15edf34927214e015d4ac30839ed437c",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "MEDIUM",
+      "reasoning_family": "conditional-chaining",
+      "test_id": "ECP-TEST-M3-ELR-006"
+    },
+    {
+      "answer_space": "TERNARY",
+      "candidate_id": "ECP-CAND-000107",
+      "case_id": "ECP-CASE-M3-ELR-007",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "6b039d54864235b7cf19c4c98f4aa31a17e6704561ba3b66ff2a351678a63bc1",
+      "gt_commitment": "ac314718e084394fc57a41761256dbfb534139aed01c6a0f6909ba6fe10562ec",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "MEDIUM",
+      "reasoning_family": "conditional-chaining",
+      "test_id": "ECP-TEST-M3-ELR-007"
+    },
+    {
+      "answer_space": "TERNARY",
+      "candidate_id": "ECP-CAND-000108",
+      "case_id": "ECP-CASE-M3-ELR-008",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "69a0659e95641608e4dc5f89d63cce58e3b6026e30f4acc2eadc654453186b99",
+      "gt_commitment": "65a34e17755ad525a706a276659b0fa5179c0a8a51595506a234be0bf25cf021",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "SHALLOW",
+      "reasoning_family": "conditional-chaining",
+      "test_id": "ECP-TEST-M3-ELR-008"
+    },
+    {
+      "answer_space": "TERNARY",
+      "candidate_id": "ECP-CAND-000109",
+      "case_id": "ECP-CASE-M3-ELR-009",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "ff9533bd878644b77d0c93f9d249b7f6a7af4e7b9e6614ad65b1e8fac47899d6",
+      "gt_commitment": "779a14dae394d0c883928a0fd7f4ed4f5d2b948aca5e3fbe879390b12b689883",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "SHALLOW",
+      "reasoning_family": "conditional-chaining",
+      "test_id": "ECP-TEST-M3-ELR-009"
+    },
+    {
+      "answer_space": "TERNARY",
+      "candidate_id": "ECP-CAND-000110",
+      "case_id": "ECP-CASE-M3-ELR-010",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "86d63eecd77394758c9bb71570f916a2489d8658ed727e94ce1b1490b4e8cb11",
+      "gt_commitment": "322b921e2dc6ddaf6b045680071dcf1d6de0d586b96396a66a175891bb03c84c",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "MEDIUM",
+      "reasoning_family": "conditional-chaining",
+      "test_id": "ECP-TEST-M3-ELR-010"
+    },
+    {
+      "answer_space": "BINARY",
+      "candidate_id": "ECP-CAND-000111",
+      "case_id": "ECP-CASE-M3-ELR-011",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "f0c37e26ca476aa76d356f228202cc03b393fe31b52a50b46cb5fa11554ac7d6",
+      "gt_commitment": "66a98085bb3853bf6fb892e6e3c944daddee4050d91f203b6e5f350e02aae3a4",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "SHALLOW",
+      "reasoning_family": "consistency-contradiction",
+      "test_id": "ECP-TEST-M3-ELR-011"
+    },
+    {
+      "answer_space": "BINARY",
+      "candidate_id": "ECP-CAND-000112",
+      "case_id": "ECP-CASE-M3-ELR-012",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "743641739dd4f820a622c88d4832995573d886cc2b7355439d30ca334e4f4b81",
+      "gt_commitment": "5d45f9bfe4145080f8afd8c20f20548d8df05254f716a51efb1f8f8916a74788",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "MEDIUM",
+      "reasoning_family": "consistency-contradiction",
+      "test_id": "ECP-TEST-M3-ELR-012"
+    },
+    {
+      "answer_space": "BINARY",
+      "candidate_id": "ECP-CAND-000113",
+      "case_id": "ECP-CASE-M3-ELR-013",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "771af56218b1ce91933fc39201216d2943759118989893eb2ed0116b3769cf02",
+      "gt_commitment": "1b8c650ffe1b099e692fff380674dcd836d2759be015f10875c3d9f6ec710e56",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "MEDIUM",
+      "reasoning_family": "consistency-contradiction",
+      "test_id": "ECP-TEST-M3-ELR-013"
+    },
+    {
+      "answer_space": "BINARY",
+      "candidate_id": "ECP-CAND-000114",
+      "case_id": "ECP-CASE-M3-ELR-014",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "15306ae57c549cb2be80836d0d852db68e5cdfa0e03db250f89f8b1ade5972fc",
+      "gt_commitment": "920db01cae3cb1a367851f0e40951aa380d04be3cbc9f0fe65599fbbbac169e3",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "SHALLOW",
+      "reasoning_family": "consistency-contradiction",
+      "test_id": "ECP-TEST-M3-ELR-014"
+    },
+    {
+      "answer_space": "VALUE",
+      "candidate_id": "ECP-CAND-000115",
+      "case_id": "ECP-CASE-M3-ELR-015",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "2812c304844d64de3e3fadc0d34e3bfb304947410203401ebcdcc3d530f33ece",
+      "gt_commitment": "98dd920aea176dead8c98b54d0c0dea432e5e271d9d1a8ae7296819bd337a065",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "DEEP",
+      "reasoning_family": "consistency-contradiction",
+      "test_id": "ECP-TEST-M3-ELR-015"
+    },
+    {
+      "answer_space": "TERNARY",
+      "candidate_id": "ECP-CAND-000116",
+      "case_id": "ECP-CASE-M3-ELR-016",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "f9db2a4eb8734761b76ff5cc6efe3f52a675dc33588b26aef032e83c6104ecb9",
+      "gt_commitment": "e6ee50568242444892c587ea11a3b3341f651d75a0c96e4fe95a12eea438b0ea",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "MEDIUM",
+      "reasoning_family": "relational-discrimination",
+      "test_id": "ECP-TEST-M3-ELR-016"
+    },
+    {
+      "answer_space": "TERNARY",
+      "candidate_id": "ECP-CAND-000117",
+      "case_id": "ECP-CASE-M3-ELR-017",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "dd267e6df60e4b492eeff22cd5b5038d042934132c28d025b07a97a802b7017c",
+      "gt_commitment": "f770ddb0c06e10bef3c36a12d128aabf63ef07136fb65409a7bf84a4c886b045",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "MEDIUM",
+      "reasoning_family": "relational-discrimination",
+      "test_id": "ECP-TEST-M3-ELR-017"
+    },
+    {
+      "answer_space": "TERNARY",
+      "candidate_id": "ECP-CAND-000118",
+      "case_id": "ECP-CASE-M3-ELR-018",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "54aa878927b9fa7a0bea5cce5c2fa23d9713c3c81e170124984cb2e03b5b877b",
+      "gt_commitment": "4a956e89b01851274bcd23a1ff6b04fdef7c4a05e8518bcbf600d3ca89f51d80",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "MEDIUM",
+      "reasoning_family": "relational-discrimination",
+      "test_id": "ECP-TEST-M3-ELR-018"
+    },
+    {
+      "answer_space": "TERNARY",
+      "candidate_id": "ECP-CAND-000119",
+      "case_id": "ECP-CASE-M3-ELR-019",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "da7396057bbac3ffb998c2d8fc50d72ee4e6935848200df905940c23d62d0f77",
+      "gt_commitment": "43ff4beeb8ac71753bb10e2f6370ab8daf0d4a802b0549ff7604b3973c54516d",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "MEDIUM",
+      "reasoning_family": "relational-discrimination",
+      "test_id": "ECP-TEST-M3-ELR-019"
+    },
+    {
+      "answer_space": "TERNARY",
+      "candidate_id": "ECP-CAND-000120",
+      "case_id": "ECP-CASE-M3-ELR-020",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "d4d14e000e2d9cb65a6952c7f4226a3426f852fda368de1c45e03268fc86111b",
+      "gt_commitment": "f6fd97d74d9c31352a0ae4a813aa0c61bcdbbad1866279a6777433f70739cd4e",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "SHALLOW",
+      "reasoning_family": "relational-discrimination",
+      "test_id": "ECP-TEST-M3-ELR-020"
+    },
+    {
+      "answer_space": "VALUE",
+      "candidate_id": "ECP-CAND-000121",
+      "case_id": "ECP-CASE-M3-ELR-021",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "a792080f64378cc8dd1f610f98f72d26c0522ae2130206824880eb750aae4c47",
+      "gt_commitment": "d633d12a26dba71e586a622f29bdfa8e7a9acd5c3b332daf218d4b74ccf6a21d",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "MEDIUM",
+      "reasoning_family": "constraint-quantitative",
+      "test_id": "ECP-TEST-M3-ELR-021"
+    },
+    {
+      "answer_space": "BINARY",
+      "candidate_id": "ECP-CAND-000122",
+      "case_id": "ECP-CASE-M3-ELR-022",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "b08f4d07057926c65c822e0718759427226fbde2d2887d2cc3d6669957c474a8",
+      "gt_commitment": "ec9306fa414a669e69c708d81a0d8a7812ff5b572905107f0a4cf86a6d1fcd5a",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "MEDIUM",
+      "reasoning_family": "constraint-quantitative",
+      "test_id": "ECP-TEST-M3-ELR-022"
+    },
+    {
+      "answer_space": "TERNARY",
+      "candidate_id": "ECP-CAND-000123",
+      "case_id": "ECP-CASE-M3-ELR-023",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "99a53a6d194a55fae3d4240f10da81a17b50e2c349c213243699acc2799664d8",
+      "gt_commitment": "13441886976d2a25230c3463543e82336e38553df8a744b10cc4e7d3c8047771",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "MEDIUM",
+      "reasoning_family": "constraint-quantitative",
+      "test_id": "ECP-TEST-M3-ELR-023"
+    },
+    {
+      "answer_space": "VALUE",
+      "candidate_id": "ECP-CAND-000124",
+      "case_id": "ECP-CASE-M3-ELR-024",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "18083a49274d01b68a4cfb2a81334bee8da9a502efa33c99bd0231f2098c39e2",
+      "gt_commitment": "6f4b5b6d60a3d555f84acd16d23540f5c4ceac1d374a963496267862f3b51943",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "MEDIUM",
+      "reasoning_family": "constraint-quantitative",
+      "test_id": "ECP-TEST-M3-ELR-024"
+    },
+    {
+      "answer_space": "VALUE",
+      "candidate_id": "ECP-CAND-000125",
+      "case_id": "ECP-CASE-M3-ELR-025",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "71c49e6f079f699fdd202775c50b6a8dd98c0b7be88224097cf2d94ba217f69c",
+      "gt_commitment": "7382936b32782ef410b9ef0eb72f20e9498b7d88bfde90d15ef328629c9481d4",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "DEEP",
+      "reasoning_family": "constraint-quantitative",
+      "test_id": "ECP-TEST-M3-ELR-025"
+    },
+    {
+      "answer_space": "TERNARY",
+      "candidate_id": "ECP-CAND-000126",
+      "case_id": "ECP-CASE-M3-ELR-026",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "5e5917c29ce47ce6d520de2eafea2736e43b38dfe98c68e589a518c6ff7a2525",
+      "gt_commitment": "e2d5b4d08163c5d8bce4d613a9cca7d9f950c64a917703dcd84621284abf4e4a",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "MEDIUM",
+      "reasoning_family": "default-exception",
+      "test_id": "ECP-TEST-M3-ELR-026"
+    },
+    {
+      "answer_space": "TERNARY",
+      "candidate_id": "ECP-CAND-000127",
+      "case_id": "ECP-CASE-M3-ELR-027",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "5f79890939bdb27db230acb8df738428941bb9b5344a0dbfbd6db96c254a4dfe",
+      "gt_commitment": "08f25d9aad2cb328c8a230b140d8c5c0ec1bd74413a2a7cf036fa229dfb34459",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "MEDIUM",
+      "reasoning_family": "default-exception",
+      "test_id": "ECP-TEST-M3-ELR-027"
+    },
+    {
+      "answer_space": "TERNARY",
+      "candidate_id": "ECP-CAND-000128",
+      "case_id": "ECP-CASE-M3-ELR-028",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "043b1fec80836f4d8fd83ef8db4ee0a2779597067b6fb298f07bfa4cb5aa38f9",
+      "gt_commitment": "5585cfeff75f4fb3696490395cae7e7ea92e2a5e627c84cd50f356bd8d6c8f3a",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "MEDIUM",
+      "reasoning_family": "default-exception",
+      "test_id": "ECP-TEST-M3-ELR-028"
+    },
+    {
+      "answer_space": "TERNARY",
+      "candidate_id": "ECP-CAND-000129",
+      "case_id": "ECP-CASE-M3-ELR-029",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "35cd41b5cb29e30e42aa5533705092cefed7b65947e90d0a8206b4ee20df9199",
+      "gt_commitment": "86006e11e44b159bc2fafca71502a8c8cfcd8ecf6fb2b755c4884f2fd053b7ef",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "DEEP",
+      "reasoning_family": "default-exception",
+      "test_id": "ECP-TEST-M3-ELR-029"
+    },
+    {
+      "answer_space": "TERNARY",
+      "candidate_id": "ECP-CAND-000130",
+      "case_id": "ECP-CASE-M3-ELR-030",
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "content_hash": "be82936dec9488d907a62f3770a16f2b7a5c86ec9526e36b879790f622170e50",
+      "gt_commitment": "a9dd6cf31bfc6bf00347c987f4685f7f4c9c43005899664ed94b2b1b786d8063",
+      "population_id": "ECP-POP-M3-CA0V1-V1",
+      "reasoning_depth": "DEEP",
+      "reasoning_family": "default-exception",
+      "test_id": "ECP-TEST-M3-ELR-030"
+    }
+  ],
+  "condition": {
+    "condition_id": "ECP-COND-M3-ELR-1",
+    "external_context_injection": "NONE",
+    "level": "L1 model-only",
+    "max_tokens": 1024,
+    "model_state": "MODEL-ENABLED",
+    "prompt_authority": "RegisteredCaseArtifact is the sole prompt authority; the model input is exactly the registered case presentation (which embeds the authored answer-format instruction)",
+    "provider_nondeterminism": "disclosed: provider-side sampling nondeterminism may persist at temperature 0.0; recorded per execution",
+    "retrieval": "NONE",
+    "system_prompt": "NONE",
+    "temperature": 0.0,
+    "tools": "NONE",
+    "transport_timeout_seconds": 30
+  },
+  "content_class": "registration",
+  "disclosures": [
+    {
+      "id": "O-01-C",
+      "state": "OPEN / ABSENT",
+      "text": "the novelty-evidence mechanism does not exist; in-repo mechanical screens are context, not external novelty evidence; no novelty claim is manufactured"
+    },
+    {
+      "id": "O-03",
+      "state": "RECORDED",
+      "text": "CA0v1 author-model overlap (GLM family); the admitted target is non-GLM; glm-4-plus requires an owner disposition before admission"
+    },
+    {
+      "id": "QUALIFICATION-PROVENANCE",
+      "state": "PARTIALLY VERIFIED",
+      "text": "artifact layer absent from durable custody; content layer byte-verified; five-gate BLOCKED record carried verbatim; registration proceeds under the owner's explicit directive"
+    },
+    {
+      "id": "SRE-V1-RELATIONSHIP",
+      "state": "SEPARATE",
+      "text": "SRE-v1 is a separate frozen registration (N=9 single-system); its 9-case set is a subset of the 30; never conflated; its DEME owner decision gate remains OPEN"
+    },
+    {
+      "id": "COMPONENT-2",
+      "state": "PENDING-REAUTHORIZATION",
+      "text": "the 18 prior-pool surviving candidates remain pending their own re-authoring owner order; never merged into component 1"
+    },
+    {
+      "id": "RECONSTRUCTION",
+      "state": "DISCLOSED",
+      "text": "this package is the 2026-09-13 reconstruction of ECP-PKG-M3-ELR-V1 after custody event D-01 #7 destroyed the original (unpushed) commit c49b18f; the historical package hash a6e560930c8014122709a30e74b6e9c334f6069f2552290cd9d4307c54613191 is permanently historical (no surviving artifact copy; verification against it is impossible); the case material is byte-exact re-derived (CA0v1 source/sidecar/intake pins verified); the machinery is re-implemented to the documented contracts; the F-01b ordering reproduction is anchor-verified (first three registered tests ECP-TEST-M3-ELR-006 / -008 / -015); the reconstruction is pre-execution and outcome-blind (zero model calls, zero outcomes existed project-wide); this package's own hash is the operative frozen registration"
+    }
+  ],
+  "ecp_object": "m3-registration-package",
+  "endpoints": {
+    "descriptive": "model performance (success rates) is reported only as descriptive stratum- and family-level summaries (charter §8.2); it is never an endpoint of M3",
+    "missing_data": {
+      "execution_attempts": "ONE attempt per registered test; no retries (the registered retry policy is NONE)",
+      "fabrication": "forbidden: a provider timeout/error/malformed response is never converted into a logical answer",
+      "inconclusive": "legitimate separately reported outcome class (charter §8.7), distinct from INVALID and from missing data",
+      "invalid_execution": "remains in the denominator as a classified outcome (charter §8.6), never dropped",
+      "missing_bundle_element": "counts as a protocol failure for that unit (charter §8.5); no convenience exclusion",
+      "silent_retry": "forbidden: any retry would violate the frozen execution contract"
+    },
+    "primary": {
+      "definition": "charter §8.1: among all attempted System x Case x repetition units in a preregistered stage, the fraction producing a complete minimum evidence bundle, a valid identity record, and an unambiguous mechanically derived outcome classification",
+      "name": "ECCE (Evidence-Complete Classified Execution rate)"
+    },
+    "secondary": {
+      "definition": "audit agreement; independent-verification success; evidence-bundle completeness; invalid-execution and inconclusive rates; between-repetition classification agreement; protocol-waiver count",
+      "label": "exploratory-labeled, never promoted post-hoc (charter §8.2)"
+    }
+  },
+  "evaluation": {
+    "case_count": 30,
+    "case_ids": [
+      "ECP-CASE-M3-ELR-001",
+      "ECP-CASE-M3-ELR-002",
+      "ECP-CASE-M3-ELR-003",
+      "ECP-CASE-M3-ELR-004",
+      "ECP-CASE-M3-ELR-005",
+      "ECP-CASE-M3-ELR-006",
+      "ECP-CASE-M3-ELR-007",
+      "ECP-CASE-M3-ELR-008",
+      "ECP-CASE-M3-ELR-009",
+      "ECP-CASE-M3-ELR-010",
+      "ECP-CASE-M3-ELR-011",
+      "ECP-CASE-M3-ELR-012",
+      "ECP-CASE-M3-ELR-013",
+      "ECP-CASE-M3-ELR-014",
+      "ECP-CASE-M3-ELR-015",
+      "ECP-CASE-M3-ELR-016",
+      "ECP-CASE-M3-ELR-017",
+      "ECP-CASE-M3-ELR-018",
+      "ECP-CASE-M3-ELR-019",
+      "ECP-CASE-M3-ELR-020",
+      "ECP-CASE-M3-ELR-021",
+      "ECP-CASE-M3-ELR-022",
+      "ECP-CASE-M3-ELR-023",
+      "ECP-CASE-M3-ELR-024",
+      "ECP-CASE-M3-ELR-025",
+      "ECP-CASE-M3-ELR-026",
+      "ECP-CASE-M3-ELR-027",
+      "ECP-CASE-M3-ELR-028",
+      "ECP-CASE-M3-ELR-029",
+      "ECP-CASE-M3-ELR-030"
+    ],
+    "classifier": "M3-ELR-LOGICAL-CLASSIFIER-1",
+    "evaluation_id": "ECP-EVAL-M3-ELR-1",
+    "test_ids": [
+      "ECP-TEST-M3-ELR-001",
+      "ECP-TEST-M3-ELR-002",
+      "ECP-TEST-M3-ELR-003",
+      "ECP-TEST-M3-ELR-004",
+      "ECP-TEST-M3-ELR-005",
+      "ECP-TEST-M3-ELR-006",
+      "ECP-TEST-M3-ELR-007",
+      "ECP-TEST-M3-ELR-008",
+      "ECP-TEST-M3-ELR-009",
+      "ECP-TEST-M3-ELR-010",
+      "ECP-TEST-M3-ELR-011",
+      "ECP-TEST-M3-ELR-012",
+      "ECP-TEST-M3-ELR-013",
+      "ECP-TEST-M3-ELR-014",
+      "ECP-TEST-M3-ELR-015",
+      "ECP-TEST-M3-ELR-016",
+      "ECP-TEST-M3-ELR-017",
+      "ECP-TEST-M3-ELR-018",
+      "ECP-TEST-M3-ELR-019",
+      "ECP-TEST-M3-ELR-020",
+      "ECP-TEST-M3-ELR-021",
+      "ECP-TEST-M3-ELR-022",
+      "ECP-TEST-M3-ELR-023",
+      "ECP-TEST-M3-ELR-024",
+      "ECP-TEST-M3-ELR-025",
+      "ECP-TEST-M3-ELR-026",
+      "ECP-TEST-M3-ELR-027",
+      "ECP-TEST-M3-ELR-028",
+      "ECP-TEST-M3-ELR-029",
+      "ECP-TEST-M3-ELR-030"
+    ]
+  },
+  "execution_contract": {
+    "attempts_per_test": 1,
+    "case_order": "the frozen F-01b ordered_test_ids sequence, unmodified",
+    "credential": "OPENROUTER_API_KEY resolved at launch through the authorized credential gateway only; never in Git, records, source, evidence, or logs",
+    "execution_surface": "python run_m3_elr_console.py",
+    "missing_data": {
+      "execution_attempts": "ONE attempt per registered test; no retries (the registered retry policy is NONE)",
+      "fabrication": "forbidden: a provider timeout/error/malformed response is never converted into a logical answer",
+      "inconclusive": "legitimate separately reported outcome class (charter §8.7), distinct from INVALID and from missing data",
+      "invalid_execution": "remains in the denominator as a classified outcome (charter §8.6), never dropped",
+      "missing_bundle_element": "counts as a protocol failure for that unit (charter §8.5); no convenience exclusion",
+      "silent_retry": "forbidden: any retry would violate the frozen execution contract"
+    },
+    "retry_policy": "NONE (a retry would violate the frozen execution contract)"
+  },
+  "family_distribution": {
+    "conditional-chaining": 5,
+    "consistency-contradiction": 5,
+    "constraint-quantitative": 5,
+    "default-exception": 5,
+    "relational-discrimination": 5,
+    "transitive-relational": 5
+  },
+  "family_reconciliation": {
+    "order_example_correspondences_asserted": false,
+    "rule": "identity-mapped: existing CA0v1 family names are registered as-is; no silent renames"
+  },
+  "intake_battery": {
+    "candidates_verified": 30,
+    "carried_findings": 59,
+    "fatal_issues": 0,
+    "method": "re-run of the qualification engine's own verify_ground_truth + symbol coverage + value agreement over the live recovered candidate artifacts"
+  },
+  "order_reference": {
+    "branch": "main",
+    "repository": "jsiadyarslan-lab/ECP",
+    "title": "M3 REAL EXTERNAL LOGICAL REASONING EVALUATION — READINESS, TARGET BINDING & REGISTRATION v1"
+  },
+  "ordered_test_ids": [
+    "ECP-TEST-M3-ELR-006",
+    "ECP-TEST-M3-ELR-008",
+    "ECP-TEST-M3-ELR-015",
+    "ECP-TEST-M3-ELR-012",
+    "ECP-TEST-M3-ELR-011",
+    "ECP-TEST-M3-ELR-025",
+    "ECP-TEST-M3-ELR-021",
+    "ECP-TEST-M3-ELR-029",
+    "ECP-TEST-M3-ELR-026",
+    "ECP-TEST-M3-ELR-016",
+    "ECP-TEST-M3-ELR-020",
+    "ECP-TEST-M3-ELR-005",
+    "ECP-TEST-M3-ELR-001",
+    "ECP-TEST-M3-ELR-002",
+    "ECP-TEST-M3-ELR-007",
+    "ECP-TEST-M3-ELR-009",
+    "ECP-TEST-M3-ELR-013",
+    "ECP-TEST-M3-ELR-014",
+    "ECP-TEST-M3-ELR-022",
+    "ECP-TEST-M3-ELR-030",
+    "ECP-TEST-M3-ELR-027",
+    "ECP-TEST-M3-ELR-017",
+    "ECP-TEST-M3-ELR-003",
+    "ECP-TEST-M3-ELR-010",
+    "ECP-TEST-M3-ELR-023",
+    "ECP-TEST-M3-ELR-028",
+    "ECP-TEST-M3-ELR-018",
+    "ECP-TEST-M3-ELR-004",
+    "ECP-TEST-M3-ELR-024",
+    "ECP-TEST-M3-ELR-019"
+  ],
+  "ordering": {
+    "rule": "F-01b STRATIFIED: family x depth strata (family and depth both sorted by registered name), within-stratum candidate_id ascending, round-robin interleave across the strata; a pure function of registered metadata; deterministic and bit-reproducible; never derived from model performance, reputation, observed responses, or prior runs",
+    "strata": [
+      {
+        "case_numbers": [
+          6,
+          7,
+          10
+        ],
+        "reasoning_depth": "MEDIUM",
+        "reasoning_family": "conditional-chaining"
+      },
+      {
+        "case_numbers": [
+          8,
+          9
+        ],
+        "reasoning_depth": "SHALLOW",
+        "reasoning_family": "conditional-chaining"
+      },
+      {
+        "case_numbers": [
+          15
+        ],
+        "reasoning_depth": "DEEP",
+        "reasoning_family": "consistency-contradiction"
+      },
+      {
+        "case_numbers": [
+          12,
+          13
+        ],
+        "reasoning_depth": "MEDIUM",
+        "reasoning_family": "consistency-contradiction"
+      },
+      {
+        "case_numbers": [
+          11,
+          14
+        ],
+        "reasoning_depth": "SHALLOW",
+        "reasoning_family": "consistency-contradiction"
+      },
+      {
+        "case_numbers": [
+          25
+        ],
+        "reasoning_depth": "DEEP",
+        "reasoning_family": "constraint-quantitative"
+      },
+      {
+        "case_numbers": [
+          21,
+          22,
+          23,
+          24
+        ],
+        "reasoning_depth": "MEDIUM",
+        "reasoning_family": "constraint-quantitative"
+      },
+      {
+        "case_numbers": [
+          29,
+          30
+        ],
+        "reasoning_depth": "DEEP",
+        "reasoning_family": "default-exception"
+      },
+      {
+        "case_numbers": [
+          26,
+          27,
+          28
+        ],
+        "reasoning_depth": "MEDIUM",
+        "reasoning_family": "default-exception"
+      },
+      {
+        "case_numbers": [
+          16,
+          17,
+          18,
+          19
+        ],
+        "reasoning_depth": "MEDIUM",
+        "reasoning_family": "relational-discrimination"
+      },
+      {
+        "case_numbers": [
+          20
+        ],
+        "reasoning_depth": "SHALLOW",
+        "reasoning_family": "relational-discrimination"
+      },
+      {
+        "case_numbers": [
+          5
+        ],
+        "reasoning_depth": "DEEP",
+        "reasoning_family": "transitive-relational"
+      },
+      {
+        "case_numbers": [
+          1,
+          3,
+          4
+        ],
+        "reasoning_depth": "MEDIUM",
+        "reasoning_family": "transitive-relational"
+      },
+      {
+        "case_numbers": [
+          2
+        ],
+        "reasoning_depth": "SHALLOW",
+        "reasoning_family": "transitive-relational"
+      }
+    ],
+    "strata_count": 14
+  },
+  "owner_rulings": {
+    "file_sha256": "5d7a518c42a4059feb356de27d4390843feda94342e377217ce473752fa2d2e5",
+    "register_hash_prefix": "9ea325d1aa0241fd",
+    "register_id": "ECP-OWNDEC-000006",
+    "rulings": {
+      "F-01a": "AUTHORIZE-NOW",
+      "F-01b": "STRATIFIED",
+      "O-01": "O-01-C",
+      "O-02": "AUTHORIZE",
+      "O-04": "AUTHORIZED",
+      "POP": "30+18"
+    }
+  },
+  "package_hash": "6f5c57a3e6b5a8fb1360036207d20868e31d2b409087645a25da4491c7ccd6b4",
+  "package_id": "ECP-PKG-M3-ELR-V1",
+  "package_version": 1,
+  "population": {
+    "component_1": {
+      "case_pack_id": "ECP-CASEPACK-M3-CA0V1",
+      "case_pack_version": 1,
+      "registered_count": 30,
+      "source": "ECP-POP-M3-CA0V1-V1",
+      "status": "REGISTERED"
+    },
+    "component_2": {
+      "candidate_count": 18,
+      "registered_count": 0,
+      "source": "prior 20-candidate pool surviving candidates (readiness-engine refusal intact)",
+      "status": "PENDING-REAUTHORIZATION (requires its own owner order)"
+    },
+    "counts": {
+      "component_2_executed": 0,
+      "component_2_registered": 0,
+      "component_2_surviving": 18,
+      "prior_pool": 20
+    },
+    "never_merged_into": "a single undifferentiated 48-case campaign",
+    "representation": "TWO-COMPONENT (owner ruling POP = 30+18, ECP-OWNDEC-000006)"
+  },
+  "protocol_version": "0.7.0",
+  "reasoning_depth": {
+    "distribution": {
+      "DEEP": 5,
+      "MEDIUM": 19,
+      "SHALLOW": 6
+    },
+    "rule": "registered case property, authored and qualification-verified; never inferred from answer length; never changed after observing results"
+  },
+  "registered_at": "2026-09-12T21:37:33Z",
+  "schema_version": "0.8.0",
+  "scientific_execution_lock": {
+    "case_execution": "NO",
+    "model_call": "NO",
+    "note": "execution requires the separate owner order (M3 — REAL EXTERNAL LOGICAL REASONING EXECUTION v1)",
+    "outcome_extraction": "NO",
+    "provider_call": "NO",
+    "scoring": "NO",
+    "statistical_analysis": "NO"
+  },
+  "target": {
+    "adapter_id": "ECP-ADAPTER-OPENROUTER-CHAT-COMPLETIONS",
+    "adapter_version": "1.0.0",
+    "api_interface": "openrouter-chat-completions-api (POST /api/v1/chat/completions, OpenAI-compatible dialect)",
+    "conformance_evidence": "ECP-EXEC-CONSOLE-6f73b46447ab4f4da9f1bb2e68f4b2d6 (real external OpenRouter round trip, 2026-09-12): CONFORMANCE ONLY — never a scientific result, never relabeled",
+    "credential_ref": "ECP-M3-ELR-CREDENTIAL-OPENROUTER",
+    "exact_model_api_identifier": "inclusionai/ling-3.0-flash-sante:free",
+    "independence_basis": [
+      "system lineage: InclusionAI Ling 3.0 Flash served via OpenRouter — outside ECP/JARVIS lineage",
+      "case selection: performed by qualification/registration only, no target-side participation",
+      "evaluation ownership: ECP-side, protocol-controlled",
+      "information access: the target receives only the registered case presentation",
+      "ground-truth access: none — sealed GT lives in the private qualification area, absent from the execution environment",
+      "benchmark access: none — no retrieval, no tools, no network beyond the single chat-completions endpoint",
+      "execution control: the ECP local gateway enforces the registered intent contract and frozen adapter configuration",
+      "no author-model overlap: InclusionAI Ling is outside the GLM family that authored the CA0v1 pool (O-03 consequence recorded)"
+    ],
+    "independence_classification": "EXTERNAL-INDEPENDENT",
+    "model_identifier": "inclusionai/ling-3.0-flash-sante:free",
+    "model_identity_rule": "the openrouter/free moving alias is NEVER a scientific model identity; the exact identifier is pinned and frozen",
+    "official_name": "InclusionAI Ling 3.0 Flash (Sante edition) served via OpenRouter",
+    "pinned_by_exact_identifier": true,
+    "provider": "ECP-PROVIDER-OPENROUTER",
+    "provider_organization": "OpenRouter",
+    "runtime_identity": "ECP-RUNTIME-LOCAL-GATEWAY-1",
+    "system_id": "ECP-SYSTEM-M3-ELR-001",
+    "system_type": "model-only"
+  }
+}

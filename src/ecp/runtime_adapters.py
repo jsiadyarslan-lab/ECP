@@ -284,6 +284,9 @@ class OpenRouterChatCompletionsAdapter:
         token_header: str | None = None,
         bearer_value: str | None = None,
         extra_headers: Mapping[str, str] | None = None,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+        timeout: float | None = None,
     ) -> None:
         if not model or not endpoint:
             raise ValueError("model and endpoint are required")
@@ -293,22 +296,40 @@ class OpenRouterChatCompletionsAdapter:
         self.adapter_id = adapter_id
         self.prompt = prompt
         self._transport = transport or _post_json
+        self._temperature = temperature
+        self._max_tokens = max_tokens
+        self._timeout = 30.0 if timeout is None else float(timeout)
         self._token_header, self._bearer_value, self._extra_headers = _validate_gateway_headers(
             token_header, bearer_value, extra_headers
         )
 
     def execute(self, lease: Any, request: Mapping[str, str]) -> Mapping[str, Any]:
-        payload = json.dumps({
+        # Registered-case prompt authority (M3-ELR): when the resolved
+        # request carries the registered case prompt, it takes precedence
+        # over the constructor's static conformance prompt. Clients can
+        # never force this value: it is resolved server-side from the
+        # RegisteredCaseArtifact by the execution contract resolver.
+        content = request.get("prompt") if isinstance(request, Mapping) else None
+        if not isinstance(content, str) or not content.strip():
+            content = self.prompt
+        body = {
             "model": self.model,
-            "messages": [{"role": "user", "content": self.prompt}],
+            "messages": [{"role": "user", "content": content}],
             "stream": False,
-        }).encode("utf-8")
+        }
+        # Frozen sampling policy knobs (None = omitted: byte-compatible
+        # with the historical payload, tested).
+        if self._temperature is not None:
+            body["temperature"] = self._temperature
+        if self._max_tokens is not None:
+            body["max_tokens"] = self._max_tokens
+        payload = json.dumps(body).encode("utf-8")
         headers = _chat_completions_headers(
             lease, self._token_header, self._bearer_value, self._extra_headers
         )
         started = time.monotonic()
         try:
-            status, body = self._transport(self.endpoint, headers, payload, 30.0)
+            status, resp_body = self._transport(self.endpoint, headers, payload, self._timeout)
         except (OSError, urllib_error.URLError, TimeoutError) as exc:
             raise RuntimeAdapterTransportError(_transport_failure_message(self.endpoint, exc)) from exc
         if status < 200 or status >= 300:
@@ -322,7 +343,7 @@ class OpenRouterChatCompletionsAdapter:
                 category = "PROVIDER_REQUEST_FAILED"
             raise RuntimeAdapterTransportError(category, http_status=status)
         try:
-            response = json.loads(body.decode("utf-8"))
+            response = json.loads(resp_body.decode("utf-8"))
         except (UnicodeDecodeError, json.JSONDecodeError) as exc:
             raise RuntimeAdapterTransportError("MALFORMED_PROVIDER_RESPONSE", http_status=status) from exc
         output = _openrouter_response_text(response)

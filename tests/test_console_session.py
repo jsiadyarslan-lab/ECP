@@ -106,15 +106,15 @@ def build_stack(tmp_path, routes=None, clock=None):
     """Full session stack over the existing universal fabric (all offline)."""
     transport = FakeProbeTransport(routes or {OPENAI_MODELS_URL: (200, json.dumps(OPENAI_MODELS_BODY).encode())})
     backing = DictSecretStore()
-    session_credentials = SessionCredentialGateway(backing, {})
+    mutable_clock = {"now": datetime(2026, 9, 12, 12, 0, 0, tzinfo=timezone.utc)}
+    if clock is None:
+        clock = lambda: mutable_clock["now"]
+    session_credentials = SessionCredentialGateway(backing, {}, clock=clock)
     providers = ProviderRegistry()
     targets = TargetRegistry(providers)
     adapters = AdapterRegistry()
     runtime = RuntimeAdapterRegistry()
-    service = TargetOnboardingService(providers, targets, adapters, runtime, session_credentials)
-    mutable_clock = {"now": datetime(2026, 9, 12, 12, 0, 0, tzinfo=timezone.utc)}
-    if clock is None:
-        clock = lambda: mutable_clock["now"]
+    service = TargetOnboardingService(providers, targets, adapters, runtime, session_credentials, clock=clock)
     gateway = LocalGateway(
         GatewayConfig(frozenset({ORIGIN}), artifact_root=Path(tmp_path)),
         service.evaluations,

@@ -1,0 +1,350 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ecp-protocol.org/0.8.0/m3-registration-package.schema.json",
+  "title": "ECP M3-ELR Registration Package",
+  "description": "The frozen M3 external logical reasoning registration package: registered cases (protected-case bindings, gt_commitment only — never raw ground truth), pinned external target, frozen condition, F-01b stratified ordering, charter endpoints, two-component POP representation, owner rulings, disclosures, and the scientific execution lock. Registration-only: no credentials, no prompts, no scientific results.",
+  "type": "object",
+  "required": [
+    "ecp_object",
+    "package_id",
+    "package_version",
+    "content_class",
+    "protocol_version",
+    "schema_version",
+    "registered_at",
+    "order_reference",
+    "package_hash",
+    "evaluation",
+    "population",
+    "cases",
+    "family_distribution",
+    "reasoning_depth",
+    "answer_space_distribution",
+    "answer_space_metadata",
+    "ordering",
+    "ordered_test_ids",
+    "target",
+    "condition",
+    "endpoints",
+    "execution_contract",
+    "owner_rulings",
+    "intake_battery",
+    "disclosures",
+    "scientific_execution_lock"
+  ],
+  "properties": {
+    "ecp_object": { "const": "m3-registration-package" },
+    "description": { "type": "string", "description": "Human-facing illustration note; never carries operational or secret meaning." },
+    "package_id": { "const": "ECP-PKG-M3-ELR-V1" },
+    "package_version": { "type": "integer", "minimum": 1 },
+    "content_class": { "const": "registration" },
+    "protocol_version": { "$ref": "#/$defs/semver" },
+    "schema_version": { "$ref": "#/$defs/semver" },
+    "registered_at": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$" },
+    "order_reference": {
+      "type": "object",
+      "required": ["title", "repository", "branch"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "sections": { "type": "string" },
+        "repository": { "type": "string", "minLength": 1 },
+        "branch": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": { "type": "string" }
+    },
+    "package_hash": { "$ref": "#/$defs/hex64" },
+    "evaluation": {
+      "type": "object",
+      "required": ["evaluation_id", "case_count", "test_ids", "case_ids", "classifier"],
+      "properties": {
+        "evaluation_id": { "const": "ECP-EVAL-M3-ELR-1" },
+        "case_count": { "type": "integer", "minimum": 1, "maximum": 1000 },
+        "test_ids": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^ECP-TEST-M3-ELR-\\d{3,}$" } },
+        "case_ids": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^ECP-CASE-M3-ELR-\\d{3,}$" } },
+        "classifier": { "const": "M3-ELR-LOGICAL-CLASSIFIER-1" }
+      },
+      "additionalProperties": true
+    },
+    "population": {
+      "type": "object",
+      "required": ["representation", "component_1", "component_2", "never_merged_into", "counts"],
+      "properties": {
+        "representation": { "type": "string", "minLength": 1 },
+        "component_1": {
+          "type": "object",
+          "required": ["source", "case_pack_id", "case_pack_version", "registered_count", "status"],
+          "properties": {
+            "source": { "type": "string", "pattern": "^ECP-POP-" },
+            "case_pack_id": { "type": "string", "pattern": "^ECP-CASEPACK-" },
+            "case_pack_version": { "type": "integer", "minimum": 1 },
+            "registered_count": { "type": "integer", "minimum": 0 },
+            "status": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": true
+        },
+        "component_2": {
+          "type": "object",
+          "required": ["candidate_count", "registered_count", "status"],
+          "properties": {
+            "source": { "type": "string" },
+            "candidate_count": { "type": "integer", "minimum": 0 },
+            "registered_count": { "type": "integer", "minimum": 0 },
+            "status": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": true
+        },
+        "never_merged_into": { "type": "string", "minLength": 1 },
+        "counts": {
+          "type": "object",
+          "required": ["prior_pool", "component_2_surviving", "component_2_registered", "component_2_executed"],
+          "properties": {
+            "prior_pool": { "type": "integer", "minimum": 0 },
+            "component_2_surviving": { "type": "integer", "minimum": 0 },
+            "component_2_registered": { "type": "integer", "minimum": 0 },
+            "component_2_executed": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": { "type": "integer" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "case_id", "test_id", "candidate_id", "population_id",
+          "case_pack_id", "case_pack_version", "content_hash",
+          "reasoning_family", "reasoning_depth", "answer_space", "gt_commitment"
+        ],
+        "properties": {
+          "case_id": { "type": "string", "pattern": "^ECP-CASE-M3-ELR-\\d{3,}$" },
+          "test_id": { "type": "string", "pattern": "^ECP-TEST-M3-ELR-\\d{3,}$" },
+          "candidate_id": { "type": "string", "pattern": "^ECP-CAND-\\d{6}$" },
+          "population_id": { "type": "string", "pattern": "^ECP-POP-" },
+          "case_pack_id": { "type": "string", "pattern": "^ECP-CASEPACK-" },
+          "case_pack_version": { "type": "integer", "minimum": 1 },
+          "content_hash": { "$ref": "#/$defs/hex64" },
+          "reasoning_family": { "type": "string", "minLength": 1 },
+          "reasoning_depth": { "enum": ["SHALLOW", "MEDIUM", "DEEP"] },
+          "answer_space": { "enum": ["TERNARY", "BINARY", "VALUE"] },
+          "gt_commitment": { "$ref": "#/$defs/hex64" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "family_distribution": { "type": "object", "minProperties": 1, "additionalProperties": { "type": "integer", "minimum": 0 } },
+    "family_reconciliation": {
+      "type": "object",
+      "required": ["rule", "order_example_correspondences_asserted"],
+      "properties": {
+        "rule": { "type": "string", "minLength": 1 },
+        "order_example_correspondences_asserted": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "reasoning_depth": {
+      "type": "object",
+      "required": ["distribution", "rule"],
+      "properties": {
+        "distribution": { "type": "object", "minProperties": 1, "additionalProperties": { "type": "integer", "minimum": 0 } },
+        "rule": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "answer_space_distribution": { "type": "object", "minProperties": 1, "additionalProperties": { "type": "integer", "minimum": 0 } },
+    "answer_space_metadata": {
+      "type": "object",
+      "required": ["ternary_key_distribution", "note"],
+      "properties": {
+        "ternary_key_distribution": {
+          "type": "object",
+          "required": ["YES", "NO", "CANNOT-DETERMINE"],
+          "properties": {
+            "YES": { "type": "integer", "minimum": 0 },
+            "NO": { "type": "integer", "minimum": 0 },
+            "CANNOT-DETERMINE": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        },
+        "note": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "ordering": {
+      "type": "object",
+      "required": ["rule", "strata", "strata_count"],
+      "properties": {
+        "rule": { "type": "string", "minLength": 1 },
+        "strata": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["reasoning_family", "reasoning_depth", "case_numbers"],
+            "properties": {
+              "reasoning_family": { "type": "string", "minLength": 1 },
+              "reasoning_depth": { "enum": ["SHALLOW", "MEDIUM", "DEEP"] },
+              "case_numbers": { "type": "array", "minItems": 1, "items": { "type": "integer", "minimum": 1 } }
+            },
+            "additionalProperties": false
+          }
+        },
+        "strata_count": { "type": "integer", "minimum": 1 },
+        "deterministic": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "ordered_test_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "pattern": "^ECP-TEST-M3-ELR-\\d{3,}$" }
+    },
+    "target": {
+      "type": "object",
+      "required": [
+        "system_id", "system_type", "official_name", "provider",
+        "provider_organization", "model_identifier", "exact_model_api_identifier",
+        "api_interface", "adapter_id", "adapter_version", "runtime_identity",
+        "independence_classification", "credential_ref", "pinned_by_exact_identifier",
+        "model_identity_rule", "conformance_evidence", "independence_basis"
+      ],
+      "properties": {
+        "system_id": { "const": "ECP-SYSTEM-M3-ELR-001" },
+        "system_type": { "enum": ["model-only", "complete-system", "agent", "hybrid", "non-llm"] },
+        "official_name": { "type": "string", "minLength": 1 },
+        "provider": { "type": "string", "pattern": "^ECP-PROVIDER-" },
+        "provider_organization": { "type": "string", "minLength": 1 },
+        "model_identifier": { "const": "inclusionai/ling-3.0-flash-sante:free" },
+        "exact_model_api_identifier": { "type": "string", "minLength": 1 },
+        "api_interface": { "type": "string", "minLength": 1 },
+        "adapter_id": { "type": "string", "pattern": "^ECP-ADAPTER-" },
+        "adapter_version": { "$ref": "#/$defs/semver" },
+        "runtime_identity": { "type": "string", "minLength": 1 },
+        "independence_classification": { "type": "string", "minLength": 1 },
+        "credential_ref": { "type": "string", "minLength": 1 },
+        "pinned_by_exact_identifier": { "const": true },
+        "model_identity_rule": { "type": "string", "minLength": 1 },
+        "conformance_evidence": { "type": "string", "minLength": 1 },
+        "independence_basis": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+      },
+      "additionalProperties": true
+    },
+    "condition": {
+      "type": "object",
+      "required": [
+        "condition_id", "model_state", "level", "system_prompt", "tools",
+        "retrieval", "external_context_injection", "temperature", "max_tokens",
+        "transport_timeout_seconds", "provider_nondeterminism", "prompt_authority"
+      ],
+      "properties": {
+        "condition_id": { "const": "ECP-COND-M3-ELR-1" },
+        "model_state": { "const": "MODEL-ENABLED" },
+        "level": { "type": "string", "minLength": 1 },
+        "system_prompt": { "const": "NONE" },
+        "tools": { "const": "NONE" },
+        "retrieval": { "const": "NONE" },
+        "external_context_injection": { "const": "NONE" },
+        "temperature": { "type": "number", "minimum": 0, "maximum": 2 },
+        "max_tokens": { "type": "integer", "minimum": 1 },
+        "transport_timeout_seconds": { "type": "number", "exclusiveMinimum": 0 },
+        "provider_nondeterminism": { "type": "string", "minLength": 1 },
+        "prompt_authority": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "endpoints": {
+      "type": "object",
+      "required": ["primary", "secondary", "descriptive", "missing_data"],
+      "properties": {
+        "primary": { "type": "object", "required": ["name", "definition"], "additionalProperties": { "type": "string" } },
+        "secondary": { "type": "object", "required": ["label", "definition"], "additionalProperties": { "type": "string" } },
+        "descriptive": { "type": "string", "minLength": 1 },
+        "missing_data": { "type": "object", "minProperties": 1 }
+      },
+      "additionalProperties": true
+    },
+    "execution_contract": {
+      "type": "object",
+      "required": ["execution_surface", "attempts_per_test", "retry_policy", "case_order", "missing_data", "credential"],
+      "properties": {
+        "execution_surface": { "const": "python run_m3_elr_console.py" },
+        "attempts_per_test": { "type": "integer", "minimum": 1 },
+        "retry_policy": { "type": "string", "minLength": 1 },
+        "case_order": { "type": "string", "minLength": 1 },
+        "missing_data": { "type": "object", "minProperties": 1 },
+        "credential": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "owner_rulings": {
+      "type": "object",
+      "required": ["register_id", "file_sha256", "register_hash_prefix", "rulings"],
+      "properties": {
+        "register_id": { "type": "string", "pattern": "^ECP-OWNDEC-" },
+        "file_sha256": { "$ref": "#/$defs/hex64" },
+        "register_hash_prefix": { "type": "string", "minLength": 8 },
+        "rulings": {
+          "type": "object",
+          "required": ["O-01", "O-02", "O-04", "F-01a", "F-01b", "POP"],
+          "properties": {
+            "O-01": { "const": "O-01-C" },
+            "O-02": { "const": "AUTHORIZE" },
+            "O-04": { "const": "AUTHORIZED" },
+            "F-01a": { "const": "AUTHORIZE-NOW" },
+            "F-01b": { "const": "STRATIFIED" },
+            "POP": { "const": "30+18" }
+          },
+          "additionalProperties": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "intake_battery": {
+      "type": "object",
+      "required": ["candidates_verified", "fatal_issues", "carried_findings", "method"],
+      "properties": {
+        "candidates_verified": { "type": "integer", "minimum": 0 },
+        "fatal_issues": { "type": "integer", "minimum": 0 },
+        "carried_findings": { "type": "integer", "minimum": 0 },
+        "method": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "disclosures": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "state", "text"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "state": { "type": "string", "minLength": 1 },
+          "text": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "scientific_execution_lock": {
+      "type": "object",
+      "required": ["case_execution", "provider_call", "model_call", "scoring", "outcome_extraction", "statistical_analysis", "note"],
+      "properties": {
+        "case_execution": { "const": "NO" },
+        "provider_call": { "const": "NO" },
+        "model_call": { "const": "NO" },
+        "scoring": { "const": "NO" },
+        "outcome_extraction": { "const": "NO" },
+        "statistical_analysis": { "const": "NO" },
+        "note": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "semver": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "hex64": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "ref": { "type": "string", "minLength": 1 }
+  }
+}

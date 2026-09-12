@@ -92,11 +92,37 @@ class SessionCredentialGateway(CredentialGateway):
     disk, never serialized, never stringified.
     """
 
-    def __init__(self, backing_store: SecretStore, identities: Mapping[str, CredentialIdentity]) -> None:
+    def __init__(
+        self,
+        backing_store: SecretStore,
+        identities: Mapping[str, CredentialIdentity],
+        *,
+        clock: "Callable[[], datetime] | None" = None,
+    ) -> None:
+        # Optional injected clock (deterministic tests): production default
+        # stays the real wall clock; every internal "now" defaults to it.
+        self._clock = clock or (lambda: datetime.now(timezone.utc))
         self._session_values = _SessionSecretStore()
         self._session_lock = threading.RLock()
         self._sessions: dict[str, _SessionState] = {}
         super().__init__(_CompositeSecretStore(self._session_values, backing_store), identities)
+
+    def release(
+        self,
+        request: ScopedReleaseRequest,
+        binding: CredentialBinding,
+        authorization: AuthorizationGrant,
+        *,
+        now: datetime | None = None,
+    ) -> SecretLease:
+        """Release through the existing path, defaulting ``now`` to the clock.
+
+        Callers that pass an explicit ``now`` (the console session manager
+        does) are unchanged; callers that omit it (the execution fabric)
+        previously fell back to the real wall clock and now fall back to the
+        injected clock, which is the real wall clock in production.
+        """
+        return super().release(request, binding, authorization, now=now or self._clock())
 
     # ------------------------------------------------------------------
     # Session lifecycle
@@ -121,7 +147,7 @@ class SessionCredentialGateway(CredentialGateway):
             )
         if not isinstance(ttl_seconds, int) or not 60 <= ttl_seconds <= 86400:
             raise SessionConsoleError("session ttl must be between 60 and 86400 seconds")
-        current = now or datetime.now(timezone.utc)
+        current = now or self._clock()
         expires_at = (
             current.astimezone(timezone.utc) + _ttl_delta(ttl_seconds)
         ).replace(microsecond=0).isoformat().replace("+00:00", "Z")
@@ -165,7 +191,7 @@ class SessionCredentialGateway(CredentialGateway):
             purpose=DISCOVERY_PURPOSE,
             scope=frozenset({DISCOVERY_PURPOSE}),
             lease_seconds=60,
-            requested_at=_iso(now or datetime.now(timezone.utc)),
+            requested_at=_iso(now or self._clock()),
         )
         return self.release(request, state.discovery_binding, state.discovery_grant, now=now)
 
