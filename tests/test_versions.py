@@ -39,7 +39,7 @@ def test_matrix_covers_all_known_object_types():
         | set(V070_CONTRACTS)
         | set(V080_CONTRACTS)
     )
-    assert len(SCHEMA_VERSIONS) == 34
+    assert len(SCHEMA_VERSIONS) == 35  # +onboarding-record (0.8.0 bundle, universal onboarding)
 
 
 def test_v010_contracts_accept_all_bundle_versions():

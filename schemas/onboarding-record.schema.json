@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ecp-protocol.org/0.8.0/onboarding-record.schema.json",
+  "title": "ECP Target Onboarding Record",
+  "description": "Deterministic record of one universal target onboarding run. References and verdicts only: no credentials, no authorization decisions, no scientific results, no evidence. Byte-identical for identical configurations (provable idempotency).",
+  "type": "object",
+  "required": [
+    "ecp_object",
+    "onboarding_id",
+    "onboarding_version",
+    "protocol_version",
+    "schema_version",
+    "target_id",
+    "target_version",
+    "target_hash",
+    "system_id",
+    "system_kind",
+    "provider_id",
+    "provider_interface",
+    "adapter_id",
+    "adapter_version",
+    "model_identifier",
+    "credential_ref",
+    "authorization_ref",
+    "binding_id",
+    "authorization_grant_ref",
+    "evaluation_id",
+    "test_ids",
+    "readiness_state",
+    "readiness_checks"
+  ],
+  "properties": {
+    "ecp_object": { "const": "onboarding-record" },
+    "description": { "type": "string", "description": "Human-facing illustration note; never carries operational or secret meaning." },
+    "onboarding_id": { "type": "string", "pattern": "^ECP-ONBOARD-[A-Fa-f0-9]{16}$" },
+    "onboarding_version": { "$ref": "#/$defs/semver" },
+    "protocol_version": { "$ref": "#/$defs/semver" },
+    "schema_version": { "$ref": "#/$defs/semver" },
+    "target_id": { "type": "string", "pattern": "^ECP-TARGET-[A-Za-z0-9][A-Za-z0-9._:-]*$" },
+    "target_version": { "$ref": "#/$defs/semver" },
+    "target_hash": { "$ref": "#/$defs/hex64" },
+    "system_id": { "type": "string", "pattern": "^ECP-SYSTEM-[A-Za-z0-9][A-Za-z0-9._:-]*$" },
+    "system_kind": { "enum": ["model-only", "complete-system", "agent", "hybrid", "non-llm"] },
+    "provider_id": { "type": "string", "pattern": "^ECP-PROVIDER-[A-Za-z0-9][A-Za-z0-9._:-]*$" },
+    "provider_interface": { "type": "string", "minLength": 1 },
+    "adapter_id": { "type": "string", "pattern": "^ECP-ADAPTER-[A-Za-z0-9][A-Za-z0-9._:-]*$" },
+    "adapter_version": { "$ref": "#/$defs/semver" },
+    "model_identifier": { "type": "string", "minLength": 1 },
+    "credential_ref": { "$ref": "#/$defs/ref" },
+    "authorization_ref": { "$ref": "#/$defs/ref" },
+    "binding_id": { "type": "string", "pattern": "^ECP-[A-Za-z0-9][A-Za-z0-9._:-]*$" },
+    "authorization_grant_ref": { "type": "string", "pattern": "^ECP-[A-Za-z0-9][A-Za-z0-9._:-]*$" },
+    "evaluation_id": { "type": "string", "pattern": "^ECP-[A-Za-z0-9][A-Za-z0-9._:-]*$" },
+    "test_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/ref" },
+      "uniqueItems": true
+    },
+    "readiness_state": { "enum": ["READY", "NOT_READY"] },
+    "readiness_checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["check", "result", "detail"],
+        "properties": {
+          "check": {
+            "enum": [
+              "provider_available",
+              "adapter_metadata_available",
+              "runtime_adapter_available",
+              "model_identified",
+              "credential_resolved",
+              "authorization_valid",
+              "interface_valid",
+              "execution_contract_valid",
+              "test_available"
+            ]
+          },
+          "result": { "enum": ["PASS", "FAIL"] },
+          "detail": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "ref": { "type": "string", "pattern": "^ECP-[A-Z0-9][A-Z0-9._:-]*$" },
+    "hex64": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    }
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "ecp_object": "onboarding-record",
+  "description": "FORMAT EXAMPLE — universal target onboarding record (deterministic; identical configurations yield byte-identical records).",
+  "onboarding_id": "ECP-ONBOARD-78df9fbdc0f86ce9",
+  "onboarding_version": "1.0.0",
+  "protocol_version": "0.7.0",
+  "schema_version": "0.8.0",
+  "target_id": "ECP-TARGET-ONBOARD-EXAMPLE-1",
+  "target_version": "1.0.0",
+  "target_hash": "78df9fbdc0f86ce97b6cc857aba6a5c730b01f089253b4de2af01ff188407038",
+  "system_id": "ECP-SYSTEM-ONBOARD-EXAMPLE-1",
+  "system_kind": "model-only",
+  "provider_id": "ECP-PROVIDER-ONBOARD-EXAMPLE",
+  "provider_interface": "offline-conformance",
+  "adapter_id": "ECP-ADAPTER-ONBOARD-EXAMPLE",
+  "adapter_version": "1.0.0",
+  "model_identifier": "example-model-1",
+  "credential_ref": "ECP-ONBOARD-EXAMPLE-CREDENTIAL",
+  "authorization_ref": "ECP-ONBOARD-EXAMPLE-AUTH",
+  "binding_id": "ECP-BIND-ONBOARD-EXAMPLE-1",
+  "authorization_grant_ref": "ECP-ONBOARD-EXAMPLE-AUTH",
+  "evaluation_id": "ECP-EVAL-ONBOARD-EXAMPLE-1",
+  "test_ids": [
+    "ECP-ONBOARD-EXAMPLE-TEST-1"
+  ],
+  "readiness_state": "READY",
+  "readiness_checks": [
+    {
+      "check": "provider_available",
+      "result": "PASS",
+      "detail": "provider ECP-PROVIDER-ONBOARD-EXAMPLE is active"
+    },
+    {
+      "check": "adapter_metadata_available",
+      "result": "PASS",
+      "detail": "adapter ECP-ADAPTER-ONBOARD-EXAMPLE@1.0.0 is active"
+    },
+    {
+      "check": "runtime_adapter_available",
+      "result": "PASS",
+      "detail": "runtime adapter ECP-ADAPTER-ONBOARD-EXAMPLE is registered and enabled"
+    },
+    {
+      "check": "model_identified",
+      "result": "PASS",
+      "detail": "model identifier is configured: example-model-1"
+    },
+    {
+      "check": "credential_resolved",
+      "result": "PASS",
+      "detail": "credential ECP-ONBOARD-EXAMPLE-CREDENTIAL is registered and resolves"
+    },
+    {
+      "check": "authorization_valid",
+      "result": "PASS",
+      "detail": "authorization grant is active and covers the binding"
+    },
+    {
+      "check": "interface_valid",
+      "result": "PASS",
+      "detail": "interface offline-conformance is declared by the provider and the adapter contract"
+    },
+    {
+      "check": "execution_contract_valid",
+      "result": "PASS",
+      "detail": "the universal execution contract resolves the evaluation, system, credential, test and authorization"
+    },
+    {
+      "check": "test_available",
+      "result": "PASS",
+      "detail": "authorized tests are available: ECP-ONBOARD-EXAMPLE-TEST-1"
+    }
+  ]
+}

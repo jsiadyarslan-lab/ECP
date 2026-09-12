@@ -41,6 +41,7 @@ EXAMPLE_SCHEMA_MAP = [
     ("lineage-event.example.json", "lineage-event"),
     ("trust-store-manifest.example.json", "trust-store-manifest"),
     ("runtime-observation.example.json", "runtime-observation"),
+    ("onboarding.example.json", "onboarding-record"),
 ]
 
 

@@ -122,11 +122,14 @@ V070_CONTRACTS = (
 
 # Object types introduced by the generic external target control-plane
 # foundation. These are operational metadata contracts, not scientific
-# registration or execution-result contracts.
+# registration or execution-result contracts. The onboarding record (same
+# 0.8.0 bundle) is the deterministic output of the universal onboarding
+# fabric: references and readiness verdicts only.
 V080_CONTRACTS = (
     "provider",
     "target",
     "adapter",
+    "onboarding-record",
 )
 
 #: Per-object-type accepted ``schema_version`` values.

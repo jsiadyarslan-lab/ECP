@@ -57,6 +57,8 @@ SCHEMA_FILES = {
     "provider": "provider.schema.json",
     "target": "target.schema.json",
     "adapter": "adapter.schema.json",
+    # Universal target onboarding fabric record (0.8.0 bundle, additive).
+    "onboarding-record": "onboarding-record.schema.json",
 }
 
 _CACHE: dict = {}

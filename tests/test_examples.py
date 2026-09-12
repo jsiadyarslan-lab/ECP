@@ -45,6 +45,7 @@ EXAMPLE_FILES = [
     "lineage-event.example.json",
     "trust-store-manifest.example.json",
     "runtime-observation.example.json",
+    "onboarding.example.json",
 ]
 
 
