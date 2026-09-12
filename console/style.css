@@ -39,5 +39,13 @@ button.secondary { background:transparent; border:1px solid var(--line); color:v
 .model-meta { color:var(--accent); font-size:11px; overflow-wrap:anywhere; text-align:right; }
 #discovery-probes { margin-top:12px; }
 #discovery-probes summary { color:var(--muted); cursor:pointer; font-size:12px; }
+.ledger-scroll { border:1px solid #1d2b45; border-radius:10px; margin:12px 0 4px; max-height:420px; overflow:auto; }
+.ledger-table { border-collapse:collapse; font-size:12.5px; width:100%; }
+.ledger-table th { background:#0c1426; color:var(--muted); font-size:11px; letter-spacing:.07em; padding:9px 10px; position:sticky; text-align:left; text-transform:uppercase; top:0; }
+.ledger-table td { border-top:1px solid #1d2b45; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; overflow-wrap:anywhere; padding:8px 10px; }
+.ledger-table td.num { color:var(--muted); }
+.ledger-table td.good { color:var(--good); font-weight:700; }
+.ledger-table td.bad { color:var(--bad); font-weight:700; }
+#m3elr-summary { margin-top:12px; min-height:60px; }
 footer { color:var(--muted); display:flex; justify-content:space-between; gap:18px; font-size:12px; padding:24px 2px; }
 @media(max-width:700px){ .pairing-row,.form-grid,.status-grid,.discovery-grid{grid-template-columns:1fr;} .discovery-grid .span-2{grid-column:auto;} footer{display:block;} footer span{display:block;margin-top:8px;} .model-row{grid-template-columns:1fr;} .model-meta{text-align:left;} .provider-line{grid-template-columns:1fr;} }

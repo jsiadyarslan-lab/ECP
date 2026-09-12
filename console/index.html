@@ -73,6 +73,37 @@
       <p id="selection-detail" class="muted">No protected case material or credential value is loaded into the browser.</p>
     </section>
 
+    <section class="card" id="m3elr-card" aria-labelledby="m3elr-title" hidden>
+      <div class="section-title"><h2 id="m3elr-title">M3-ELR scientific campaign</h2><span id="m3elr-state" class="pill neutral">NOT STARTED</span></div>
+      <p class="muted">The frozen registration package executed in the browser: paste the provider credential above, open the credential session, then run the campaign. Results appear below as each registered test completes; evidence, audit and the campaign ledger are persisted by the gateway outside the repository.</p>
+      <dl class="status-grid">
+        <div><dt>Package</dt><dd id="m3elr-package">—</dd></div>
+        <div><dt>Package hash</dt><dd id="m3elr-hash">—</dd></div>
+        <div><dt>Target model</dt><dd id="m3elr-model">—</dd></div>
+        <div><dt>Condition</dt><dd id="m3elr-condition">—</dd></div>
+        <div><dt>Cases</dt><dd id="m3elr-cases">—</dd></div>
+        <div><dt>Order</dt><dd id="m3elr-order">—</dd></div>
+        <div><dt>Evidence root</dt><dd id="m3elr-evidence-root">—</dd></div>
+        <div><dt>Readiness gate</dt><dd id="m3elr-gate">—</dd></div>
+        <div><dt>Attempts</dt><dd id="m3elr-attempts">—</dd></div>
+      </dl>
+      <button id="m3elr-run-button" class="run" type="button" disabled>RUN CAMPAIGN</button>
+      <p class="hint" id="m3elr-note">The target is pinned by the frozen registration (the model selected during discovery is informational only). One attempt per registered test, frozen order, no retries; ONE campaign per launcher process — restart the launcher to run a new campaign. The protected ground truth never leaves the gateway: only classifications are shown and persisted.</p>
+
+      <div id="m3elr-progress" hidden>
+        <div class="section-title"><h3>Campaign ledger</h3><span id="m3elr-progress-count" class="pill neutral">0/0</span></div>
+        <p class="muted" id="m3elr-current">—</p>
+        <div class="ledger-scroll">
+          <table class="ledger-table">
+            <thead><tr><th>#</th><th>Test</th><th>Execution</th><th>Provider status</th><th>Answer</th><th>Outcome</th></tr></thead>
+            <tbody id="m3elr-ledger-body"></tbody>
+          </table>
+        </div>
+        <pre id="m3elr-summary" class="result" hidden></pre>
+        <p class="hint" id="m3elr-ledger-path" hidden></p>
+      </div>
+    </section>
+
     <section class="card" aria-labelledby="execution-title">
       <div class="section-title"><h2 id="execution-title">Execution</h2><span id="execution-state" class="pill neutral">IDLE</span></div>
       <dl class="status-grid">
@@ -100,6 +131,6 @@
 
     <footer><span>Execution surface only.</span><span>Scientific registration, Ground Truth, scoring, and historical artifacts are immutable here.</span></footer>
   </main>
-  <script src="./app.js?v=urpeb1"></script>
+  <script src="./app.js?v=m3elr1"></script>
 </body>
 </html>

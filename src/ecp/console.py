@@ -41,6 +41,14 @@ _SESSION_ROUTES={
     "/api/v1/credentials/session/revoke":"revoke_session",
     "/api/v1/discovery":"discover",
     "/api/v1/session/targets":"select_target",
+    # M3-ELR scientific campaign surface (owner order 2026-09-13): the
+    # campaign console component implements these exactly like the session
+    # routes above — dict in / dict out, secret-free responses, credentials
+    # still flow only through the session credential gateway, and the
+    # campaign itself executes through the shared frozen engine consumed
+    # by the registered CLI launcher.
+    "/api/v1/m3elr/campaign":"m3elr_campaign",
+    "/api/v1/m3elr/campaign/status":"m3elr_campaign_status",
 }
 _SESSION_BODY_SECRET_KEYS=frozenset({"credential_secret","api_key","secret","secret_value","token","password","authorization"})
 

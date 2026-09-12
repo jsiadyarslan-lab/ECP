@@ -263,6 +263,7 @@ digest  = hash_document(doc)
 | [docs/M3-R1-ARCHITECTURE-DECISION.md](docs/M3-R1-ARCHITECTURE-DECISION.md) | R1 architecture decision record: Option C — minimal coupled foundation (protected store + registration ledger), threat model, rejected alternatives |
 | [docs/UNIVERSAL-PROVIDER-DISCOVERY-CONSOLE.md](docs/UNIVERSAL-PROVIDER-DISCOVERY-CONSOLE.md) | Universal visual provider & model evaluation console: browser credential session, unified provider/model discovery, model selection, execution through the universal fabric |
 | [docs/M3-ELR-READINESS-RECONSTRUCTION.md](docs/M3-ELR-READINESS-RECONSTRUCTION.md) | M3-ELR readiness reconstruction record: byte-exact recovery + re-implementation of the frozen external logical reasoning registration (package hash, anchor-verified F-01b ordering, disclosures) |
+| [docs/M3-ELR-BROWSER-CONSOLE.md](docs/M3-ELR-BROWSER-CONSOLE.md) | M3-ELR scientific campaign browser console: the registered execution surface in the existing evaluation console (paste the credential, RUN CAMPAIGN, live results; same frozen engine as the CLI surface) |
 
 ## 9. Development status & roadmap
 
