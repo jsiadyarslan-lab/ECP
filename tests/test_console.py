@@ -49,6 +49,12 @@ def test_partial_success_is_not_success(tmp_path):
     gateway,_,_,_=build_gateway(tmp_path,store=FailingStore(tmp_path)); result=gateway.execute({"evaluation_id":"ECP-EVAL-CONSOLE-TEST","system_id":"ECP-SYSTEM-CONSOLE-TEST","credential_ref":"cred-1","test_id":"test-1","request_id":"partial-persist"}); assert result["status"]=="PARTIAL_SUCCESS"; assert result["failure_stage"]=="evidence_audit_or_persistence"
 def test_static_ui_has_no_provider_or_secret_write_path():
     root=Path(__file__).resolve().parents[1]/"console"; html=(root/"index.html").read_text(); app=(root/"app.js").read_text(); assert "127.0.0.1:8765" in app; assert "github" not in app.lower(); assert "api_key" not in app.lower(); assert "secret_value" not in app.lower(); assert "GitHub write tokens" not in html; assert "Ground Truth" in html
+    # Session console hardening: the owner credential is never persisted by
+    # the page and is submitted only to the loopback gateway.
+    assert app.count("localStorage.setItem")==1 and "sessionStorageKey" in app  # only the pairing session token is stored
+    assert "owner-credential-input" in html and 'type="password"' in html  # secure input field
+    assert app.count("http")==1  # the ONLY origin contacted is the loopback gateway
+    assert 'input.value = ""' in app  # the credential field is cleared immediately after submission
 DEMO_REQUEST={"evaluation_id":"ECP-EVAL-CONSOLE-TEST","system_id":"ECP-SYSTEM-CONSOLE-TEST","credential_ref":"cred-1","test_id":"test-1","request_id":"auth-focused"}
 def _pair_over_http(gateway):
     status,payload,_=request(gateway,"POST","/api/v1/pair",{"pairing_code":gateway.pairing_code}); assert status==200; return payload["session"]

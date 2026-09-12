@@ -506,6 +506,21 @@ class ExecutionContractResolver:
         """The single execution registry this resolver resolves against."""
         return self._runtime
 
+    def register(self, evaluation: Any) -> None:
+        """Register one additional authorized evaluation (additive seam).
+
+        Console sessions that onboard targets at runtime (for example the
+        universal provider discovery console) register the resulting
+        evaluation here so execution continues to flow through this single
+        resolver. Structural wiring is not validated by this seam — the
+        evaluation must already be fully wired (credential binding and
+        authorization grant included) by its onboarding path.
+        """
+        evaluation_id = getattr(evaluation, "evaluation_id", None)
+        if not isinstance(evaluation_id, str) or not evaluation_id.strip():
+            raise ContractViolation("registered evaluations require an evaluation_id")
+        self._evaluations[evaluation_id] = evaluation
+
     def resolve(self, intent: ClientExecutionIntent) -> ResolvedUniversalExecutionRequest:
         if not isinstance(intent, ClientExecutionIntent):
             raise ContractViolation("resolve requires a ClientExecutionIntent")

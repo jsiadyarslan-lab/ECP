@@ -997,6 +997,49 @@ def test_launcher_fails_closed_when_real_credential_missing(repo_root, tmp_path)
         launcher.build_gateway(configuration, gateway_config)
 
 
+def test_launcher_builds_session_console_enabled_gateway(repo_root, tmp_path):
+    # The SAME launcher now serves the visual provider discovery console on
+    # the SAME gateway: registry-driven descriptors + credential sessions,
+    # with the offline demonstration target still fully functional.
+    launcher = _import_launcher(repo_root)
+    configuration = launcher.load_configuration(None)
+    gateway_config = GatewayConfig(
+        frozenset({"http://127.0.0.1:8766"}), artifact_root=tmp_path
+    )
+    gateway, service = launcher.build_gateway(configuration, gateway_config)
+    descriptors = gateway.session_descriptors()
+    assert len(descriptors) == 6
+    session_secret = "sk-launcher-session-TESTKEY-DO-NOT-LEAK-0001"
+    handle = gateway.execute_session_route(
+        "/api/v1/credentials/session", {"credential_secret": session_secret}
+    )
+    assert handle["credential_ref"].startswith("ECP-SESSION-CREDENTIAL-")
+    assert session_secret not in json.dumps(handle)
+    # offline regression: the configured demo target still executes intact
+    record = gateway.execute({
+        "evaluation_id": "ECP-EVAL-DEMO-OFFLINE-1",
+        "test_id": "ECP-TEST-DEMO-OFFLINE-1",
+        "system_id": "ECP-SYSTEM-DEMO-OFFLINE-1",
+        "credential_ref": "ECP-DEMO-CREDENTIAL-OFFLINE",
+        "request_id": "request-launcher-session-regression",
+    })
+    assert record["status"] == "SUCCESS"
+    assert record["result"]["normalized_output"] == "ECP-CONFORMANCE-OK"
+
+
+def test_launcher_builds_anthropic_messages_adapter_kind(repo_root):
+    launcher = _import_launcher(repo_root)
+    target = {"provider": {"provider_id": "ECP-PROVIDER-ANTHROPIC-TEST"}, "adapter": {"adapter_id": "ECP-ADAPTER-ANTHROPIC-TEST"}}
+    adapter = launcher._build_runtime_adapter(
+        {"adapter_kind": "anthropic-messages", "model": "claude-test", "endpoint": "https://provider.invalid/v1"},
+        target,
+    )
+    assert isinstance(adapter, launcher.AnthropicMessagesAdapter)
+    assert adapter.model == "claude-test"
+    assert adapter.provider == "ECP-PROVIDER-ANTHROPIC-TEST"
+    assert adapter.adapter_id == "ECP-ADAPTER-ANTHROPIC-TEST"
+
+
 # ---------------------------------------------------------------------------
 # Shipped example integrity
 # ---------------------------------------------------------------------------

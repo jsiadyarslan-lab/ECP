@@ -6,6 +6,7 @@ from ecp.console import AuthorizedEvaluation, AuthorizedTest, GatewayConfig, Loc
 from ecp.credential_binding import AuthorizationGrant, CredentialBinding
 from ecp.credentials import CredentialGateway, CredentialIdentity, SecretLease
 from ecp.runtime_adapters import (
+    AnthropicMessagesAdapter,
     GeminiGenerateContentAdapter,
     OpenAIResponsesAdapter,
     OpenRouterChatCompletionsAdapter,
@@ -13,6 +14,7 @@ from ecp.runtime_adapters import (
     RuntimeAdapterRegistry,
     RuntimeAdapterTransportError,
     RuntimeAdapterUnavailable,
+    anthropic_conformance_adapter,
 )
 
 
@@ -249,6 +251,54 @@ def test_openai_adapter_exposes_safe_transport_reason():
     adapter = OpenAIResponsesAdapter(model="test-model", endpoint="https://api.openai.com/v1/responses", transport=transport)
     with pytest.raises(RuntimeAdapterTransportError, match=r"PROVIDER_CONNECTION_FAILED host=api\.openai\.com reason=network unreachable"):
         adapter.execute(SecretLease("synthetic-secret", {}), {"request_id": "request-3"})
+
+
+def test_anthropic_adapter_normalizes_messages_response_without_credential():
+    def transport(endpoint, headers, payload, timeout):
+        assert endpoint.endswith("/messages")
+        assert headers["x-api-key"] == "synthetic-secret"
+        assert headers["anthropic-version"] == "2023-06-01"
+        body = json.loads(payload)
+        assert body["model"] == "claude-test"
+        assert body["messages"][0]["role"] == "user"
+        return 200, json.dumps({"id": "msg-1", "content": [{"type": "text", "text": "ECP-CONFORMANCE-OK"}]}).encode()
+
+    adapter = AnthropicMessagesAdapter(model="claude-test", endpoint="https://provider.invalid/v1/messages", transport=transport)
+    result = adapter.execute(SecretLease("synthetic-secret", {}), {"request_id": "request-anthropic"})
+    assert result == {
+        "provider_status": "RECEIVED",
+        "response_id": "msg-1",
+        "model": "claude-test",
+        "output_text": "ECP-CONFORMANCE-OK",
+        "request_id": "request-anthropic",
+    }
+    assert "synthetic-secret" not in json.dumps(result)
+
+
+def test_anthropic_adapter_maps_provider_failures_safely():
+    def transport(endpoint, headers, payload, timeout):
+        return 401, b"provider body may contain sensitive details"
+
+    adapter = AnthropicMessagesAdapter(model="claude-test", endpoint="https://provider.invalid/v1/messages", transport=transport)
+    with pytest.raises(RuntimeAdapterTransportError, match="PROVIDER_AUTHENTICATION_FAILED") as exc_info:
+        adapter.execute(SecretLease("synthetic-secret", {}), {"request_id": "request-anthropic-401"})
+    assert "sensitive details" not in str(exc_info.value)
+    assert "synthetic-secret" not in str(exc_info.value)
+
+
+def test_anthropic_adapter_rejects_malformed_responses():
+    def transport(endpoint, headers, payload, timeout):
+        return 200, json.dumps({"content": [{"type": "tool_use", "id": "x"}]}).encode()
+
+    adapter = AnthropicMessagesAdapter(model="claude-test", endpoint="https://provider.invalid/v1/messages", transport=transport)
+    with pytest.raises(RuntimeAdapterTransportError, match="MALFORMED_PROVIDER_RESPONSE"):
+        adapter.execute(SecretLease("synthetic-secret", {}), {"request_id": "request-anthropic-malformed"})
+
+
+def test_anthropic_conformance_factory_reads_configuration():
+    adapter = anthropic_conformance_adapter(model="claude-factory-test", endpoint="https://provider.invalid/custom")
+    assert adapter.endpoint == "https://provider.invalid/custom/messages"
+    assert adapter.model == "claude-factory-test"
 
 
 def test_gateway_uses_runtime_registry_and_preserves_safe_record(tmp_path):

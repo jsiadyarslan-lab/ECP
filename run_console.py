@@ -25,6 +25,8 @@ configuration can never trigger arbitrary code execution:
                                   requires the separately authorized real
                                   external evaluation phase)
     gemini-generate-content       Gemini generateContent adapter (real; same gate)
+    anthropic-messages            Anthropic Messages API adapter (real; same
+                                  gate; credential in x-api-key)
     openrouter-chat-completions   generic OpenAI-compatible chat-completions
                                   adapter (real; same gate). Optional
                                   provider-neutral gateway knobs from the
@@ -35,7 +37,18 @@ configuration can never trigger arbitrary code execution:
                                   is used) and ``extra_headers`` (additional
                                   static non-secret routing headers).
 
-Secrets are read ONLY from environment variables into the credential
+UNIVERSAL VISUAL PROVIDER & MODEL EVALUATION CONSOLE (owner order
+2026-09-12): this launcher additionally enables the browser-facing session
+console on the SAME gateway — the owner opens the console at
+http://127.0.0.1:8766/, submits a provider credential through the loopback
+gateway (stored in-process by the session credential gateway, referenced
+only by credential_ref), runs unified provider/model discovery, selects a
+discovered model, and executes through the single existing
+/api/v1/executions path. The executor/launcher never sees, asks for or
+stores the owner's credential value.
+
+Secrets are read ONLY from environment variables (configured targets) or
+the browser session submission (session targets) into the credential
 gateway's private store (existing boundary); they never appear in the
 configuration file, the registries, the onboarding records, the browser
 payload, evidence or audit.
@@ -69,10 +82,17 @@ ARTIFACT_ROOT = REPO_ROOT / "local-browser-artifacts"
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from ecp.console import GatewayConfig, LocalGateway  # noqa: E402
+from ecp.console_session import (  # noqa: E402
+    ConsoleSessionManager,
+    DEFAULT_SESSION_TTL_SECONDS,
+    SessionCredentialGateway,
+)
 from ecp.credential_binding import AuthorizationGrant, CredentialBinding  # noqa: E402
-from ecp.credentials import CredentialGateway, CredentialIdentity, SecretStore  # noqa: E402
+from ecp.credentials import CredentialIdentity, SecretStore  # noqa: E402
+from ecp.discovery import ProviderDiscoveryService, builtin_discovery_registry  # noqa: E402
 from ecp.onboarding import TargetOnboardingService  # noqa: E402
 from ecp.runtime_adapters import (  # noqa: E402
+    AnthropicMessagesAdapter,
     GeminiGenerateContentAdapter,
     OpenAIResponsesAdapter,
     OpenRouterChatCompletionsAdapter,
@@ -121,6 +141,7 @@ BUILTIN_ADAPTER_KINDS = frozenset({
     "offline-mock",
     "openai-responses",
     "gemini-generate-content",
+    "anthropic-messages",
     "openrouter-chat-completions",
 })
 
@@ -320,6 +341,8 @@ def _build_runtime_adapter(entry: Mapping[str, Any], target: Mapping[str, Any]) 
         return OpenAIResponsesAdapter(model=model, endpoint=endpoint, provider=provider, adapter_id=adapter_id)
     if kind == "gemini-generate-content":
         return GeminiGenerateContentAdapter(model=model, endpoint=endpoint, provider=provider, adapter_id=adapter_id)
+    if kind == "anthropic-messages":
+        return AnthropicMessagesAdapter(model=model, endpoint=endpoint, provider=provider, adapter_id=adapter_id)
     # kind == "openrouter-chat-completions": the generic chat-completions
     # dialect; optional non-secret gateway-header knobs from configuration.
     token_header = entry.get("token_header")
@@ -340,6 +363,25 @@ def _build_runtime_adapter(entry: Mapping[str, Any], target: Mapping[str, Any]) 
         bearer_value=bearer_value,
         extra_headers=extra_headers,
     )
+
+
+def _session_adapter_factory(adapter_kind, *, model, endpoint, provider, adapter_id):
+    """Build the runtime adapter for a session-onboarded target (same factory)."""
+    return _build_runtime_adapter(
+        {"adapter_kind": adapter_kind, "model": model, "endpoint": endpoint},
+        {"provider": {"provider_id": provider}, "adapter": {"adapter_id": adapter_id}},
+    )
+
+
+def _session_ttl_seconds() -> int:
+    raw = os.environ.get("ECP_SESSION_TTL_SECONDS", "")
+    if not raw:
+        return DEFAULT_SESSION_TTL_SECONDS
+    try:
+        value = int(raw)
+    except ValueError:
+        return DEFAULT_SESSION_TTL_SECONDS
+    return value if 60 <= value <= 86400 else DEFAULT_SESSION_TTL_SECONDS
 
 
 def build_gateway(
@@ -386,7 +428,7 @@ def build_gateway(
                 f"{credential_id} (real provider execution is a separately "
                 "authorized phase)"
             )
-    credential_gateway = CredentialGateway(_ConfigurationSecretStore(sources), identities)
+    credential_gateway = SessionCredentialGateway(_ConfigurationSecretStore(sources), identities)
 
     service = TargetOnboardingService(
         providers, targets, adapters, runtime, credential_gateway
@@ -448,6 +490,15 @@ def build_gateway(
         credential_gateway,
         runtime,
     )
+    session_console = ConsoleSessionManager(
+        gateway=gateway,
+        session_credentials=credential_gateway,
+        discovery=ProviderDiscoveryService(builtin_discovery_registry()),
+        onboarding=service,
+        adapter_factory=_session_adapter_factory,
+        ttl_seconds=_session_ttl_seconds(),
+    )
+    gateway.enable_session_console(session_console)
     return gateway, service
 
 
@@ -482,6 +533,7 @@ def main(argv: "list[str] | None" = None) -> int:
     print(f"Onboarded targets (configuration-driven): {onboarded}")
     print(f"PAIRING CODE: {gateway.pairing_code}")
     print(f"Console: http://127.0.0.1:{args.console_port}/")
+    print("Session console: enabled — provider credentials are submitted in the browser and held in-process only.")
     print("Press Ctrl+C to stop.")
 
     os.chdir(REPO_ROOT / "console")

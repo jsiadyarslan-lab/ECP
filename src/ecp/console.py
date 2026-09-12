@@ -31,6 +31,19 @@ POLL_INTERVAL_MS=1500
 EXECUTION_TIMEOUT_SECONDS=120
 _ALLOWED_REQUEST_KEYS={"evaluation_id","test_id","system_id","credential_ref","request_id"}
 
+#: Session-console routes served by an attached session component (owner
+#: order: UNIVERSAL VISUAL PROVIDER & MODEL EVALUATION CONSOLE v1). Each
+#: route delegates to the component; the component owns no new authority —
+#: credentials flow through the credential gateway, execution flows through
+#: the single existing execution path above.
+_SESSION_ROUTES={
+    "/api/v1/credentials/session":"open_session",
+    "/api/v1/credentials/session/revoke":"revoke_session",
+    "/api/v1/discovery":"discover",
+    "/api/v1/session/targets":"select_target",
+}
+_SESSION_BODY_SECRET_KEYS=frozenset({"credential_secret","api_key","secret","secret_value","token","password","authorization"})
+
 class ConsoleError(Exception): pass
 class AuthorizationError(ConsoleError): pass
 class ExecutionAuthorizationError(ConsoleError): pass
@@ -91,16 +104,55 @@ class GatewayConfig:
     allowed_origins:frozenset[str]; port:int=DEFAULT_PORT; pairing_ttl_seconds:int=PAIRING_TTL_SECONDS; artifact_root:Path|None=None
 
 class LocalGateway:
-    def __init__(self,config,evaluations,credential_gateway,adapters=None,store=None,clock=None,cases=None):
+    def __init__(self,config,evaluations,credential_gateway,adapters=None,store=None,clock=None,cases=None,session_console=None):
         if not config.allowed_origins: raise ValueError("at least one explicit console origin is required")
         if not 1<=config.port<=65535: raise ValueError("port must be between 1 and 65535")
-        self.config=config; self.evaluations=dict(evaluations); self.credential_gateway=credential_gateway; self.adapters=adapters if isinstance(adapters, RuntimeAdapterRegistry) else RuntimeAdapterRegistry(adapters or {}); self.store=store or ExecutionStore(config.artifact_root); self._pairing_code=secrets.token_urlsafe(24); self._clock=clock or __import__("time").time; self._pairing_expires=self._clock()+config.pairing_ttl_seconds; self._session_tokens=set(); self._session_lock=threading.RLock(); self._httpd=None
+        self.config=config; self.evaluations=dict(evaluations); self.credential_gateway=credential_gateway; self.adapters=adapters if isinstance(adapters, RuntimeAdapterRegistry) else RuntimeAdapterRegistry(adapters or {}); self.store=store or ExecutionStore(config.artifact_root); self._pairing_code=secrets.token_urlsafe(24); self._clock=clock or __import__("time").time; self._pairing_expires=self._clock()+config.pairing_ttl_seconds; self._session_tokens=set(); self._session_lock=threading.RLock(); self._httpd=None; self._session_console=None
         self._contract=ExecutionContractResolver(self.evaluations,cases,self.adapters)
+        if session_console is not None: self.enable_session_console(session_console)
 
     @property
     def contract_resolver(self): return self._contract
     @property
     def pairing_code(self): return self._pairing_code
+    def enable_session_console(self,session_console):
+        """Attach the session console component (credential sessions, unified
+        provider/model discovery, model selection/onboarding delegation).
+
+        The component is a thin composition layer: it holds no execution
+        authority of its own — every execution still flows through
+        :meth:`execute` above, and every credential release still flows
+        through the attached credential gateway.
+        """
+        for method in ("open_session","revoke_session","discover","select_target","descriptors"):
+            if not callable(getattr(session_console,method,None)): raise ValueError(f"session console component requires a callable {method}()")
+        self._session_console=session_console
+    def register_evaluation(self,evaluation):
+        """Register one additional authorized evaluation (additive seam).
+
+        Console sessions that onboard targets at runtime register the fully
+        wired evaluation here so the single existing execution path serves
+        it. Re-registering the same evaluation object is a no-op; a different
+        object under an occupied identifier is a deterministic failure.
+        """
+        evaluation_id=getattr(evaluation,"evaluation_id",None)
+        if not isinstance(evaluation_id,str) or not evaluation_id.strip(): raise ConsoleError("registered evaluations require an evaluation_id")
+        existing=self.evaluations.get(evaluation_id)
+        if existing is not None and existing is not evaluation: raise ConsoleError(f"evaluation {evaluation_id} is already registered with different wiring")
+        self.evaluations[evaluation_id]=evaluation; self._contract.register(evaluation)
+    def session_descriptors(self):
+        """The discovery descriptor registry view (registry-driven UI data)."""
+        if self._session_console is None: raise ConsoleError("session console is not enabled")
+        return self._session_console.descriptors()
+    def execute_session_route(self,path,body):
+        """Dispatch one session-console route with submitted-secret redaction."""
+        if self._session_console is None: raise ConsoleError("session console is not enabled")
+        method=_SESSION_ROUTES.get(path)
+        if method is None: raise ConsoleError("unknown session route")
+        try: return getattr(self._session_console,method)(dict(body))
+        except Exception as exc:
+            message=safe_exception_message(exc); redactor=SecretRedactionFilter(_submitted_secret_values(body))
+            raise ConsoleError(redactor.redact(message)) from None
     def pair(self,code):
         if not secrets.compare_digest(str(code),self._pairing_code) or self._clock()>=self._pairing_expires: raise AuthorizationError("pairing code is invalid or expired")
         token=secrets.token_urlsafe(32)
@@ -172,6 +224,9 @@ class LocalGateway:
                 try:
                     gateway.authenticate(self.headers.get("X-ECP-Session"))
                     if path=="/api/v1/catalog": self._json(200,gateway.catalog())
+                    elif path=="/api/v1/discovery/descriptors":
+                        try: self._json(200,{"descriptors":gateway.session_descriptors()})
+                        except ConsoleError as exc: self._json(404,{"error":str(exc)})
                     elif path.startswith("/api/v1/executions/"):
                         execution=gateway.store.get(path.rsplit("/",1)[-1]); self._json(200 if execution else 404,execution or {"error":"execution not found"})
                     else: self._json(404,{"error":"not found"})
@@ -187,6 +242,7 @@ class LocalGateway:
                     if path=="/api/v1/pair": self._json(200,{"session":gateway.pair(body.get("pairing_code",""))}); return
                     gateway.authenticate(self.headers.get("X-ECP-Session"))
                     if path=="/api/v1/executions": self._json(200,gateway.execute(body))
+                    elif path in _SESSION_ROUTES: self._json(200,gateway.execute_session_route(path,body))
                     else: self._json(404,{"error":"not found"})
                 except ExecutionAuthorizationError as exc: self._json(403,{"error":str(exc),"state":"EXECUTION_AUTHORIZATION_REQUIRED"})
                 except AuthorizationError as exc: self._json(401,{"error":str(exc),"state":"AUTHENTICATION_REQUIRED"})
@@ -202,6 +258,13 @@ def _safe_result(result,secrets_to_redact=()):
         if isinstance(value,str): safe[key]=redactor.redact(value)
         elif isinstance(value,(int,float,bool)) or value is None: safe[key]=value
     return safe
+def _submitted_secret_values(body):
+    """String values of secret-bearing request keys, for redaction only."""
+    values=[]
+    if isinstance(body,Mapping):
+        for key,value in body.items():
+            if str(key).lower() in _SESSION_BODY_SECRET_KEYS and isinstance(value,str) and value: values.append(value)
+    return tuple(values)
 def _safe_exception_message(error,lease=None):
     message=safe_exception_message(error); return SecretRedactionFilter((lease.value,)).redact(message) if lease is not None else message
 def _utc_now(): return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00","Z")

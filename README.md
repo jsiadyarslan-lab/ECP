@@ -261,6 +261,7 @@ digest  = hash_document(doc)
 | [docs/OPEN-CORE.md](docs/OPEN-CORE.md) | Open scientific core vs future commercial layer (architectural separation only) |
 | [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) | Contribution rules, hard boundaries, schema versioning policy |
 | [docs/M3-R1-ARCHITECTURE-DECISION.md](docs/M3-R1-ARCHITECTURE-DECISION.md) | R1 architecture decision record: Option C — minimal coupled foundation (protected store + registration ledger), threat model, rejected alternatives |
+| [docs/UNIVERSAL-PROVIDER-DISCOVERY-CONSOLE.md](docs/UNIVERSAL-PROVIDER-DISCOVERY-CONSOLE.md) | Universal visual provider & model evaluation console: browser credential session, unified provider/model discovery, model selection, execution through the universal fabric |
 
 ## 9. Development status & roadmap
 

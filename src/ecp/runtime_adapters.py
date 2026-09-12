@@ -286,6 +286,79 @@ class OpenRouterChatCompletionsAdapter:
         }
 
 
+class AnthropicMessagesAdapter:
+    """One controlled Anthropic Messages API conformance implementation.
+
+    The Anthropic messages dialect places the released credential in the
+    ``x-api-key`` header and requires the static, non-secret
+    ``anthropic-version`` header. The secret itself continues to flow only
+    through the credential lease; it is never stored on the adapter and
+    never appears in results or errors.
+    """
+
+    provider = "example-provider"
+    adapter_id = "example-adapter"
+
+    def __init__(
+        self,
+        *,
+        model: str,
+        endpoint: str,
+        provider: str = "ECP-PROVIDER-ANTHROPIC",
+        adapter_id: str = "ECP-ADAPTER-ANTHROPIC-MESSAGES",
+        transport: Callable[[str, Mapping[str, str], bytes, float], tuple[int, bytes]] | None = None,
+        prompt: str = "ECP controlled conformance probe. Reply with exactly: ECP-CONFORMANCE-OK",
+    ) -> None:
+        if not model or not endpoint:
+            raise ValueError("model and endpoint are required")
+        self.model = model
+        self.endpoint = endpoint.rstrip("/")
+        self.provider = provider
+        self.adapter_id = adapter_id
+        self.prompt = prompt
+        self._transport = transport or _post_json
+
+    def execute(self, lease: Any, request: Mapping[str, str]) -> Mapping[str, Any]:
+        payload = json.dumps({
+            "model": self.model,
+            "max_tokens": 64,
+            "messages": [{"role": "user", "content": self.prompt}],
+        }).encode("utf-8")
+        headers = {
+            "x-api-key": lease.value,
+            "anthropic-version": "2023-06-01",
+            "Content-Type": "application/json",
+        }
+        try:
+            status, body = self._transport(self.endpoint, headers, payload, 30.0)
+        except (OSError, urllib_error.URLError, TimeoutError) as exc:
+            raise RuntimeAdapterTransportError(_transport_failure_message(self.endpoint, exc)) from exc
+        if status < 200 or status >= 300:
+            if status in {401, 403}:
+                category = "PROVIDER_AUTHENTICATION_FAILED"
+            elif status == 408 or status == 504:
+                category = "PROVIDER_TIMEOUT"
+            elif status == 429:
+                category = "PROVIDER_RATE_LIMITED"
+            else:
+                category = "PROVIDER_REQUEST_FAILED"
+            raise RuntimeAdapterTransportError(category)
+        try:
+            response = json.loads(body.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise RuntimeAdapterTransportError("MALFORMED_PROVIDER_RESPONSE") from exc
+        output = _anthropic_response_text(response)
+        if not output:
+            raise RuntimeAdapterTransportError("MALFORMED_PROVIDER_RESPONSE")
+        return {
+            "provider_status": "RECEIVED",
+            "response_id": response.get("id") if isinstance(response, dict) else None,
+            "model": self.model,
+            "output_text": output,
+            "request_id": request["request_id"],
+        }
+
+
 def _validate_gateway_headers(
     token_header: str | None,
     bearer_value: str | None,
@@ -438,6 +511,16 @@ def _openrouter_response_text(response: Any) -> str | None:
     return "".join(chunks).strip() or None
 
 
+def _anthropic_response_text(response: Any) -> str | None:
+    if not isinstance(response, dict):
+        return None
+    chunks: list[str] = []
+    for block in response.get("content", []):
+        if isinstance(block, dict) and isinstance(block.get("text"), str):
+            chunks.append(block["text"])
+    return "".join(chunks).strip() or None
+
+
 def openai_conformance_adapter(*, model: str | None = None, endpoint: str | None = None) -> OpenAIResponsesAdapter:
     base = endpoint or os.environ.get("OPENAI_API_BASE", "https://api.openai.com/v1").rstrip("/")
     return OpenAIResponsesAdapter(model=model or os.environ.get("ECP_CONFORMANCE_MODEL", "gpt-5-mini"), endpoint=f"{base}/responses")
@@ -455,7 +538,14 @@ def openrouter_conformance_adapter(*, model: str | None = None, endpoint: str | 
     return OpenRouterChatCompletionsAdapter(model=model_name, endpoint=f"{base}/chat/completions")
 
 
+def anthropic_conformance_adapter(*, model: str | None = None, endpoint: str | None = None) -> AnthropicMessagesAdapter:
+    model_name = model or os.environ.get("ECP_ANTHROPIC_MODEL", "claude-3-5-haiku-latest")
+    base = endpoint or os.environ.get("ANTHROPIC_API_BASE", "https://api.anthropic.com/v1").rstrip("/")
+    return AnthropicMessagesAdapter(model=model_name, endpoint=f"{base}/messages")
+
+
 __all__ = [
+    "AnthropicMessagesAdapter",
     "GeminiGenerateContentAdapter",
     "OpenAIResponsesAdapter",
     "OpenRouterChatCompletionsAdapter",
@@ -467,4 +557,5 @@ __all__ = [
     "gemini_conformance_adapter",
     "openai_conformance_adapter",
     "openrouter_conformance_adapter",
+    "anthropic_conformance_adapter",
 ]

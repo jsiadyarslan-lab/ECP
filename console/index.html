@@ -11,7 +11,7 @@
     <header>
       <p class="eyebrow">ECP / CONTROLLED EXECUTION SURFACE</p>
       <h1>ECP Evaluation Console</h1>
-      <p class="lede">Select an authorized registered evaluation. The browser sends identifiers only; the local gateway resolves credentials and owns execution, evidence, audit, and persistence.</p>
+      <p class="lede">Select an authorized registered evaluation, or open a provider credential session and let the local gateway identify the provider and its models. The browser sends identifiers and your credential only to the loopback gateway; the gateway resolves credentials and owns execution, evidence, audit, and persistence.</p>
     </header>
 
     <section class="card pairing-card" aria-labelledby="pairing-title">
@@ -23,6 +23,42 @@
         <button id="pair-button" type="button">PAIR</button>
       </div>
       <p class="hint">The code is short-lived, held in gateway memory, and never committed to this site.</p>
+    </section>
+
+    <section class="card discovery-card" aria-labelledby="discovery-title">
+      <div class="section-title"><h2 id="discovery-title">Universal provider &amp; model discovery</h2><span id="discovery-state" class="pill neutral">CLOSED</span></div>
+      <p class="muted">Enter a provider credential. It is submitted once to the loopback gateway, held in-process behind the credential gateway, and referenced afterwards only by a credential reference. The value is never stored by this page.</p>
+
+      <div class="discovery-grid">
+        <label class="span-2">Provider credential<input id="owner-credential-input" type="password" autocomplete="off" spellcheck="false" placeholder="Paste the provider credential value (never stored by this page)"></label>
+        <button id="credential-open-button" type="button">OPEN CREDENTIAL SESSION</button>
+        <label>Provider (optional)<select id="provider-hint-select" disabled><option value="">Auto-detect</option></select></label>
+        <label>Custom endpoint (optional)<input id="custom-endpoint-input" type="text" spellcheck="false" placeholder="https://host/v1 or http://127.0.0.1:8000"></label>
+        <button id="credential-revoke-button" type="button" class="secondary" disabled>FORGET CREDENTIAL</button>
+      </div>
+      <p id="credential-session-detail" class="muted">No credential session is open.</p>
+
+      <button id="discover-button" type="button" disabled>DISCOVER PROVIDER &amp; MODELS</button>
+      <p id="discovery-detail" class="muted">Discovery probes candidate provider dialects through the unified discovery fabric. If no dialect answers, the state is UNKNOWN — it is never guessed.</p>
+
+      <div id="discovery-provider" class="discovery-provider" hidden>
+        <div class="provider-line"><span class="muted">Provider</span><strong id="discovered-provider-name">—</strong></div>
+        <div class="provider-line"><span class="muted">Identification</span><strong id="discovered-provider-id">—</strong></div>
+        <div class="provider-line"><span class="muted">Protocol / adapter</span><strong id="discovered-adapter">—</strong></div>
+        <div class="provider-line"><span class="muted">Endpoint</span><strong id="discovered-endpoint">—</strong></div>
+      </div>
+
+      <div id="models-block" hidden>
+        <div class="section-title"><h3>Discovered models</h3><span id="discovery-model-count" class="pill neutral">0</span></div>
+        <div id="models-list" class="models-list" role="listbox" aria-label="Discovered models"></div>
+      </div>
+
+      <button id="session-run-button" class="run" type="button" disabled>RUN EVALUATION</button>
+
+      <details id="discovery-probes" hidden>
+        <summary>Probe diagnostics</summary>
+        <pre id="discovery-probe-detail" class="result">—</pre>
+      </details>
     </section>
 
     <section class="card" aria-labelledby="selection-title">
@@ -43,8 +79,11 @@
         <div><dt>External call</dt><dd id="external-status">NOT STARTED</dd></div>
         <div><dt>Response</dt><dd id="response-status">NOT RECEIVED</dd></div>
         <div><dt>Evidence</dt><dd id="evidence-status">NOT GENERATED</dd></div>
+        <div><dt>Evidence reference</dt><dd id="evidence-id">—</dd></div>
+        <div><dt>Audit reference</dt><dd id="audit-id">—</dd></div>
         <div><dt>Audit-safe record</dt><dd id="audit-status">NOT GENERATED</dd></div>
         <div><dt>Persistence</dt><dd id="persistence-status">NOT PERSISTED</dd></div>
+        <div><dt>Persisted at</dt><dd id="persistence-location">—</dd></div>
       </dl>
       <pre id="result" class="result" aria-live="polite">No execution has been requested.</pre>
       <p id="error" class="error" role="alert"></p>
@@ -52,6 +91,6 @@
 
     <footer><span>Execution surface only.</span><span>Scientific registration, Ground Truth, scoring, and historical artifacts are immutable here.</span></footer>
   </main>
-  <script src="./app.js?v=4e213839"></script>
+  <script src="./app.js?v=vpce1"></script>
 </body>
 </html>

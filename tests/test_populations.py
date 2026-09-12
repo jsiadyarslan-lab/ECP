@@ -360,7 +360,13 @@ def test_populations_module_has_no_execution_coupling():
 
 
 def test_no_new_runner_and_no_duplicate_registry():
-    """src/ecp declares exactly the baseline registries and no runner."""
+    """src/ecp declares exactly the sanctioned registries and no runner.
+
+    DiscoveryRegistry (added by the universal visual provider & model
+    evaluation console order, 2026-09-12) holds discovery DESCRIPTOR data
+    recipes for provider identification — it is not an execution registry;
+    execution continues to dispatch solely through RuntimeAdapterRegistry.
+    """
     registry_classes = set()
     runner_classes = set()
     for path in sorted((REPO_ROOT / "src" / "ecp").glob("*.py")):
@@ -375,6 +381,7 @@ def test_no_new_runner_and_no_duplicate_registry():
         "RuntimeAdapterRegistry",
         "ProviderRegistry",
         "TargetRegistry",
+        "DiscoveryRegistry",
     }
     assert runner_classes == set()
 

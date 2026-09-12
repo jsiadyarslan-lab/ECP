@@ -5,6 +5,9 @@
   let session = localStorage.getItem(sessionStorageKey);
   let catalog = null;
   let current = null;
+  let credentialRef = null;
+  let discoveryDocument = null;
+  let selectedModel = null;
   const $ = (id) => document.getElementById(id);
   const setPill = (id, text, tone = "neutral") => { const el = $(id); el.textContent = text; el.className = `pill ${tone}`; };
   const setText = (id, text) => { $(id).textContent = text == null ? "—" : String(text); };
@@ -65,6 +68,7 @@
       try {
         catalog = await call("/api/v1/catalog");
         populate();
+        await loadDescriptors();
         setPill("gateway-state", "CONNECTED", "good");
         setText("gateway-detail", "Authenticated loopback gateway is ready.");
       } catch (error) {
@@ -112,6 +116,7 @@
       $("pairing-code").value = "";
       catalog = await call("/api/v1/catalog");
       populate();
+      await loadDescriptors();
       setPill("gateway-state", "CONNECTED", "good");
       setText("gateway-detail", "Authenticated loopback gateway is ready.");
     } catch (error) {
@@ -120,14 +125,181 @@
       safeError(error);
     }
   }
+  // ------------------------------------------------------------------
+  // Universal provider & model discovery (credential session flow)
+  // ------------------------------------------------------------------
+  async function loadDescriptors() {
+    const payload = await call("/api/v1/discovery/descriptors");
+    const select = $("provider-hint-select");
+    select.replaceChildren(new Option("Auto-detect", ""));
+    for (const descriptor of payload.descriptors) {
+      const label = descriptor.requires_base_url
+        ? `${descriptor.display_name} (needs endpoint below)`
+        : descriptor.display_name;
+      select.add(new Option(label, descriptor.discovery_id));
+    }
+    select.disabled = false;
+  }
+  async function openCredentialSession() {
+    $("error").textContent = "";
+    const input = $("owner-credential-input");
+    const value = input.value;
+    input.value = "";
+    try {
+      if (!value) throw new Error("Paste a provider credential first.");
+      const payload = await call("/api/v1/credentials/session", { method: "POST", body: JSON.stringify({ credential_secret: value }) });
+      credentialRef = payload.credential_ref;
+      resetDiscoveryView();
+      setPill("discovery-state", "OPEN", "good");
+      setText("credential-session-detail", `Credential session open until ${payload.expires_at}. Reference ${credentialRef}; the value is held in-process by the credential gateway only.`);
+      $("discover-button").disabled = false;
+      $("credential-revoke-button").disabled = false;
+      $("discover-button").focus();
+    } catch (error) {
+      if (error.status === 401 || error.state === "AUTHENTICATION_REQUIRED") requirePairing();
+      setPill("discovery-state", "ERROR", "bad");
+      safeError(error);
+    }
+  }
+  function resetDiscoveryView() {
+    discoveryDocument = null;
+    selectedModel = null;
+    $("discovery-provider").hidden = true;
+    $("models-block").hidden = true;
+    $("session-run-button").disabled = true;
+    $("discovery-probes").hidden = true;
+    setPill("discovery-state", credentialRef ? "OPEN" : "CLOSED", credentialRef ? "good" : "neutral");
+    setText("discovery-detail", "Discovery probes candidate provider dialects through the unified discovery fabric. If no dialect answers, the state is UNKNOWN — it is never guessed.");
+  }
+  async function discover() {
+    $("error").textContent = "";
+    if (!credentialRef) { safeError(new Error("Open a credential session first.")); return; }
+    $("discover-button").disabled = true;
+    setPill("discovery-state", "DISCOVERING", "warn");
+    setText("discovery-detail", "Probing provider dialects through the unified discovery fabric…");
+    try {
+      const body = { credential_ref: credentialRef };
+      const hint = $("provider-hint-select").value;
+      const endpoint = $("custom-endpoint-input").value.trim();
+      if (hint) body.provider_hint = hint;
+      if (endpoint) body.base_url = endpoint;
+      discoveryDocument = await call("/api/v1/discovery", { method: "POST", body: JSON.stringify(body) });
+      renderDiscovery();
+    } catch (error) {
+      if (error.status === 401 || error.state === "AUTHENTICATION_REQUIRED") requirePairing();
+      setPill("discovery-state", "ERROR", "bad");
+      safeError(error);
+      setText("discovery-detail", "Discovery failed before any provider was identified.");
+    }
+    finally { $("discover-button").disabled = !credentialRef; }
+  }
+  function renderDiscovery() {
+    const document_ = discoveryDocument;
+    if (!document_) return;
+    const failed = document_.status !== "DISCOVERED";
+    setPill("discovery-state", failed ? (document_.identification === "UNKNOWN" ? "UNKNOWN" : "DISCOVERY_FAILED") : "DISCOVERED", failed ? "bad" : "good");
+    const provider = document_.provider || {};
+    if (!failed) {
+      $("discovery-provider").hidden = false;
+      setText("discovered-provider-name", provider.display_name || "—");
+      setText("discovered-provider-id", provider.provider_id || "—");
+      setText("discovered-adapter", `${document_.adapter && document_.adapter.protocol ? document_.adapter.protocol : "—"} · ${document_.adapter && document_.adapter.adapter_kind ? document_.adapter.adapter_kind : "—"}`);
+      setText("discovered-endpoint", document_.adapter && document_.adapter.endpoint_base ? document_.adapter.endpoint_base : "—");
+      setText("discovery-detail", `${provider.identification_basis || "provider identified"}. Select a model, then run the evaluation through the universal fabric.`);
+    } else {
+      $("discovery-provider").hidden = true;
+      setText("discovery-detail", "No provider was identified from the credential. The state is explicit — the fabric never guesses a provider identity.");
+    }
+    const models = document_.models || [];
+    $("models-block").hidden = models.length === 0;
+    setPill("discovery-model-count", document_.models_truncated ? `${models.length} of ${document_.total_models}` : String(models.length), models.length ? "good" : "neutral");
+    const list = $("models-list");
+    list.replaceChildren();
+    for (const model of models) {
+      const row = document.createElement("button");
+      row.type = "button";
+      row.className = "model-row";
+      row.setAttribute("role", "option");
+      row.dataset.modelIdentifier = model.model_identifier;
+      const name = document.createElement("span");
+      name.className = "model-name";
+      name.textContent = model.display_name || model.model_identifier;
+      const identifier = document.createElement("span");
+      identifier.className = "model-id";
+      identifier.textContent = model.model_identifier;
+      const meta = document.createElement("span");
+      meta.className = "model-meta";
+      const capabilities = (model.capabilities || []).slice(0, 4).join(", ");
+      meta.textContent = capabilities ? capabilities : (model.availability || "AVAILABLE");
+      row.append(name, identifier, meta);
+      row.addEventListener("click", () => selectModel(model.model_identifier));
+      list.append(row);
+    }
+    selectedModel = null;
+    $("session-run-button").disabled = true;
+    const probes = document_.probes || [];
+    $("discovery-probes").hidden = probes.length === 0;
+    $("discovery-probe-detail").textContent = JSON.stringify(probes, null, 2);
+  }
+  function selectModel(modelIdentifier) {
+    selectedModel = modelIdentifier;
+    for (const row of $("models-list").children) {
+      row.classList.toggle("selected", row.dataset.modelIdentifier === modelIdentifier);
+    }
+    $("session-run-button").disabled = false;
+    setText("discovery-detail", `Model ${modelIdentifier} selected. RUN EVALUATION onboards it through the universal fabric and executes the conformance probe.`);
+  }
+  async function runSessionEvaluation() {
+    $("error").textContent = "";
+    if (!credentialRef || !selectedModel) { safeError(new Error("Open a credential session, discover, and select a model first.")); return; }
+    $("session-run-button").disabled = true;
+    setPill("execution-state", "RUNNING", "warn");
+    try {
+      const target = await call("/api/v1/session/targets", { method: "POST", body: JSON.stringify({ credential_ref: credentialRef, model_identifier: selectedModel }) });
+      const requestId = (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`);
+      const request = { evaluation_id: target.evaluation_id, system_id: target.system_id, credential_ref: target.credential_ref, test_id: target.test_id, request_id: requestId };
+      const record = await call("/api/v1/executions", { method: "POST", body: JSON.stringify(request) });
+      render(record);
+      catalog = await call("/api/v1/catalog");
+      populate();
+    } catch (error) {
+      if (error.status === 401 || error.state === "AUTHENTICATION_REQUIRED") {
+        requirePairing();
+        setPill("execution-state", "ERROR", "bad");
+        safeError(new Error("Gateway session expired. Pair again with the current temporary code."));
+      } else {
+        setPill("execution-state", "ERROR", "bad");
+        safeError(error);
+      }
+    }
+    finally { $("session-run-button").disabled = !(credentialRef && selectedModel); }
+  }
+  async function revokeCredential() {
+    $("error").textContent = "";
+    if (!credentialRef) return;
+    try {
+      await call("/api/v1/credentials/session/revoke", { method: "POST", body: JSON.stringify({ credential_ref: credentialRef }) });
+    } catch (error) {
+      safeError(error);
+    }
+    credentialRef = null;
+    resetDiscoveryView();
+    setText("credential-session-detail", "Credential session closed. The gateway no longer holds the credential value.");
+    $("discover-button").disabled = true;
+    $("credential-revoke-button").disabled = true;
+    $("session-run-button").disabled = true;
+  }
   function render(record) {
     current = record;
     setText("execution-id", record.execution_id);
     setText("external-status", record.execution_status);
     setText("response-status", record.response_status);
     setText("evidence-status", record.evidence_status);
+    setText("evidence-id", record.evidence_id || "—");
+    setText("audit-id", record.audit_id || "—");
     setText("audit-status", record.audit_status);
     setText("persistence-status", record.persistence_status);
+    setText("persistence-location", record.persistence_location || "—");
     setPill("execution-state", record.status, record.status === "SUCCESS" ? "good" : record.status === "RUNNING" ? "warn" : "bad");
     $("result").textContent = JSON.stringify(record.result || { error: record.error || "No safe result returned." }, null, 2);
   }
@@ -159,5 +331,10 @@
   $("pair-button").addEventListener("click", pair);
   $("run-button").addEventListener("click", run);
   $("evaluation-select").addEventListener("change", updateSelection);
+  $("credential-open-button").addEventListener("click", openCredentialSession);
+  $("credential-revoke-button").addEventListener("click", revokeCredential);
+  $("discover-button").addEventListener("click", discover);
+  $("session-run-button").addEventListener("click", runSessionEvaluation);
+  $("owner-credential-input").addEventListener("keydown", (event) => { if (event.key === "Enter") openCredentialSession(); });
   status();
 })();
