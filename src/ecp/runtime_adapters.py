@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import time
 from dataclasses import dataclass
 from typing import Any, Callable, Mapping
 from urllib import error as urllib_error
@@ -30,7 +31,16 @@ class RuntimeAdapterBindingError(RuntimeAdapterError):
 
 
 class RuntimeAdapterTransportError(RuntimeAdapterError):
-    """The external transport failed without exposing request credentials."""
+    """The external transport failed without exposing request credentials.
+
+    Carries the provider HTTP status code when the failure IS an HTTP-level
+    response (401/403/429/5xx), so execution records can display the real
+    provider verdict. Connection-level failures carry no status.
+    """
+
+    def __init__(self, message: str, *, http_status: int | None = None) -> None:
+        super().__init__(message)
+        self.http_status = http_status
 
 
 @dataclass(frozen=True)
@@ -77,6 +87,42 @@ class RuntimeAdapterRegistry:
         return len(self._entries)
 
 
+def _transport_facts(endpoint: str, http_status: int, started: float) -> dict[str, Any]:
+    """Non-secret transport attribution for one real external HTTP call.
+
+    Real executions must be distinguishable from offline demonstrations in
+    every record, result and evidence document (owner order: UNIVERSAL REAL
+    PROVIDER EXECUTION BINDING v1). These four scalar facts — the transport
+    kind, the exact endpoint URL, the provider HTTP status and the round-trip
+    latency — prove that the request left for the provider and what the
+    provider answered. None of them is secret; the credential value is never
+    included.
+    """
+    return {
+        "transport_kind": "http",
+        "endpoint": endpoint,
+        "http_status": int(http_status),
+        "latency_ms": max(0, int(round((time.monotonic() - started) * 1000))),
+    }
+
+
+def normalize_gateway_headers(
+    token_header: str | None,
+    bearer_value: str | None,
+    extra_headers: Mapping[str, str] | None,
+) -> "tuple[str | None, str | None, dict[str, str]]":
+    """Validate and normalize owner-supplied non-secret gateway headers.
+
+    Public seam over the same validation used by the adapter constructor, so
+    discovery probes, console sessions and runtime adapters share ONE header
+    placement contract. Returns the normalized
+    ``(token_header, bearer_value, extra_headers)`` triple; deterministic
+    ValueError on anything that could displace the credential or shadow
+    the transport's own headers.
+    """
+    return _validate_gateway_headers(token_header, bearer_value, extra_headers)
+
+
 class OpenAIResponsesAdapter:
     """One controlled OpenAI Responses API conformance implementation."""
 
@@ -105,6 +151,7 @@ class OpenAIResponsesAdapter:
     def execute(self, lease: Any, request: Mapping[str, str]) -> Mapping[str, Any]:
         payload = json.dumps({"model": self.model, "input": self.prompt}).encode("utf-8")
         headers = {"Authorization": f"Bearer {lease.value}", "Content-Type": "application/json"}
+        started = time.monotonic()
         try:
             status, body = self._transport(self.endpoint, headers, payload, 30.0)
         except (OSError, urllib_error.URLError, TimeoutError) as exc:
@@ -118,20 +165,21 @@ class OpenAIResponsesAdapter:
                 category = _rate_limit_failure_category(body)
             else:
                 category = "PROVIDER_REQUEST_FAILED"
-            raise RuntimeAdapterTransportError(category)
+            raise RuntimeAdapterTransportError(category, http_status=status)
         try:
             response = json.loads(body.decode("utf-8"))
         except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-            raise RuntimeAdapterTransportError("MALFORMED_PROVIDER_RESPONSE") from exc
+            raise RuntimeAdapterTransportError("MALFORMED_PROVIDER_RESPONSE", http_status=status) from exc
         output = _response_text(response)
         if not output:
-            raise RuntimeAdapterTransportError("MALFORMED_PROVIDER_RESPONSE")
+            raise RuntimeAdapterTransportError("MALFORMED_PROVIDER_RESPONSE", http_status=status)
         return {
             "provider_status": "RECEIVED",
             "response_id": response.get("id") if isinstance(response, dict) else None,
             "model": self.model,
             "output_text": output,
             "request_id": request["request_id"],
+            **_transport_facts(self.endpoint, status, started),
         }
 
 
@@ -163,6 +211,7 @@ class GeminiGenerateContentAdapter:
     def execute(self, lease: Any, request: Mapping[str, str]) -> Mapping[str, Any]:
         payload = json.dumps({"contents": [{"parts": [{"text": self.prompt}]}]}).encode("utf-8")
         headers = {"x-goog-api-key": lease.value, "Content-Type": "application/json"}
+        started = time.monotonic()
         try:
             status, body = self._transport(self.endpoint, headers, payload, 30.0)
         except (OSError, urllib_error.URLError, TimeoutError) as exc:
@@ -176,20 +225,21 @@ class GeminiGenerateContentAdapter:
                 category = "PROVIDER_RATE_LIMITED"
             else:
                 category = "PROVIDER_REQUEST_FAILED"
-            raise RuntimeAdapterTransportError(category)
+            raise RuntimeAdapterTransportError(category, http_status=status)
         try:
             response = json.loads(body.decode("utf-8"))
         except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-            raise RuntimeAdapterTransportError("MALFORMED_PROVIDER_RESPONSE") from exc
+            raise RuntimeAdapterTransportError("MALFORMED_PROVIDER_RESPONSE", http_status=status) from exc
         output = _gemini_response_text(response)
         if not output:
-            raise RuntimeAdapterTransportError("MALFORMED_PROVIDER_RESPONSE")
+            raise RuntimeAdapterTransportError("MALFORMED_PROVIDER_RESPONSE", http_status=status)
         return {
             "provider_status": "RECEIVED",
             "response_id": None,
             "model": self.model,
             "output_text": output,
             "request_id": request["request_id"],
+            **_transport_facts(self.endpoint, status, started),
         }
 
 
@@ -256,6 +306,7 @@ class OpenRouterChatCompletionsAdapter:
         headers = _chat_completions_headers(
             lease, self._token_header, self._bearer_value, self._extra_headers
         )
+        started = time.monotonic()
         try:
             status, body = self._transport(self.endpoint, headers, payload, 30.0)
         except (OSError, urllib_error.URLError, TimeoutError) as exc:
@@ -269,20 +320,21 @@ class OpenRouterChatCompletionsAdapter:
                 category = "PROVIDER_RATE_LIMITED"
             else:
                 category = "PROVIDER_REQUEST_FAILED"
-            raise RuntimeAdapterTransportError(category)
+            raise RuntimeAdapterTransportError(category, http_status=status)
         try:
             response = json.loads(body.decode("utf-8"))
         except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-            raise RuntimeAdapterTransportError("MALFORMED_PROVIDER_RESPONSE") from exc
+            raise RuntimeAdapterTransportError("MALFORMED_PROVIDER_RESPONSE", http_status=status) from exc
         output = _openrouter_response_text(response)
         if not output:
-            raise RuntimeAdapterTransportError("MALFORMED_PROVIDER_RESPONSE")
+            raise RuntimeAdapterTransportError("MALFORMED_PROVIDER_RESPONSE", http_status=status)
         return {
             "provider_status": "RECEIVED",
             "response_id": response.get("id") if isinstance(response, dict) else None,
             "model": self.model,
             "output_text": output,
             "request_id": request["request_id"],
+            **_transport_facts(self.endpoint, status, started),
         }
 
 
@@ -329,6 +381,7 @@ class AnthropicMessagesAdapter:
             "anthropic-version": "2023-06-01",
             "Content-Type": "application/json",
         }
+        started = time.monotonic()
         try:
             status, body = self._transport(self.endpoint, headers, payload, 30.0)
         except (OSError, urllib_error.URLError, TimeoutError) as exc:
@@ -342,20 +395,21 @@ class AnthropicMessagesAdapter:
                 category = "PROVIDER_RATE_LIMITED"
             else:
                 category = "PROVIDER_REQUEST_FAILED"
-            raise RuntimeAdapterTransportError(category)
+            raise RuntimeAdapterTransportError(category, http_status=status)
         try:
             response = json.loads(body.decode("utf-8"))
         except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-            raise RuntimeAdapterTransportError("MALFORMED_PROVIDER_RESPONSE") from exc
+            raise RuntimeAdapterTransportError("MALFORMED_PROVIDER_RESPONSE", http_status=status) from exc
         output = _anthropic_response_text(response)
         if not output:
-            raise RuntimeAdapterTransportError("MALFORMED_PROVIDER_RESPONSE")
+            raise RuntimeAdapterTransportError("MALFORMED_PROVIDER_RESPONSE", http_status=status)
         return {
             "provider_status": "RECEIVED",
             "response_id": response.get("id") if isinstance(response, dict) else None,
             "model": self.model,
             "output_text": output,
             "request_id": request["request_id"],
+            **_transport_facts(self.endpoint, status, started),
         }
 
 
@@ -555,6 +609,7 @@ __all__ = [
     "RuntimeAdapterTransportError",
     "RuntimeAdapterUnavailable",
     "gemini_conformance_adapter",
+    "normalize_gateway_headers",
     "openai_conformance_adapter",
     "openrouter_conformance_adapter",
     "anthropic_conformance_adapter",

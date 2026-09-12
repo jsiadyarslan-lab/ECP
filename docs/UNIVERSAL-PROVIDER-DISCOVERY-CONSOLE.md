@@ -104,10 +104,26 @@ Each discovered model carries the provider-neutral representation: `provider`, `
   1. `POST /api/v1/session/targets` — the server builds a **plain target configuration** (deterministic identifiers derived from provider + model + endpoint + credential reference) and onboards it through the **EXISTING** `TargetOnboardingService` pipeline: validation → provider/target/adapter registration → binding/grant resolution → 9-check readiness battery → evaluation registration. No provider-specific code is involved anywhere.
   2. `POST /api/v1/executions` — the single existing execution contract (the same endpoint the configured targets use). Authorization, credential release, the provider adapter call, normalization, evidence, audit and persistence all flow through the unchanged universal path.
 * The evaluation sends the registered conformance probe (`ECP-CONFORMANCE-OK`); it is a transport/conformance test, not a scientific case.
+* The selected model identifier reaches the provider adapter **verbatim** (it is adapter configuration, never client data), and the execution request carries **identifiers only** — `evaluation_id`, `system_id`, `credential_ref`, `test_id`, `request_id`. No secret travels through the browser or the request payload after the session opens.
+* There is **no fallback** to the offline demo anywhere on this path: the session target, its adapter and its credential binding are distinct objects, and the demo evaluation can only run through its own explicit **RUN TEST** button.
 
 ## 6. Where the result, evidence and audit appear
 
-The **Execution** card shows, live: execution id, execution status, response status, evidence status + **Evidence reference** (`ECP-EVID-CONSOLE-…`), **Audit reference** (`ECP-AUDIT-CONSOLE-…`), audit status, persistence status and the on-disk persistence location, plus the redacted safe result. Evidence/audit files are persisted under the artifact root exactly as before (`local-browser-artifacts/external-executions/<execution_id>/` by default). Audit records are `PENDING_HUMAN_REVIEW` as always.
+The **Execution** card shows, live: execution id, **Provider**, **Model**, **Adapter**, **Endpoint**, **Transport**, **Provider status code**, **Latency**, execution status, response status, **Failure classification** (on failures), evidence status + **Evidence reference** (`ECP-EVID-CONSOLE-…`), **Audit reference** (`ECP-AUDIT-CONSOLE-…`), audit status, persistence status and the on-disk persistence location, plus the redacted safe result. Evidence/audit files are persisted under the artifact root exactly as before (`local-browser-artifacts/external-executions/<execution_id>/` by default). Audit records are `PENDING_HUMAN_REVIEW` as always.
+
+### Execution attribution — real external calls vs offline demonstrations
+
+Every execution record and evidence document now carries non-secret **transport attribution** (owner order: UNIVERSAL REAL PROVIDER EXECUTION BINDING v1):
+
+| Field | Real external execution (any provider) | Offline demo execution |
+|---|---|---|
+| `transport_kind` | `http` | `offline-mock` |
+| `endpoint` | the exact provider URL the request was sent to (e.g. `https://openrouter.ai/api/v1/chat/completions`) | absent (no network) |
+| `http_status` | the provider's HTTP status for the call (e.g. `200`; on failures the rejected status, e.g. `401`) | absent |
+| `latency_ms` | measured round-trip time | absent |
+| `network` | — | `none` |
+
+A real **failure** is displayed just as honestly: the record keeps the provider, model, adapter, endpoint and the provider's HTTP status, with the real classification (`PROVIDER_AUTHENTICATION_FAILED`, `PROVIDER_RATE_LIMITED`, `PROVIDER_TIMEOUT`, `PROVIDER_REQUEST_FAILED`, `PROVIDER_QUOTA_EXCEEDED`, `PROVIDER_CONNECTION_FAILED`) — never a fabricated SUCCESS. Because the demo and a real call can produce the same `normalized_output` (`ECP-CONFORMANCE-OK` by design of the conformance probe), the transport fields above are the definitive distinction.
 
 ## 7. Security properties (owner order §4)
 
@@ -119,7 +135,7 @@ The **Execution** card shows, live: execution id, execution status, response sta
 
 ## 8. Notes and limits
 
-* **OpenRouter** serves its model list publicly: a wrong key can still "identify" the provider and list models; execution will then fail honestly with `PROVIDER_AUTHENTICATION_FAILED`. Identification is a dialect claim, not a credential-validity claim.
-* **Custom-header chat-completions gateways** (credential in a non-standard header plus static routing headers) are onboarded through the launcher configuration path (`examples/launcher/onboarding-chat-completions-gateway.example.json`) — the browser session flow covers standard bearer dialects in v1.
+* **OpenRouter** serves its model list publicly: a wrong key can still "identify" the provider and list models; execution will then fail honestly with `PROVIDER_AUTHENTICATION_FAILED` and the provider's HTTP status in the record. Identification is a dialect claim, not a credential-validity claim.
+* **Custom-header chat-completions gateways** (credential in a non-standard header plus static routing headers) work through BOTH paths now: the launcher configuration (`examples/launcher/onboarding-chat-completions-gateway.example.json`) and the **browser session flow** — enter the endpoint plus the optional **Gateway headers** JSON (`{"token_header":…,"bearer_value":…,"extra_headers":{…}}`) in the discovery card. These knobs are non-secret configuration only (header names, public markers, routing values); the credential value itself still flows exclusively through the credential gateway's release path, in the same placement the runtime adapter uses.
 * Adding a provider = one descriptor entry (data) in `ecp.discovery` plus, only for a genuinely new transport dialect, one adapter class in `ecp.runtime_adapters`. Adding models requires nothing — they arrive from the provider's own models endpoint.
-* The console's own regression battery: `tests/test_discovery.py`, `tests/test_console_session.py` (fully synthetic — no real credential, no network).
+* The console's own regression battery: `tests/test_discovery.py`, `tests/test_console_session.py` (fully synthetic — no real credential, no network), plus the real-provider binding tests in `tests/test_console_session.py` (UNIVERSAL REAL PROVIDER EXECUTION BINDING v1 section: the selected model reaches the real adapter verbatim at the real endpoint with the session lease; the offline demo is never invoked; real failures surface honestly; no credential leakage).

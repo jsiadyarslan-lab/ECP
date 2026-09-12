@@ -14,6 +14,7 @@ import http.client
 import json
 import socket
 import threading
+import uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -96,7 +97,7 @@ class MockSessionAdapter:
         }
 
 
-def mock_adapter_factory(kind, *, model, endpoint, provider, adapter_id):
+def mock_adapter_factory(kind, *, model, endpoint, provider, adapter_id, token_header=None, bearer_value=None, extra_headers=None):
     assert kind in {"openai-responses", "gemini-generate-content", "anthropic-messages", "openrouter-chat-completions"}
     return MockSessionAdapter(model=model, endpoint=endpoint, provider=provider, adapter_id=adapter_id)
 
@@ -644,3 +645,427 @@ def test_session_catalog_integration_shows_session_targets(running_stack):
 
 def test_default_session_ttl_is_sane():
     assert 60 <= DEFAULT_SESSION_TTL_SECONDS <= 86400
+
+
+# ---------------------------------------------------------------------------
+# UNIVERSAL REAL PROVIDER EXECUTION BINDING v1 (owner order 2026-09-12)
+#
+# These tests pin the exact binding the owner doubted: RUN EVALUATION must
+# execute the SELECTED discovered model through the REAL provider adapter
+# class with the REAL credential-session lease, at the REAL provider endpoint,
+# with transport attribution that makes a real external call unmistakable —
+# and the offline demo must never be reachable from that path.
+# ---------------------------------------------------------------------------
+
+OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models"
+OPENROUTER_MODELS_BODY = {
+    "data": [
+        {"id": "~z-ai/glm-flash-latest", "object": "model", "owned_by": "z-ai"},
+        {"id": "inclusionai/ling-3.0-flash-sante:free", "object": "model", "owned_by": "inclusionai"},
+    ]
+}
+
+
+class RecordingExecutionTransport:
+    """Fake POST transport recording every (endpoint, headers, payload)."""
+
+    def __init__(self, respond):
+        self.calls = []
+        self._respond = respond
+
+    def __call__(self, endpoint, headers, payload, timeout):
+        self.calls.append((endpoint, dict(headers), json.loads(payload.decode("utf-8"))))
+        return self._respond()
+
+
+def _openrouter_chat_response(model, text="ECP-CONFORMANCE-OK"):
+    return (
+        200,
+        json.dumps(
+            {
+                "id": "gen-binding-" + uuid.uuid4().hex[:8],
+                "model": model,
+                "choices": [{"message": {"role": "assistant", "content": text}}],
+            }
+        ).encode(),
+    )
+
+
+def build_real_adapter_stack(tmp_path, execution):
+    """Session stack whose adapter factory builds the REAL chat-completions adapter.
+
+    Discovery probes are fakes (offline); the execution adapter is the genuine
+    OpenRouterChatCompletionsAdapter over the given recording fake transport,
+    so the exact endpoint, headers and body of the real dialect are asserted
+    without any network access.
+    """
+    from ecp.runtime_adapters import OpenRouterChatCompletionsAdapter
+
+    def factory(kind, *, model, endpoint, provider, adapter_id, token_header=None, bearer_value=None, extra_headers=None):
+        assert kind == "openrouter-chat-completions"
+        return OpenRouterChatCompletionsAdapter(
+            model=model,
+            endpoint=endpoint,
+            provider=provider,
+            adapter_id=adapter_id,
+            transport=execution,
+            token_header=token_header,
+            bearer_value=bearer_value,
+            extra_headers=extra_headers,
+        )
+
+    stack = build_stack(
+        tmp_path,
+        routes={OPENROUTER_MODELS_URL: (200, json.dumps(OPENROUTER_MODELS_BODY).encode())},
+    )
+    stack["manager"]._adapter_factory = factory
+    stack["execution"] = execution
+    return stack
+
+
+def test_selected_model_reaches_the_real_openrouter_adapter_literally(tmp_path):
+    execution_transport = RecordingExecutionTransport(lambda: _openrouter_chat_response("~z-ai/glm-flash-latest"))
+    stack = build_real_adapter_stack(tmp_path, execution_transport)
+    handle = open_session(stack)
+    document = stack["manager"].discover({"credential_ref": handle["credential_ref"]})
+    assert document["status"] == "DISCOVERED"
+    assert document["provider"]["provider_id"] == "ECP-PROVIDER-OPENROUTER"
+    selection = stack["manager"].select_target(
+        {"credential_ref": handle["credential_ref"], "model_identifier": "~z-ai/glm-flash-latest"}
+    )
+    assert selection["ready"] == "READY"
+    assert selection["model_identifier"] == "~z-ai/glm-flash-latest"
+    record = stack["gateway"].execute({
+        "evaluation_id": selection["evaluation_id"],
+        "system_id": selection["system_id"],
+        "credential_ref": selection["credential_ref"],
+        "test_id": selection["test_id"],
+        "request_id": "binding-real-openrouter-1",
+    })
+    # THE binding proof: exactly one real-dialect HTTP request, to the real
+    # OpenRouter chat-completions endpoint, with the session credential lease
+    # as the bearer credential and the SELECTED model identifier verbatim.
+    assert len(execution_transport.calls) == 1
+    endpoint, headers, payload = execution_transport.calls[0]
+    assert endpoint == "https://openrouter.ai/api/v1/chat/completions"
+    assert headers["Authorization"] == f"Bearer {SECRET}"
+    assert payload["model"] == "~z-ai/glm-flash-latest"
+    assert payload["stream"] is False
+    assert payload["messages"][0]["role"] == "user"
+    # Transport attribution on the record: real external call, unmistakable.
+    assert record["status"] == "SUCCESS"
+    assert record["provider"] == "ECP-PROVIDER-OPENROUTER"
+    assert record["model"] == "~z-ai/glm-flash-latest"
+    assert record["adapter"] == selection["adapter_id"]
+    assert record["endpoint"] == "https://openrouter.ai/api/v1/chat/completions"
+    assert record["result"]["transport_kind"] == "http"
+    assert record["result"]["http_status"] == 200
+    assert isinstance(record["result"]["latency_ms"], int) and record["result"]["latency_ms"] >= 0
+    assert record["result"]["response_id"].startswith("gen-binding-")
+    # Transport attribution on the persisted evidence document.
+    evidence_path = Path(tmp_path) / "external-executions" / record["execution_id"] / "evidence.json"
+    evidence = json.loads(evidence_path.read_text())
+    assert evidence["provider"] == "ECP-PROVIDER-OPENROUTER"
+    assert evidence["model"] == "~z-ai/glm-flash-latest"
+    assert evidence["transport_kind"] == "http"
+    assert evidence["endpoint"] == "https://openrouter.ai/api/v1/chat/completions"
+    assert evidence["http_status"] == 200
+    assert evidence["result"]["transport_kind"] == "http"
+    # No credential anywhere.
+    for blob in (json.dumps(record), json.dumps(evidence), json.dumps(selection)):
+        assert SECRET not in blob
+
+
+def test_session_execution_never_invokes_the_offline_demo(tmp_path):
+    """The demo/offline evaluation must be unreachable from RUN EVALUATION."""
+    import run_console as launcher
+
+    execution_transport = RecordingExecutionTransport(lambda: _openrouter_chat_response("~z-ai/glm-flash-latest"))
+    from ecp.runtime_adapters import OpenRouterChatCompletionsAdapter
+
+    def factory(kind, *, model, endpoint, provider, adapter_id, token_header=None, bearer_value=None, extra_headers=None):
+        return OpenRouterChatCompletionsAdapter(
+            model=model, endpoint=endpoint, provider=provider, adapter_id=adapter_id,
+            transport=execution_transport,
+            token_header=token_header, bearer_value=bearer_value, extra_headers=extra_headers,
+        )
+
+    configuration = json.loads(json.dumps(launcher.BUILTIN_DEMO_CONFIGURATION))
+    gateway, service = launcher.build_gateway(
+        configuration,
+        GatewayConfig(frozenset({ORIGIN}), artifact_root=Path(tmp_path)),
+        session_adapter_factory=factory,
+    )
+    manager = gateway._session_console
+    # Offline demo adapter tripwire: any invocation fails the test loudly.
+    demo_adapter = gateway.adapters.get("ECP-ADAPTER-DEMO-OFFLINE")
+    assert demo_adapter is not None
+    original_demo_execute = demo_adapter.execute
+    tripwire_fired = []
+
+    def tripwire(lease, request):
+        tripwire_fired.append(True)
+        raise AssertionError("the offline demo adapter was invoked by the session execution path")
+
+    demo_adapter.execute = tripwire
+    # Discovery probes stay offline (fake transport injection).
+    manager._discovery._transport = FakeProbeTransport(
+        {OPENROUTER_MODELS_URL: (200, json.dumps(OPENROUTER_MODELS_BODY).encode())}
+    )
+    handle = manager.open_session({"credential_secret": SECRET})
+    document = manager.discover({"credential_ref": handle["credential_ref"]})
+    assert document["status"] == "DISCOVERED"
+    selection = manager.select_target(
+        {"credential_ref": handle["credential_ref"], "model_identifier": "~z-ai/glm-flash-latest"}
+    )
+    record = gateway.execute({
+        "evaluation_id": selection["evaluation_id"],
+        "system_id": selection["system_id"],
+        "credential_ref": selection["credential_ref"],
+        "test_id": selection["test_id"],
+        "request_id": "binding-no-demo-1",
+    })
+    assert record["status"] == "SUCCESS"
+    assert record["evaluation_id"] == selection["evaluation_id"]
+    assert record["evaluation_id"] != "ECP-EVAL-DEMO-OFFLINE-1"
+    assert record["provider"] == "ECP-PROVIDER-OPENROUTER"
+    assert record["result"]["transport_kind"] == "http"
+    assert SECRET not in json.dumps(record)
+    assert not tripwire_fired  # the demo adapter was never touched by the session flow
+    # And the demo evaluation itself, when explicitly run, labels itself offline.
+    demo_adapter.execute = original_demo_execute
+    demo_record = gateway.execute({
+        "evaluation_id": "ECP-EVAL-DEMO-OFFLINE-1",
+        "system_id": "ECP-SYSTEM-DEMO-OFFLINE-1",
+        "credential_ref": "ECP-DEMO-CREDENTIAL-OFFLINE",
+        "test_id": "ECP-TEST-DEMO-OFFLINE-1",
+        "request_id": "binding-demo-explicit-1",
+    })
+    assert demo_record["status"] == "SUCCESS"
+    assert demo_record["result"]["transport_kind"] == "offline-mock"
+    assert demo_record["result"]["network"] == "none"
+
+
+def test_real_provider_failure_surfaces_honestly(tmp_path):
+    """A provider rejection is a REAL failure with provider/model/status — never a fake SUCCESS."""
+    rejected = RecordingExecutionTransport(
+        lambda: (401, json.dumps({"error": {"message": "No auth credentials found in request", "code": 401}}).encode())
+    )
+    stack = build_real_adapter_stack(tmp_path, rejected)
+    handle = open_session(stack)
+    stack["manager"].discover({"credential_ref": handle["credential_ref"]})
+    selection = stack["manager"].select_target(
+        {"credential_ref": handle["credential_ref"], "model_identifier": "inclusionai/ling-3.0-flash-sante:free"}
+    )
+    record = stack["gateway"].execute({
+        "evaluation_id": selection["evaluation_id"],
+        "system_id": selection["system_id"],
+        "credential_ref": selection["credential_ref"],
+        "test_id": selection["test_id"],
+        "request_id": "binding-real-failure-1",
+    })
+    assert record["status"] == "FAILED"
+    assert record["execution_status"] == "PROVIDER_AUTHENTICATION_FAILED"
+    assert record["error_classification"] == "PROVIDER_AUTHENTICATION_FAILED"
+    assert record["http_status"] == 401
+    assert record["provider"] == "ECP-PROVIDER-OPENROUTER"
+    assert record["model"] == "inclusionai/ling-3.0-flash-sante:free"
+    assert record["endpoint"] == "https://openrouter.ai/api/v1/chat/completions"
+    assert record["response_status"] == "NOT_RECEIVED"
+    assert record["evidence_status"] == "NOT_GENERATED"
+    # No evidence artifacts for the failed execution; no secret anywhere.
+    assert not (Path(tmp_path) / "external-executions" / record["execution_id"]).exists()
+    assert SECRET not in json.dumps(record)
+    assert SECRET not in record["error"]
+
+
+def test_execution_request_after_session_open_carries_identifiers_only(tmp_path):
+    """After the session opens, the execution request payload is identifiers only."""
+    stack = build_real_adapter_stack(tmp_path, RecordingExecutionTransport(lambda: _openrouter_chat_response("~z-ai/glm-flash-latest")))
+    handle = open_session(stack)
+    stack["manager"].discover({"credential_ref": handle["credential_ref"]})
+    selection = stack["manager"].select_target(
+        {"credential_ref": handle["credential_ref"], "model_identifier": "~z-ai/glm-flash-latest"}
+    )
+    request = {
+        "evaluation_id": selection["evaluation_id"],
+        "system_id": selection["system_id"],
+        "credential_ref": selection["credential_ref"],
+        "test_id": selection["test_id"],
+        "request_id": "binding-identifiers-only-1",
+    }
+    record = stack["gateway"].execute(request)
+    assert record["status"] == "SUCCESS"
+    assert set(request) == {"evaluation_id", "system_id", "credential_ref", "test_id", "request_id"}
+    assert SECRET not in json.dumps(request)
+    # The browser builds exactly this identifier set (static contract pin).
+    app = (Path(__file__).resolve().parents[1] / "console" / "app.js").read_text()
+    assert "const request = { evaluation_id: target.evaluation_id, system_id: target.system_id, credential_ref: target.credential_ref, test_id: target.test_id, request_id: requestId };" in app
+
+
+# ---------------------------------------------------------------------------
+# Custom-endpoint gateway header knobs (non-secret configuration)
+# ---------------------------------------------------------------------------
+
+
+CUSTOM_BASE = "http://127.0.0.1:9099/v1"
+CUSTOM_MODELS_BODY = {"data": [{"id": "gateway-model-a", "object": "model"}]}
+
+
+def test_gateway_headers_flow_from_discovery_probe_to_execution_headers(tmp_path):
+    execution_transport = RecordingExecutionTransport(lambda: _openrouter_chat_response("gateway-model-a"))
+    stack = build_stack(tmp_path, routes={CUSTOM_BASE + "/models": (200, json.dumps(CUSTOM_MODELS_BODY).encode())})
+    from ecp.runtime_adapters import OpenRouterChatCompletionsAdapter
+
+    def factory(kind, *, model, endpoint, provider, adapter_id, token_header=None, bearer_value=None, extra_headers=None):
+        return OpenRouterChatCompletionsAdapter(
+            model=model, endpoint=endpoint, provider=provider, adapter_id=adapter_id,
+            transport=execution_transport,
+            token_header=token_header, bearer_value=bearer_value, extra_headers=extra_headers,
+        )
+
+    stack["manager"]._adapter_factory = factory
+    handle = open_session(stack)
+    document = stack["manager"].discover({
+        "credential_ref": handle["credential_ref"],
+        "base_url": CUSTOM_BASE,
+        "gateway_headers": {"token_header": "X-Token", "bearer_value": "public-marker", "extra_headers": {"X-Route": "alpha"}},
+    })
+    assert document["status"] == "DISCOVERED"
+    # Probe headers carried the placement contract.
+    probe_url, probe_headers = stack["transport"].calls[-1]
+    assert probe_url == CUSTOM_BASE + "/models"
+    assert probe_headers["X-Token"] == SECRET
+    assert probe_headers["Authorization"] == "Bearer public-marker"
+    assert probe_headers["X-Route"] == "alpha"
+    # The report echoes the non-secret configuration for the owner.
+    assert document["gateway_headers"] == {"token_header": "X-Token", "bearer_value": "public-marker", "extra_headers": {"X-Route": "alpha"}}
+    selection = stack["manager"].select_target(
+        {"credential_ref": handle["credential_ref"], "model_identifier": "gateway-model-a"}
+    )
+    record = stack["gateway"].execute({
+        "evaluation_id": selection["evaluation_id"],
+        "system_id": selection["system_id"],
+        "credential_ref": selection["credential_ref"],
+        "test_id": selection["test_id"],
+        "request_id": "binding-gateway-headers-1",
+    })
+    assert record["status"] == "SUCCESS"
+    # Execution headers use the SAME placement: lease in X-Token, public marker as bearer.
+    endpoint, headers, payload = execution_transport.calls[0]
+    assert endpoint == CUSTOM_BASE + "/chat/completions"
+    assert headers["X-Token"] == SECRET
+    assert headers["Authorization"] == "Bearer public-marker"
+    assert headers["X-Route"] == "alpha"
+    assert payload["model"] == "gateway-model-a"
+    assert record["result"]["transport_kind"] == "http"
+    assert SECRET not in json.dumps(record)
+
+
+def test_gateway_headers_require_a_custom_endpoint(tmp_path):
+    stack = build_stack(tmp_path)
+    handle = open_session(stack)
+    with pytest.raises(SessionConsoleError, match="requires a custom endpoint"):
+        stack["manager"].discover({
+            "credential_ref": handle["credential_ref"],
+            "gateway_headers": {"token_header": "X-Token"},
+        })
+
+
+def test_gateway_headers_reject_invalid_configuration(tmp_path):
+    stack = build_stack(tmp_path, routes={CUSTOM_BASE + "/models": (200, json.dumps(CUSTOM_MODELS_BODY).encode())})
+    handle = open_session(stack)
+    with pytest.raises(SessionConsoleError, match="gateway_headers is invalid"):
+        stack["manager"].discover({
+            "credential_ref": handle["credential_ref"],
+            "base_url": CUSTOM_BASE,
+            "gateway_headers": {"token_header": "Authorization"},
+        })
+    with pytest.raises(SessionConsoleError, match="gateway_headers is invalid"):
+        stack["manager"].discover({
+            "credential_ref": handle["credential_ref"],
+            "base_url": CUSTOM_BASE,
+            "gateway_headers": {"bearer_value": "orphan-marker"},
+        })
+    with pytest.raises(SessionConsoleError, match="unknown keys"):
+        stack["manager"].discover({
+            "credential_ref": handle["credential_ref"],
+            "base_url": CUSTOM_BASE,
+            "gateway_headers": {"unexpected": "value"},
+        })
+
+
+def test_re_discovery_with_different_headers_does_not_replay_cached_selection(tmp_path):
+    first = RecordingExecutionTransport(lambda: _openrouter_chat_response("gateway-model-a"))
+    second = RecordingExecutionTransport(lambda: _openrouter_chat_response("gateway-model-a"))
+    stack = build_stack(tmp_path, routes={CUSTOM_BASE + "/models": (200, json.dumps(CUSTOM_MODELS_BODY).encode())})
+    from ecp.runtime_adapters import OpenRouterChatCompletionsAdapter
+
+    current = {"transport": first}
+
+    def factory(kind, *, model, endpoint, provider, adapter_id, token_header=None, bearer_value=None, extra_headers=None):
+        return OpenRouterChatCompletionsAdapter(
+            model=model, endpoint=endpoint, provider=provider, adapter_id=adapter_id,
+            transport=current["transport"],
+            token_header=token_header, bearer_value=bearer_value, extra_headers=extra_headers,
+        )
+
+    stack["manager"]._adapter_factory = factory
+    handle = open_session(stack)
+    stack["manager"].discover({
+        "credential_ref": handle["credential_ref"], "base_url": CUSTOM_BASE,
+        "gateway_headers": {"token_header": "X-Token", "bearer_value": "marker-one"},
+    })
+    first_selection = stack["manager"].select_target(
+        {"credential_ref": handle["credential_ref"], "model_identifier": "gateway-model-a"}
+    )
+    # Re-discover with different non-secret header placement; same model.
+    stack["manager"].discover({
+        "credential_ref": handle["credential_ref"], "base_url": CUSTOM_BASE,
+        "gateway_headers": {"token_header": "X-Token", "bearer_value": "marker-two"},
+    })
+    current["transport"] = second
+    second_selection = stack["manager"].select_target(
+        {"credential_ref": handle["credential_ref"], "model_identifier": "gateway-model-a"}
+    )
+    assert second_selection["target_id"] != first_selection["target_id"]
+    record = stack["gateway"].execute({
+        "evaluation_id": second_selection["evaluation_id"],
+        "system_id": second_selection["system_id"],
+        "credential_ref": second_selection["credential_ref"],
+        "test_id": second_selection["test_id"],
+        "request_id": "binding-rebind-1",
+    })
+    assert record["status"] == "SUCCESS"
+    _, headers, _ = second.calls[0]
+    assert headers["Authorization"] == "Bearer marker-two"
+
+
+def test_custom_endpoint_without_headers_keeps_the_bearer_contract(tmp_path):
+    execution_transport = RecordingExecutionTransport(lambda: _openrouter_chat_response("gateway-model-a"))
+    stack = build_stack(tmp_path, routes={CUSTOM_BASE + "/models": (200, json.dumps(CUSTOM_MODELS_BODY).encode())})
+    from ecp.runtime_adapters import OpenRouterChatCompletionsAdapter
+
+    def factory(kind, *, model, endpoint, provider, adapter_id, token_header=None, bearer_value=None, extra_headers=None):
+        assert token_header is None and bearer_value is None and extra_headers is None
+        return OpenRouterChatCompletionsAdapter(
+            model=model, endpoint=endpoint, provider=provider, adapter_id=adapter_id, transport=execution_transport
+        )
+
+    stack["manager"]._adapter_factory = factory
+    handle = open_session(stack)
+    document = stack["manager"].discover({"credential_ref": handle["credential_ref"], "base_url": CUSTOM_BASE})
+    assert document["status"] == "DISCOVERED"
+    assert "gateway_headers" not in document
+    selection = stack["manager"].select_target(
+        {"credential_ref": handle["credential_ref"], "model_identifier": "gateway-model-a"}
+    )
+    stack["gateway"].execute({
+        "evaluation_id": selection["evaluation_id"],
+        "system_id": selection["system_id"],
+        "credential_ref": selection["credential_ref"],
+        "test_id": selection["test_id"],
+        "request_id": "binding-bearer-default-1",
+    })
+    _, headers, _ = execution_transport.calls[0]
+    assert headers["Authorization"] == f"Bearer {SECRET}"

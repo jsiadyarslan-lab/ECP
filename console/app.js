@@ -171,6 +171,16 @@
     setPill("discovery-state", credentialRef ? "OPEN" : "CLOSED", credentialRef ? "good" : "neutral");
     setText("discovery-detail", "Discovery probes candidate provider dialects through the unified discovery fabric. If no dialect answers, the state is UNKNOWN — it is never guessed.");
   }
+  function resetExecutionAttribution() {
+    setText("execution-provider", "—");
+    setText("execution-model", "—");
+    setText("execution-adapter", "—");
+    setText("execution-endpoint", "—");
+    setText("execution-transport", "—");
+    setText("execution-status-code", "—");
+    setText("execution-latency", "—");
+    setText("execution-error-classification", "—");
+  }
   async function discover() {
     $("error").textContent = "";
     if (!credentialRef) { safeError(new Error("Open a credential session first.")); return; }
@@ -181,8 +191,16 @@
       const body = { credential_ref: credentialRef };
       const hint = $("provider-hint-select").value;
       const endpoint = $("custom-endpoint-input").value.trim();
+      const headerConfig = $("gateway-headers-input").value.trim();
       if (hint) body.provider_hint = hint;
       if (endpoint) body.base_url = endpoint;
+      if (headerConfig) {
+        try {
+          body.gateway_headers = JSON.parse(headerConfig);
+        } catch (parseError) {
+          throw new Error("Gateway headers must be valid JSON like the placeholder example.");
+        }
+      }
       discoveryDocument = await call("/api/v1/discovery", { method: "POST", body: JSON.stringify(body) });
       renderDiscovery();
     } catch (error) {
@@ -284,6 +302,7 @@
     }
     credentialRef = null;
     resetDiscoveryView();
+    resetExecutionAttribution();
     setText("credential-session-detail", "Credential session closed. The gateway no longer holds the credential value.");
     $("discover-button").disabled = true;
     $("credential-revoke-button").disabled = true;
@@ -291,7 +310,16 @@
   }
   function render(record) {
     current = record;
+    const result = record.result || {};
     setText("execution-id", record.execution_id);
+    setText("execution-provider", record.provider);
+    setText("execution-model", record.model);
+    setText("execution-adapter", record.adapter);
+    setText("execution-endpoint", record.endpoint);
+    setText("execution-transport", result.transport_kind || (record.transport_kind || "—"));
+    setText("execution-status-code", result.http_status != null ? String(result.http_status) : (record.http_status != null ? String(record.http_status) : "—"));
+    setText("execution-latency", result.latency_ms != null ? `${result.latency_ms} ms` : "—");
+    setText("execution-error-classification", record.error_classification || "—");
     setText("external-status", record.execution_status);
     setText("response-status", record.response_status);
     setText("evidence-status", record.evidence_status);

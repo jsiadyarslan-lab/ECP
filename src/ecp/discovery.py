@@ -55,6 +55,7 @@ from urllib import request as urllib_request
 from urllib.parse import urlparse
 
 from .credentials import SecretLease
+from .runtime_adapters import normalize_gateway_headers
 
 
 #: Outcome codes for one discovery probe (non-secret diagnostics only).
@@ -322,6 +323,7 @@ class DiscoveryReport:
     total_models: int = 0
     identification: str = IDENTIFICATION_UNKNOWN
     identification_basis: str = "no candidate endpoint produced a parseable model list"
+    gateway_headers: "dict[str, Any] | None" = None
 
     def to_document(self) -> dict[str, Any]:
         provider_block: dict[str, Any] = {
@@ -339,7 +341,7 @@ class DiscoveryReport:
                 "discovery_id": self.discovery_id,
                 "endpoint_base": self.matched_base_url,
             }
-        return {
+        document = {
             "status": self.status,
             "discovered_at": self.discovered_at,
             "identification": self.identification,
@@ -357,6 +359,9 @@ class DiscoveryReport:
             "total_models": self.total_models,
             "probes": [probe.to_document() for probe in self.probes],
         }
+        if self.gateway_headers is not None:
+            document["gateway_headers"] = dict(self.gateway_headers)
+        return document
 
 
 # ---------------------------------------------------------------------------
@@ -542,17 +547,33 @@ class ProviderDiscoveryService:
         *,
         provider_hint: str | None = None,
         custom_base_url: str | None = None,
+        gateway_headers: "tuple[str | None, str | None, dict[str, str]] | None" = None,
     ) -> DiscoveryReport:
-        """Run one unified discovery pass and return the honest report."""
+        """Run one unified discovery pass and return the honest report.
+
+        ``gateway_headers`` is the OPTIONAL validated, non-secret header
+        placement triple (``token_header``, ``bearer_value``,
+        ``extra_headers``) for owner-declared custom endpoints whose gateway
+        places the credential in a dedicated header. It is allowed ONLY
+        together with a custom base URL; the credential value itself continues
+        to flow exclusively through the released lease.
+        """
+        if gateway_headers is not None and custom_base_url is None:
+            raise DiscoveryError(
+                "gateway header configuration requires a custom endpoint"
+            )
         candidates = self._candidates(provider_hint, custom_base_url)
         discovered_at = self._now()
         probes: list[DiscoveryProbe] = []
         for descriptor, base_url in candidates:
-            outcome, detail, models = self._probe(descriptor, base_url, lease)
+            outcome, detail, models = self._probe(
+                descriptor, base_url, lease, gateway_headers=gateway_headers
+            )
             probes.append(DiscoveryProbe(descriptor.discovery_id, base_url, outcome, detail))
             if outcome == PROBE_IDENTIFIED:
                 return self._report_for_match(
-                    descriptor, base_url, models, discovered_at, probes
+                    descriptor, base_url, models, discovered_at, probes,
+                    gateway_headers=gateway_headers,
                 )
         return DiscoveryReport(
             status=STATUS_DISCOVERY_FAILED,
@@ -593,10 +614,14 @@ class ProviderDiscoveryService:
         ]
 
     def _probe(
-        self, descriptor: DiscoveryDescriptor, base_url: str, lease: SecretLease
+        self,
+        descriptor: DiscoveryDescriptor,
+        base_url: str,
+        lease: SecretLease,
+        gateway_headers: "tuple[str | None, str | None, dict[str, str]] | None" = None,
     ) -> "tuple[str, str, list[tuple[str, str, tuple[str, ...]]]]":
         url = descriptor.probe_url(base_url)
-        headers = _probe_headers(descriptor.auth, lease.value)
+        headers = _probe_headers(descriptor.auth, lease.value, gateway_headers)
         try:
             status, body = self._transport(url, headers, self._timeout)
         except (OSError, urllib_error.URLError, TimeoutError) as exc:
@@ -630,6 +655,7 @@ class ProviderDiscoveryService:
         models: "list[tuple[str, str, tuple[str, ...]]]",
         discovered_at: str,
         probes: "list[DiscoveryProbe]",
+        gateway_headers: "tuple[str | None, str | None, dict[str, str]] | None" = None,
     ) -> DiscoveryReport:
         total = len(models)
         truncated = total > self._max_models
@@ -643,6 +669,15 @@ class ProviderDiscoveryService:
                 discovered_at=discovered_at,
             )
             for identifier, display, capabilities in kept
+        )
+        header_document = (
+            {
+                "token_header": gateway_headers[0],
+                "bearer_value": gateway_headers[1],
+                "extra_headers": dict(gateway_headers[2]),
+            }
+            if gateway_headers is not None
+            else None
         )
         return DiscoveryReport(
             status=STATUS_DISCOVERED,
@@ -663,6 +698,7 @@ class ProviderDiscoveryService:
                 f"the endpoint at {urlparse(base_url).hostname or 'unknown-host'} answered "
                 f"the {descriptor.response_shape} models query with a parseable model list"
             ),
+            gateway_headers=header_document,
         )
 
     def _now(self) -> str:
@@ -675,9 +711,32 @@ class ProviderDiscoveryService:
         )
 
 
-def _probe_headers(auth: Mapping[str, Any], lease_value: str) -> dict[str, str]:
+def _probe_headers(
+    auth: Mapping[str, Any],
+    lease_value: str,
+    gateway_headers: "tuple[str | None, str | None, dict[str, str]] | None" = None,
+) -> dict[str, str]:
+    """Build probe request headers.
+
+    Default: the descriptor's own auth style (bearer or dedicated header).
+    With a validated custom-endpoint ``gateway_headers`` triple the placement
+    mirrors the chat-completions adapter contract exactly: the released
+    credential travels in ``token_header`` (or the Authorization bearer slot
+    when no token header is configured), ``bearer_value`` is the non-secret
+    Authorization literal, and ``extra_headers`` are merged as-is.
+    """
+    if gateway_headers is not None:
+        token_header, bearer_value, extra = gateway_headers
+        headers: dict[str, str] = {"Accept": "application/json"}
+        if token_header is None:
+            headers["Authorization"] = f"Bearer {lease_value}"
+        else:
+            headers["Authorization"] = f"Bearer {bearer_value}"
+            headers[token_header] = lease_value
+        headers.update(extra)
+        return headers
     style = auth.get("style")
-    headers: dict[str, str] = {"Accept": "application/json"}
+    headers = {"Accept": "application/json"}
     if style == "bearer":
         headers["Authorization"] = f"Bearer {lease_value}"
     elif style == "header":

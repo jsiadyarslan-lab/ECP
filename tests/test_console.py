@@ -53,7 +53,7 @@ def test_static_ui_has_no_provider_or_secret_write_path():
     # the page and is submitted only to the loopback gateway.
     assert app.count("localStorage.setItem")==1 and "sessionStorageKey" in app  # only the pairing session token is stored
     assert "owner-credential-input" in html and 'type="password"' in html  # secure input field
-    assert app.count("http")==1  # the ONLY origin contacted is the loopback gateway
+    assert app.count("http://")==1 and app.count("https://")==0  # the ONLY origin contacted is the loopback gateway (transport-attribution fields such as http_status are data keys, not origins)
     assert 'input.value = ""' in app  # the credential field is cleared immediately after submission
 DEMO_REQUEST={"evaluation_id":"ECP-EVAL-CONSOLE-TEST","system_id":"ECP-SYSTEM-CONSOLE-TEST","credential_ref":"cred-1","test_id":"test-1","request_id":"auth-focused"}
 def _pair_over_http(gateway):

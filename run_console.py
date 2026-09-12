@@ -131,6 +131,14 @@ class OfflineMockAdapter:
             "model": self.model,
             "output_text": self.reply,
             "request_id": request["request_id"],
+            # Explicit offline attribution: this adapter performs NO network
+            # call, and every record it produces must say so. A real external
+            # execution carries transport_kind "http" with the endpoint, the
+            # provider HTTP status and the round-trip latency instead — the
+            # two can never be confused (owner order: UNIVERSAL REAL PROVIDER
+            # EXECUTION BINDING v1).
+            "transport_kind": "offline-mock",
+            "network": "none",
         }
 
 
@@ -365,10 +373,32 @@ def _build_runtime_adapter(entry: Mapping[str, Any], target: Mapping[str, Any]) 
     )
 
 
-def _session_adapter_factory(adapter_kind, *, model, endpoint, provider, adapter_id):
-    """Build the runtime adapter for a session-onboarded target (same factory)."""
+def _session_adapter_factory(
+    adapter_kind,
+    *,
+    model,
+    endpoint,
+    provider,
+    adapter_id,
+    token_header=None,
+    bearer_value=None,
+    extra_headers=None,
+):
+    """Build the runtime adapter for a session-onboarded target (same factory).
+
+    The optional non-secret gateway header knobs come from the session's
+    discovery report (owner-declared custom endpoints only) and flow into the
+    same adapter constructor validation as launcher-configured targets.
+    """
     return _build_runtime_adapter(
-        {"adapter_kind": adapter_kind, "model": model, "endpoint": endpoint},
+        {
+            "adapter_kind": adapter_kind,
+            "model": model,
+            "endpoint": endpoint,
+            "token_header": token_header,
+            "bearer_value": bearer_value,
+            "extra_headers": extra_headers,
+        },
         {"provider": {"provider_id": provider}, "adapter": {"adapter_id": adapter_id}},
     )
 
@@ -387,12 +417,18 @@ def _session_ttl_seconds() -> int:
 def build_gateway(
     configuration: Mapping[str, Any],
     gateway_config: GatewayConfig,
+    *,
+    session_adapter_factory=None,
 ) -> "tuple[LocalGateway, TargetOnboardingService]":
     """Onboard every configured target and build the existing LocalGateway.
 
     The gateway is the SAME universal execution path (single endpoint,
     existing console contract); only its evaluation registry is populated —
     dynamically, from configuration, through the onboarding fabric.
+
+    ``session_adapter_factory`` is an optional test seam over the session
+    adapter factory (same signature, same built-in kinds); production callers
+    leave it unset.
     """
     providers = ProviderRegistry()
     targets = TargetRegistry(providers)
@@ -495,7 +531,7 @@ def build_gateway(
         session_credentials=credential_gateway,
         discovery=ProviderDiscoveryService(builtin_discovery_registry()),
         onboarding=service,
-        adapter_factory=_session_adapter_factory,
+        adapter_factory=session_adapter_factory or _session_adapter_factory,
         ttl_seconds=_session_ttl_seconds(),
     )
     gateway.enable_session_console(session_console)

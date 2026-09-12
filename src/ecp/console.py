@@ -182,7 +182,17 @@ class LocalGateway:
         evaluation=self.evaluations[resolved.evaluation_id]
         safe_request=resolved.intent.identifiers(); record=self.store.create(safe_request["request_id"],safe_request)
         if record["status"]!="REQUESTED": return record
-        eid=record["execution_id"]; self.store.update(eid,status="AUTHORIZED",execution_status="RUNNING"); lease=None
+        eid=record["execution_id"]
+        # Execution attribution (owner order: UNIVERSAL REAL PROVIDER EXECUTION
+        # BINDING v1): every record — success OR failure — carries the provider,
+        # the exact model identifier, the adapter and the endpoint the request
+        # was sent to, so a real provider verdict can never be confused with an
+        # offline demonstration and a real failure is always attributable.
+        context_adapter=self.adapters.get(evaluation.adapter)
+        context={"provider":evaluation.provider,"model":resolved.model_identifier,"adapter":evaluation.adapter}
+        context_endpoint=getattr(context_adapter,"endpoint",None)
+        if isinstance(context_endpoint,str) and context_endpoint.strip(): context["endpoint"]=context_endpoint
+        self.store.update(eid,status="AUTHORIZED",execution_status="RUNNING",**context); lease=None
         try:
             rr=ScopedReleaseRequest(request_id=resolved.request_id,binding_id=resolved.binding_id,target_id=evaluation.credential_binding.target_id,credential_ref=resolved.credential_ref,purpose=resolved.test_scope,scope=frozenset({resolved.test_scope}),lease_seconds=60,requested_at=_utc_now())
             lease=self.credential_gateway.release(rr,evaluation.credential_binding,evaluation.authorization_grant); adapter=self.adapters.resolve(evaluation.adapter,evaluation.provider)
@@ -195,13 +205,20 @@ class LocalGateway:
         except AdapterFailure as exc: self.store.update(eid,status="FAILED",execution_status=exc.category,response_status="NOT_RECEIVED",error_classification=exc.category,error=_safe_exception_message(exc,lease))
         except AdapterUnavailable as exc: self.store.update(eid,status="FAILED",execution_status="INCONCLUSIVE",response_status="NOT_RECEIVED",error_classification="ADAPTER_UNAVAILABLE",error=_safe_exception_message(exc,lease))
         except RuntimeAdapterUnavailable as exc: self.store.update(eid,status="FAILED",execution_status="INCONCLUSIVE",response_status="NOT_RECEIVED",error_classification="ADAPTER_UNAVAILABLE",error=_safe_exception_message(exc,lease))
-        except RuntimeAdapterTransportError as exc: self.store.update(eid,status="FAILED",execution_status="INCONCLUSIVE",response_status="NOT_RECEIVED",error_classification=str(exc),error=_safe_exception_message(exc,lease))
+        except RuntimeAdapterTransportError as exc: self.store.update(eid,status="FAILED",execution_status=str(exc),response_status="NOT_RECEIVED",error_classification=str(exc),http_status=_exc_http_status(exc),error=_safe_exception_message(exc,lease))
         except RuntimeAdapterError as exc: self.store.update(eid,status="FAILED",execution_status="INCONCLUSIVE",response_status="NOT_RECEIVED",error_classification="ADAPTER_ERROR",error=_safe_exception_message(exc,lease))
         except Exception as exc: self.store.update(eid,status="FAILED",execution_status="ERROR",response_status="NOT_RECEIVED",error_classification="ADAPTER_ERROR",error=_safe_exception_message(exc,lease))
         return self.store.get(eid) or {}
     def _finalize(self,eid,evaluation,resolved,unified,outcome,secrets_to_redact=()):
         suffix=eid.rsplit("-",1)[-1]; evid=f"ECP-EVID-CONSOLE-{suffix}"; audit_id=f"ECP-AUDIT-CONSOLE-{suffix}"
         evidence={"ecp_object":"console-evidence","evidence_id":evid,"execution_id":eid,"evaluation_id":resolved.evaluation_id,"system_id":resolved.system_id,"test_id":resolved.test_id,"provider":evaluation.provider,"adapter":evaluation.adapter,"credential_ref":resolved.credential_ref,"outcome":outcome,"result":_safe_result(unified.to_record_dict(),secrets_to_redact),"created_at":_utc_now(),"model":resolved.model_identifier,"adapter_version":resolved.adapter_version,"protocol_version":resolved.protocol_version,"case_id":resolved.experiment.case_id,"prompt_hash":resolved.experiment.prompt_hash,"prompt_reference":resolved.prompt_reference,"experiment_identity":resolved.experiment.identity_document(),"experiment_identity_hash":resolved.experiment.identity_hash()}
+        # Transport attribution at the evidence top level: the non-secret facts
+        # proving the real external round trip (kind, endpoint, provider HTTP
+        # status, latency). Offline demonstrations carry their own explicit
+        # offline markers instead — never a fabricated external success.
+        for fact_key in ("transport_kind","endpoint","http_status","latency_ms"):
+            fact_value=unified.provider_extras.get(fact_key)
+            if fact_value is None or isinstance(fact_value,(str,int,float,bool)): evidence[fact_key]=fact_value
         evidence["evidence_hash"]=hash_document(evidence); audit={"ecp_object":"console-audit","audit_id":audit_id,"execution_id":eid,"evidence_id":evid,"evidence_hash":evidence["evidence_hash"],"audit_status":"PENDING_HUMAN_REVIEW","created_at":_utc_now()}; persistence,location=self.store.persist(eid,evidence,audit); self.store.update(eid,status="SUCCESS" if persistence in {"PERSISTED_LOCALLY","PUSH_PENDING"} else "PARTIAL_SUCCESS",evidence_status="GENERATED",audit_status="GENERATED",persistence_status=persistence,persistence_location=location,evidence_id=evid,audit_id=audit_id)
     def make_server(self):
         gateway=self
@@ -258,6 +275,10 @@ def _safe_result(result,secrets_to_redact=()):
         if isinstance(value,str): safe[key]=redactor.redact(value)
         elif isinstance(value,(int,float,bool)) or value is None: safe[key]=value
     return safe
+def _exc_http_status(exc):
+    """The provider HTTP status carried by a transport failure, if any."""
+    status=getattr(exc,"http_status",None)
+    return status if isinstance(status,int) else None
 def _submitted_secret_values(body):
     """String values of secret-bearing request keys, for redaction only."""
     values=[]

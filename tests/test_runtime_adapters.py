@@ -56,12 +56,17 @@ def test_openai_adapter_normalizes_response_and_never_returns_credential():
 
     adapter = OpenAIResponsesAdapter(model="test-model", endpoint="https://provider.invalid/responses", transport=transport)
     result = adapter.execute(SecretLease("synthetic-secret", {}), {"request_id": "request-1"})
+    latency_ms = result.pop("latency_ms")
+    assert isinstance(latency_ms, int) and latency_ms >= 0
     assert result == {
         "provider_status": "RECEIVED",
         "response_id": "resp-test",
         "model": "test-model",
         "output_text": "ECP-CONFORMANCE-OK",
         "request_id": "request-1",
+        "transport_kind": "http",
+        "endpoint": "https://provider.invalid/responses",
+        "http_status": 200,
     }
     assert "synthetic-secret" not in json.dumps(result)
 
@@ -108,12 +113,17 @@ def test_gemini_adapter_normalizes_generate_content_response_without_credential(
 
     adapter = GeminiGenerateContentAdapter(model="gemini-test", endpoint="https://provider.invalid/v1beta/models/gemini-test:generateContent", transport=transport)
     result = adapter.execute(SecretLease("synthetic-secret", {}), {"request_id": "request-gemini"})
+    latency_ms = result.pop("latency_ms")
+    assert isinstance(latency_ms, int) and latency_ms >= 0
     assert result == {
         "provider_status": "RECEIVED",
         "response_id": None,
         "model": "gemini-test",
         "output_text": "ECP-CONFORMANCE-OK",
         "request_id": "request-gemini",
+        "transport_kind": "http",
+        "endpoint": "https://provider.invalid/v1beta/models/gemini-test:generateContent",
+        "http_status": 200,
     }
     assert "synthetic-secret" not in json.dumps(result)
 
@@ -141,12 +151,17 @@ def test_openrouter_adapter_normalizes_chat_completion_without_credential():
 
     adapter = OpenRouterChatCompletionsAdapter(model="openrouter/free", endpoint="https://openrouter.invalid/api/v1/chat/completions", transport=transport)
     result = adapter.execute(SecretLease("synthetic-secret", {}), {"request_id": "request-openrouter"})
+    latency_ms = result.pop("latency_ms")
+    assert isinstance(latency_ms, int) and latency_ms >= 0
     assert result == {
         "provider_status": "RECEIVED",
         "response_id": "gen-test",
         "model": "openrouter/free",
         "output_text": "ECP-CONFORMANCE-OK",
         "request_id": "request-openrouter",
+        "transport_kind": "http",
+        "endpoint": "https://openrouter.invalid/api/v1/chat/completions",
+        "http_status": 200,
     }
     assert "synthetic-secret" not in json.dumps(result)
 
@@ -265,12 +280,17 @@ def test_anthropic_adapter_normalizes_messages_response_without_credential():
 
     adapter = AnthropicMessagesAdapter(model="claude-test", endpoint="https://provider.invalid/v1/messages", transport=transport)
     result = adapter.execute(SecretLease("synthetic-secret", {}), {"request_id": "request-anthropic"})
+    latency_ms = result.pop("latency_ms")
+    assert isinstance(latency_ms, int) and latency_ms >= 0
     assert result == {
         "provider_status": "RECEIVED",
         "response_id": "msg-1",
         "model": "claude-test",
         "output_text": "ECP-CONFORMANCE-OK",
         "request_id": "request-anthropic",
+        "transport_kind": "http",
+        "endpoint": "https://provider.invalid/v1/messages",
+        "http_status": 200,
     }
     assert "synthetic-secret" not in json.dumps(result)
 

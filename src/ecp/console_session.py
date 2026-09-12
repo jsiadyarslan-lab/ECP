@@ -34,6 +34,7 @@ Session lifecycle:
 
 from __future__ import annotations
 
+import json
 import re
 import threading
 import uuid
@@ -47,6 +48,7 @@ from .credentials import CredentialGateway, CredentialIdentity, SecretLease, Sec
 from .discovery import DiscoveryReport, ProviderDiscoveryService, STATUS_DISCOVERED
 from .hashing import hash_document
 from .onboarding import TargetOnboardingService
+from .runtime_adapters import normalize_gateway_headers
 
 #: Provider identity of an unbound session credential (pre-discovery).
 SESSION_PROVIDER_ID = "ECP-PROVIDER-OWNER-SESSION"
@@ -389,12 +391,20 @@ class ConsoleSessionManager:
         credential_ref = _required_string(payload, "credential_ref")
         provider_hint = _optional_string(payload, "provider_hint")
         base_url = _optional_string(payload, "base_url")
+        gateway_headers = _extract_gateway_headers(payload)
+        if gateway_headers is not None and base_url is None:
+            raise SessionConsoleError(
+                "gateway header configuration requires a custom endpoint"
+            )
         request_id = "ECP-DISCOVERY-" + uuid.uuid4().hex[:12].upper()
         lease = self._session_credentials.discovery_lease(
             credential_ref, request_id=request_id, now=self._clock()
         )
         report = self._discovery.discover(
-            lease, provider_hint=provider_hint, custom_base_url=base_url
+            lease,
+            provider_hint=provider_hint,
+            custom_base_url=base_url,
+            gateway_headers=gateway_headers,
         )
         if report.status == STATUS_DISCOVERED and report.provider_id is not None:
             self._session_credentials.bind_discovered_provider(credential_ref, report.provider_id)
@@ -411,7 +421,11 @@ class ConsoleSessionManager:
         model_identifier = _required_string(payload, "model_identifier")
         with self._lock:
             report = self._reports.get(credential_ref)
-            cache_key = f"{credential_ref}\n{model_identifier}"
+            # The selection cache key includes the discovery report's gateway
+            # header identity: re-discovering the same provider with different
+            # non-secret header placement must NOT replay a cached selection
+            # built for the previous placement.
+            cache_key = f"{credential_ref}\n{model_identifier}\n{_gateway_headers_token(report)}"
             cached = self._selections.get(cache_key)
         if report is None or report.status != STATUS_DISCOVERED:
             raise SessionConsoleError(
@@ -457,6 +471,7 @@ class ConsoleSessionManager:
         provider_id = report.provider_id or ""
         interface = descriptor.interface()
         identity = self._session_credentials.current_identity(credential_ref)
+        gateway_headers = report.gateway_headers or {}
         h16 = hash_document(
             {
                 "provider": provider_id,
@@ -464,6 +479,7 @@ class ConsoleSessionManager:
                 "endpoint": endpoint,
                 "credential_ref": credential_ref,
                 "adapter_kind": descriptor.adapter_kind,
+                "gateway_headers": gateway_headers,
             }
         )[:16].upper()
         target_id = f"ECP-TARGET-SESSION-{h16}"
@@ -488,6 +504,9 @@ class ConsoleSessionManager:
             endpoint=endpoint,
             provider=provider_id,
             adapter_id=adapter_id,
+            token_header=gateway_headers.get("token_header"),
+            bearer_value=gateway_headers.get("bearer_value"),
+            extra_headers=gateway_headers.get("extra_headers"),
         )
 
         target_document = {
@@ -577,6 +596,57 @@ def _optional_string(payload: Mapping[str, Any], key: str) -> "str | None":
     if not isinstance(value, str) or not value.strip():
         raise SessionConsoleError(f"{key} must be a non-empty string or null")
     return value
+
+
+def _extract_gateway_headers(
+    payload: Mapping[str, Any],
+) -> "tuple[str | None, str | None, dict[str, str]] | None":
+    """Extract and validate the optional non-secret gateway header knobs.
+
+    The browser may declare, for an owner-supplied custom endpoint, how the
+    gateway expects the credential to be placed: ``token_header`` (header
+    name carrying the released lease), ``bearer_value`` (non-secret literal
+    for the Authorization header) and ``extra_headers`` (static non-secret
+    routing headers). All three are CONFIGURATION, never secrets: the
+    credential value itself continues to flow only through the credential
+    gateway's release path. Anything invalid is a deterministic failure.
+    """
+    if "gateway_headers" not in payload:
+        return None
+    raw = payload.get("gateway_headers")
+    if raw is None:
+        return None
+    if not isinstance(raw, Mapping):
+        raise SessionConsoleError(
+            "gateway_headers must be an object of non-secret header configuration"
+        )
+    unknown = sorted(set(map(str, raw)) - {"token_header", "bearer_value", "extra_headers"})
+    if unknown:
+        raise SessionConsoleError(
+            "gateway_headers carries unknown keys: " + ", ".join(unknown)
+        )
+    token_header = raw.get("token_header")
+    bearer_value = raw.get("bearer_value")
+    extra_headers = raw.get("extra_headers")
+    if extra_headers is not None and not isinstance(extra_headers, Mapping):
+        raise SessionConsoleError("gateway_headers extra_headers must be an object")
+    for name, value in (extra_headers or {}).items():
+        if not isinstance(value, str):
+            raise SessionConsoleError(
+                "gateway_headers extra_headers values must be non-secret strings"
+            )
+    try:
+        return normalize_gateway_headers(token_header, bearer_value, extra_headers)
+    except ValueError as exc:
+        raise SessionConsoleError(f"gateway_headers is invalid: {exc}") from None
+
+
+def _gateway_headers_token(report: "DiscoveryReport | None") -> str:
+    """Stable cache-token of a report's non-secret gateway header identity."""
+    if report is None or report.gateway_headers is None:
+        return ""
+    headers = report.gateway_headers
+    return json.dumps(headers, sort_keys=True, separators=(",", ":"))
 
 
 def _redact_document(document: Any, redactor: SecretRedactionFilter) -> Any:
