@@ -23,6 +23,11 @@ Usage:
     python run_m3_elr_console.py --verify-only                     # wiring proof
     python run_m3_elr_console.py --evidence-root DIR               # override
 
+Case-area resolution (portable, owner-side): --case-area DIR, else the
+ECP_CASE_AREA environment variable, else a sibling 'ecp-ca0v1' directory
+next to the repository checkout, else the executor-sandbox default
+/home/z/ecp-ca0v1.
+
 Boundaries enforced here:
 * the model input is ONLY the registered case presentation
   (RegisteredCaseArtifact — sole prompt authority; no client prompt exists);
@@ -82,6 +87,29 @@ from ecp.runtime_adapters import OpenRouterChatCompletionsAdapter  # noqa: E402
 PACKAGE_PATH = REPO / "registration" / "M3-ELR-REGISTRATION-V1.json"
 DEFAULT_EVIDENCE_ROOT = Path("/home/z/ecp-m3-elr-evidence")
 
+#: Executor-sandbox private qualification area (recovered byte-exact). Only
+#: used as the LAST resolution step; the sibling/env resolutions above make
+#: the launcher portable to the owner's machine.
+SANDBOX_CASE_AREA = "/home/z/ecp-ca0v1"
+
+
+def _resolve_case_area(explicit: "str | None") -> Path:
+    """Resolve the private qualification area (never inside the repository).
+
+    Order: explicit --case-area, then ECP_CASE_AREA, then a sibling
+    'ecp-ca0v1' directory next to the repository checkout (the documented
+    owner-side placement), then the executor-sandbox default.
+    """
+    if explicit:
+        return Path(explicit)
+    env_area = os.environ.get("ECP_CASE_AREA", "").strip()
+    if env_area:
+        return Path(env_area)
+    sibling = REPO.parent / "ecp-ca0v1"
+    if sibling.is_dir():
+        return sibling
+    return Path(SANDBOX_CASE_AREA)
+
 
 def _iso() -> str:
     from datetime import datetime, timezone
@@ -94,10 +122,23 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="M3-ELR scientific execution console (registered surface)")
     parser.add_argument("--verify-only", action="store_true", help="prove the wiring without any credential or call")
     parser.add_argument("--evidence-root", default=str(DEFAULT_EVIDENCE_ROOT), help="evidence persistence root (outside the repository)")
-    parser.add_argument("--case-area", default="/home/z/ecp-ca0v1", help="private qualification area")
+    parser.add_argument("--case-area", default=None,
+                        help="private qualification area (default: ECP_CASE_AREA env, else sibling 'ecp-ca0v1' "
+                             "next to the repository, else the executor-sandbox default)")
     args = parser.parse_args()
 
     print("=== M3-ELR SCIENTIFIC EXECUTION CONSOLE (registered surface) ===")
+    case_area = _resolve_case_area(args.case_area)
+    if not (case_area / "qualification" / "candidates").is_dir():
+        print(f"FATAL: the private qualification case area was not found at {case_area}.")
+        print("The 30 registered case artifacts are private scientific instruments: they are")
+        print("delivered OUTSIDE the repository and are never committed/pushed. Fix ONE of:")
+        print("  1. unzip the delivered 'ecp-ca0v1' archive as a SIBLING of the repo")
+        print("     (e.g. .../Documents/GitHub/ecp-ca0v1 next to .../Documents/GitHub/ECP);")
+        print("  2. set the environment variable ECP_CASE_AREA to the ecp-ca0v1 path;")
+        print("  3. pass --case-area <path-to-ecp-ca0v1>.")
+        return 1
+    print(f"case area   : {case_area} (private, outside the repository)")
     package = load_verified_package(PACKAGE_PATH)
     package_hash = package["package_hash"]
     print(f"package      : {package['package_id']} (hash {package_hash[:16]}… verified)")
@@ -105,13 +146,13 @@ def main() -> int:
     manifest = load_json(REPO / "provenance" / "m3-population-namespace-manifest.json")
     manifest_index = candidate_manifest_index(manifest, POPULATION_ID)
 
-    artifacts = load_registered_cases(package, case_area=args.case_area, manifest_index=manifest_index)
-    contents = load_case_contents(package, case_area=args.case_area)
+    artifacts = load_registered_cases(package, case_area=case_area, manifest_index=manifest_index)
+    contents = load_case_contents(package, case_area=case_area)
     ordered_test_ids = package["ordered_test_ids"]
     print(f"cases        : {len(artifacts)} registered, four-surface verified")
     print(f"order        : F-01b frozen ({ordered_test_ids[0]} … {ordered_test_ids[-1]})")
 
-    gate = run_readiness_gate(repo=REPO, package_path=PACKAGE_PATH, case_area=args.case_area)
+    gate = run_readiness_gate(repo=REPO, package_path=PACKAGE_PATH, case_area=case_area)
     print(f"§22 gate     : {gate['summary']['pass']} PASS / {gate['summary']['pending']} PENDING / {gate['summary']['fail']} FAIL")
     for check in gate["checks"]:
         if check["status"] == "FAIL":

@@ -22,9 +22,29 @@ python run_m3_elr_browser_console.py [--evidence-root DIR] [--case-area DIR]
                                      [--gateway-port 8765] [--console-port 8766]
 ```
 
+### The private case area (required once, owner-side)
+
+The 30 registered case artifacts are private scientific instruments: they
+live OUTSIDE the repository (never committed, never pushed) and must exist
+on the machine that runs the campaign. Resolution order:
+
+1. explicit `--case-area DIR`;
+2. the `ECP_CASE_AREA` environment variable;
+3. a sibling `ecp-ca0v1` directory next to the repository checkout — the
+   documented owner-side placement (e.g.
+   `…/Documents/GitHub/ecp-ca0v1` next to `…/Documents/GitHub/ECP`);
+4. the executor-sandbox default `/home/z/ecp-ca0v1`.
+
+If none is present the launcher fail-closes at boot with these same
+instructions. The launcher prints the resolved case area at boot, and the
+four-surface hash verification proves the delivered bytes are exactly the
+frozen `ECP-PKG-M3-ELR-V1` material wherever it runs.
+
 1. The launcher fail-closes at boot unless the frozen registration package
    verifies (identity + hash), the 30 registered cases verify on all four
-   surfaces, and the §22 readiness gate has zero FAIL checks.
+   surfaces, and the §22 readiness gate has zero FAIL checks. Keep the
+   checkout synchronized (`git pull`) before launching — the gate includes
+   a delivery-sync check (HEAD == origin/main).
 2. Open `http://127.0.0.1:8766/` in the browser and PAIR with the code the
    launcher prints (short-lived, held in gateway memory only).
 3. Paste the OpenRouter credential and press OPEN CREDENTIAL SESSION — the
