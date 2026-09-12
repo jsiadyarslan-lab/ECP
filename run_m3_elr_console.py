@@ -84,7 +84,7 @@ from ecp.runtime_adapters import (  # noqa: E402
 PACKAGE_PATH = REPO / "registration" / "M3-ELR-REGISTRATION-V1.json"
 OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
 SCIENTIFIC_PURPOSE = "conformance-evaluation"  # the universal execution fabric's evaluation purpose (session scope)
-ADAPTER_REGISTRY_KEY = "m3-elr-openrouter-chat-completions"
+ADAPTER_REGISTRY_KEY = "ECP-ADAPTER-OPENROUTER-CHAT-COMPLETIONS"
 DEFAULT_EVIDENCE_ROOT = Path("/home/z/ecp-m3-elr-evidence")
 
 
