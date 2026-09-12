@@ -1,0 +1,139 @@
+{
+ "ecp_object": "sre-v1-preregistration-statistical-parameters",
+ "schema_version": "1.0.0",
+ "registration": {
+  "study": "SCIENTIFIC REASONING EVALUATION v1 (SRE-v1)",
+  "registered_by_order": "SRE-v1 STATISTICAL NULL MODEL RECONCILIATION & PRE-REGISTRATION CLOSURE v1 (2026-09-12)",
+  "design_baseline_commit": "5fc90484f1fc4b7fa0cf21a92b41274414c24d24",
+  "design_phase_source_artifact": {
+   "path": "SCIENTIFIC-REASONING-EVALUATION-v1-PREREGISTRATION.json (external design package, order SRE-v1 v4)",
+   "sha256": "0cd5bea53c72dff2f7c49e10fd79874cd28ac16982d1b28370719f02f0002d30"
+  },
+  "status": "FROZEN — preregistration-locked; amendments require the formal procedure of SRE-V1-PREREGISTRATION-STATISTICAL-SECTION.md §5",
+  "supersedes_at_this_namespace": "scientific/sre-v1/power/power-analysis.json (sha256 330aa46e2283c46227972c4f41c23636d08c620bc045787d092d44426465e693) — NON-AUTHORITATIVE / NOT PREREGISTERED / NOT USED FOR SCIENTIFIC DESIGN (owner decision D3); never tracked in any commit; values not adopted"
+ },
+ "frozen_fields": {
+  "primary_endpoint": {
+   "statistic": "X = number of successes among the N_obs valid executions",
+   "per_case_success_criterion": "declared final answer in {YES, NO, CANNOT-BE-DETERMINED} matching the preregistered key class AND explicit citation of at least one premise (premise index or verbatim fragment of >= 5 consecutive words); mechanical and auditor-replayable"
+  },
+  "null_model": {
+   "scientific_null": "the evaluated system does not exceed the content-blind rate on the key-balanced frozen set",
+   "statistical_null": "H0: theta_i = 1/3 for every frozen case i",
+   "null_mechanism": "content-blind answering under the sealed key lottery of the key-balanced (3/3/3) ternary answer space",
+   "null_distribution": "X ~ Binomial(N_obs, p0)"
+  },
+  "p0": {
+   "value": "1/3",
+   "derivation": "strategy-proof balanced-ternary construction: keys 3/3/3 make every content-blind strategy (constant, position-keyed, mixed) score exactly 1/3 in expectation; verified exhaustively (constant strategies; 1,680-permutation exact averages; 19,683-vector analytic coverage; 231-point mixed grid)"
+  },
+  "p1_design_target": {
+   "value": "0.80",
+   "derivation": "capable-system blend over frozen difficulty mix (1 SHALLOW x 0.95 + 7 MEDIUM x 0.80 + 1 DEEP x 0.50)/9 = 0.7833 -> nearest conventional capability bar 0.80; corroborated by the 4-of-5 mastery convention",
+   "note": "numerically coincides with the non-authoritative file's value; independently derived (inputs: frozen-set difficulty composition, mastery convention), not adopted"
+  },
+  "N": {
+   "value": 9,
+   "derivation": "minimum admissible N meeting target power under the frozen exact rule; admissible domain N % 3 == 0 (key-balance structural constraint frozen BEFORE the search); N=3 (power 0.512) and N=6 (0.655) fail; N=9 reaches 0.914358; unconstrained minimum N=7 inadmissible (key balance impossible)",
+   "robustness": "N*=9 unchanged for p1 in [0.75, 0.85] and for target power 0.80 or 0.90"
+  },
+  "threshold": {
+   "k_star_at_9": 6,
+   "k_star_at_8_degraded_null": 6,
+   "degraded_null_p0_miss": "3/8",
+   "definition": "k*(n) = min{k : P(Bin(n, p0) >= k) < alpha}"
+  },
+  "alpha": {
+   "value": "0.05",
+   "sides": 1,
+   "direction": "upper",
+   "actual_size": "835/19683 = 0.042423",
+   "derivation": "one-sided directional-superiority convention for the capability claim; exact-test conservatism disclosed",
+   "note": "numerically coincides with the non-authoritative file's alpha; independently derived, not adopted"
+  },
+  "power": {
+   "target": "0.80",
+   "achieved": "P(Bin(9, 4/5) >= 6) = 1785856/1953125 = 0.914358",
+   "computed_for": "the exact proposed decision rule itself (not a surrogate)",
+   "derivation_of_target": "confirmatory convention beta:alpha = 4:1; primary risk = false capability claim"
+  },
+  "effect_size": {
+   "estimand": "theta_bar = mean per-case success probability of the single frozen evaluated system over the 9-case frozen universe",
+   "scope": "finite enumerated universe; no cross-system generalization; no case-population inference beyond the frozen enumeration",
+   "primary_measure": "X/N_obs with one-sided 95% Clopper-Pearson lower bound",
+   "secondary_descriptive_contrast": "X/N_obs - p0",
+   "rejected": ["risk ratio (primary)", "odds ratio (primary)", "theta_min NOT-SUPPORTED region (unregistered second decision surface)"]
+  },
+  "test": {
+   "method": "exact one-sided binomial test (survival function of Bin(N_obs, p0))",
+   "rejection_criterion": "X >= k*(N_obs)",
+   "decision_surfaces": 1,
+   "cp_equivalence": "reject iff one-sided 95% Clopper-Pearson lower bound on X/N_obs > p0 (identity verified for all x, n in {8,9})"
+  },
+  "ci_method": {
+   "decision_bound": "one-sided 95% Clopper-Pearson lower bound on X/N_obs",
+   "descriptive_interval": "two-sided 90% Clopper-Pearson interval (identical lower bound; never re-interpreted as two-sided 95%)",
+   "estimator": "X/N_obs",
+   "boundary_handling": "X=0 -> lower bound 0; X=N_obs -> upper bound 1 (standard Beta form)"
+  },
+  "multiplicity_rule": {
+   "primary_endpoints": 1,
+   "secondary_endpoints": 0,
+   "exploratory_endpoints": 0,
+   "descriptive_only": ["two-sided 90% CP interval", "per-case outcome table", "family x outcome cross-tab", "difficulty x outcome cross-tab", "void/missing infrastructure rates"],
+   "correction": "none required (single primary endpoint)",
+   "prohibitions": "no post-hoc promotion; no alpha reallocation"
+  },
+  "decision_rule": {
+   "supported": "N_obs >= 8 AND X >= k*(N_obs)",
+   "not_supported": "N_obs >= 8 AND X < k*(N_obs)",
+   "inconclusive": "N_obs <= 7 -> INCONCLUSIVE — PROTOCOL FAILURE (no capability verdict; full re-run requires a new owner order)"
+  },
+  "unit_of_analysis": {
+   "primary_observational_unit": "one case execution",
+   "primary_statistical_unit": "one case execution (the Bernoulli trial entering X)",
+   "independent_replicate": "a case execution under the frozen sealed-context protocol",
+   "n_inflation_forbidden": "execution logs, intermediate steps, evidence records, audit records, and derivation steps are never counted as observations"
+  },
+  "data_integrity_rules": {
+   "valid_failure": "captured response with unparseable/non-conforming declared answer = VALID observation, outcome FAILURE, never void, never re-executed",
+   "void_execution": "no captured model response (transport error / pre-token timeout / adapter crash) = VOID, infrastructure, not an observation",
+   "retry_policy": "exactly ONE re-execution per VOID case under the identical frozen DEME configuration; no rerun of any captured-response execution",
+   "missing_case": "retry also VOID -> MISSING; N_obs = 9 - #missing",
+   "one_missing_recompute": "N_obs=8: p0_miss = 3/8, k*(8) = 6, power 0.796918",
+   "floor": "N_obs <= 7 -> INCONCLUSIVE — PROTOCOL FAILURE",
+   "no_outcome_based_selection": "voids are infrastructure-caused only; missingness never triggered by response content"
+  },
+  "stopping_rule": "fixed N = 9; no interim analyses; no early stopping for outcomes; terminal when all 9 cases hold status success | failure | missing"
+ },
+ "frozen_case_set": [
+  {"id": "ECP-CAND-000101", "key_class": "YES", "family": "transitive-relational", "difficulty": "MEDIUM", "gt_class": "DERIVABLE", "content_hash": "28562c5ca5bedc911f7a124e7ca31103703c5ae27df401e1c0672cf5a275ecd9", "source_case_id": "N-001"},
+  {"id": "ECP-CAND-000102", "key_class": "CANNOT-DETERMINE", "family": "transitive-relational", "difficulty": "SHALLOW", "gt_class": "INDETERMINATE", "content_hash": "17fcf09cd9826ace859e4349fd46479417258022f9a87d180167b5a4d891d2bf", "source_case_id": "N-002"},
+  {"id": "ECP-CAND-000106", "key_class": "YES", "family": "conditional-chaining", "difficulty": "MEDIUM", "gt_class": "DERIVABLE", "content_hash": "8cfe7c6489de605965156ecdec479179a1a6bd4ae49094ed1fef3a1dc61484fb", "source_case_id": "N-006"},
+  {"id": "ECP-CAND-000107", "key_class": "NO", "family": "conditional-chaining", "difficulty": "MEDIUM", "gt_class": "CONTRADICTED", "content_hash": "6b039d54864235b7cf19c4c98f4aa31a17e6704561ba3b66ff2a351678a63bc1", "source_case_id": "N-007"},
+  {"id": "ECP-CAND-000116", "key_class": "NO", "family": "relational-discrimination", "difficulty": "MEDIUM", "gt_class": "CONTRADICTED", "content_hash": "f9db2a4eb8734761b76ff5cc6efe3f52a675dc33588b26aef032e83c6104ecb9", "source_case_id": "N-016"},
+  {"id": "ECP-CAND-000117", "key_class": "YES", "family": "relational-discrimination", "difficulty": "MEDIUM", "gt_class": "DERIVABLE", "content_hash": "dd267e6df60e4b492eeff22cd5b5038d042934132c28d025b07a97a802b7017c", "source_case_id": "N-017"},
+  {"id": "ECP-CAND-000123", "key_class": "CANNOT-DETERMINE", "family": "constraint-quantitative", "difficulty": "MEDIUM", "gt_class": "INDETERMINATE", "content_hash": "99a53a6d194a55fae3d4240f10da81a17b50e2c349c213243699acc2799664d8", "source_case_id": "N-023"},
+  {"id": "ECP-CAND-000128", "key_class": "NO", "family": "default-exception", "difficulty": "MEDIUM", "gt_class": "CONTRADICTED", "content_hash": "043b1fec80836f4d8fd83ef8db4ee0a2779597067b6fb298f07bfa4cb5aa38f9", "source_case_id": "N-028"},
+  {"id": "ECP-CAND-000129", "key_class": "CANNOT-DETERMINE", "family": "default-exception", "difficulty": "DEEP", "gt_class": "INDETERMINATE", "content_hash": "35cd41b5cb29e30e42aa5533705092cefed7b65947e90d0a8206b4ee20df9199", "source_case_id": "N-029"}
+ ],
+ "prohibited_after_outcomes": [
+  "changing N after seeing outcomes",
+  "changing p0 after seeing outcomes",
+  "changing alpha after seeing outcomes",
+  "switching one-sided/two-sided after seeing outcomes",
+  "switching CI method after seeing outcomes",
+  "changing primary endpoint after seeing outcomes",
+  "removing failed cases",
+  "reclassifying failed cases to improve power",
+  "selective reruns",
+  "outcome-driven case exclusion"
+ ],
+ "scientific_execution_lock": {
+  "scientific_cases_executed": "NO",
+  "providers_called": "NO",
+  "models_called": "NO",
+  "experimental_outcomes_collected": "NO",
+  "note": "execution requires a separate owner order; the DEME configuration must be frozen and sealed before the first case execution"
+ }
+}
