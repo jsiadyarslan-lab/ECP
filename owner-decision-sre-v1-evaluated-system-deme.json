@@ -1,0 +1,372 @@
+{
+  "ecp_object": "OWNER-DECISION — SRE-V1 EVALUATED-SYSTEM & DEME ESTABLISHMENT",
+  "decision_id": "OWNER-DECISION-SRE-V1-EVALUATED-SYSTEM-DEME-V1",
+  "decision_version": 1,
+  "decision_timestamp": "2026-09-12T15:29:29Z",
+  "recorded_by_order": "ECP — EVALUATED SYSTEM & DEME ESTABLISHMENT / FORMAL REGISTRATION v1 (owner message 2026-09-12)",
+  "repository": "jsiadyarslan-lab/ECP",
+  "branch": "main",
+  "baseline_commit": "5c14d2a5ed5d8a7884b474ac428c226d2a15bbac",
+  "decision_authority": "Owner Decision Gate; recorded under the authorized EVALUATED SYSTEM & DEME ESTABLISHMENT / FORMAL REGISTRATION v1 order (DESIGN / REGISTRATION ONLY)",
+  "current_status": "OWNER DECISION REQUIRED",
+  "gate_status": "OPEN — awaiting the owner's evaluated-system + condition + DEME declaration",
+  "purpose": "Close the scientific blocker recorded by the predecessor order (BLOCKED — DEME NOT ESTABLISHABLE) the only lawful way it can be closed: by registering a formal Owner Decision Gate that specifies every field the owner must declare to establish the SRE-v1 evaluated system and its DEME. No evaluated-system identity, evaluation condition, or DEME value is invented anywhere in this artifact.",
+  "predecessor_orders": [
+    {
+      "order": "SRE-v1 DEME FREEZE & REGISTERED N=9 SCIENTIFIC EXECUTION — EXECUTION ORDER v1",
+      "verdict": "EXECUTION BLOCKED at the DEME freeze gate (external design package 0cd5bea5… absent; no in-repo record names the evaluated system/condition)"
+    },
+    {
+      "order": "ECP — DEME RECONCILIATION & FORMAL REGISTRATION v1",
+      "verdict": "BLOCKED — DEME NOT ESTABLISHABLE (CASE C: no authoritative source combination establishes any DEME field)"
+    }
+  ],
+  "authoritative_source_search": {
+    "priority_1_repository": {
+      "searched": [
+        "scientific/sre-v1/ (all five frozen statistical artifacts, full text)",
+        "registration/ (M3-NATIVE-REGISTRATION-SET — a different 3-case universe, execution_status NOT_EXECUTED; registers cases, not any evaluated system)",
+        "evaluation/ (RESERVED-EMPTY: no evaluation defined, registered, started or completed)",
+        "spec/ECP-SPEC.md + docs/M3-CHARTER.md + provenance/ namespace manifests (contract-level hierarchy only: Evaluation -> System -> Case -> Execution -> Evidence; provider neutrality; no instantiated System object)",
+        "ECP-IDENTITY.json (protocol identity only — ECP is evaluation infrastructure, never the evaluated system)",
+        "owner-decision-external-system-availability.json + esv-system-discovery-record.json + esv-provisioning-readiness-record.json (ESV-G0 governance: NONE_ELIGIBLE for all four external candidates; next_path_authorized_now=false)",
+        "local-browser-artifacts/external-executions/ (6 console sessions, all case_id=null — conformance/integration probes)",
+        "mechanical full-text searches: DEME, NATIVE_REASONING_V1, MODEL-DISABLED/MODEL_DISABLED, reasoning operators, ECP-SYSTEM-, JARVIS"
+      ],
+      "deferral_evidence": [
+        {
+          "source": "scientific/sre-v1/SRE-V1-PREREGISTRATION-STATISTICAL-SECTION.md §1",
+          "quote": "Execution-phase registration mechanics (DEME declaration and sealing, execution-order machinery) remain subject to a separate owner order, as fixed by the design-phase order v4 §20."
+        },
+        {
+          "source": "scientific/sre-v1/SRE-V1-PREREGISTRATION-STATISTICAL-SECTION.md §6",
+          "quote": "The evaluated system's DEME configuration must be frozen and sealed BEFORE the first case execution of the execution phase; the execution-phase artifact set must reference this registration by its commit and hashes."
+        },
+        {
+          "source": "scientific/sre-v1/SRE-V1-NULL-MODEL-SPECIFICATION.md §2.1",
+          "quote": "The evaluated SRE-v1 system (a single frozen DEME configuration, to be sealed at the execution phase prior to any case execution)…"
+        },
+        {
+          "source": "scientific/sre-v1/SRE-V1-STATISTICAL-PARAMETERS.json :: scientific_execution_lock",
+          "quote": "execution requires a separate owner order; the DEME configuration must be frozen and sealed before the first case execution"
+        }
+      ],
+      "mechanical_absence_proofs": {
+        "DEME": "occurs only inside the frozen statistical artifacts (all of which defer sealing to the execution phase)",
+        "NATIVE_REASONING_V1": "absent from the repository",
+        "MODEL-DISABLED / MODEL_DISABLED": "absent from the repository",
+        "reasoning_operators": "TransitiveClosure / ConditionalChaining / HypotheticalConsistency absent from the repository",
+        "registered_ECP_SYSTEM_object": "none exists (schemas and console machinery only)",
+        "evaluation_records": "evaluation/ reserved-empty (boundary-scanned, test-enforced)"
+      }
+    },
+    "priority_2_project_records": {
+      "searched": [
+        "executor worklog (all task records, including both predecessor orders)",
+        "recovered CA0v1 area /home/z/ecp-ca0v1 (source pins and candidate pool — case material only)"
+      ],
+      "finding": "case material and source pins verified; no evaluated-system identity appears in any project record"
+    },
+    "priority_3_external_design_package": {
+      "artifact": "SCIENTIFIC-REASONING-EVALUATION-v1-PREREGISTRATION.json",
+      "expected_sha256": "0cd5bea53c72dff2f7c49e10fd79874cd28ac16982d1b28370719f02f0002d30",
+      "authority_status": "AUTHORITATIVE for the v4 design (reconciliation-matrix sources S1/S2/S5)",
+      "presence": "ABSENT — never tracked in any commit; not found anywhere in the environment (filename search repeated this session)"
+    },
+    "identity_conflicts": "NONE — no candidate evaluated-system identity exists in any authoritative source; there is nothing to reconcile and no conflict to resolve",
+    "determination": "NO AUTHORITATIVE RECORD ESTABLISHES THE SRE-V1 EVALUATED SYSTEM, EVALUATION CONDITION, OR DEME. The frozen statistical registration itself defers the DEME declaration and sealing to a separate owner order. Establishing any of these fields now would require an owner scientific choice. No substitute value was created; this gate records the required decision instead."
+  },
+  "already_established_and_frozen": {
+    "statistical_registration": {
+      "closure_commit": "5c14d2a5ed5d8a7884b474ac428c226d2a15bbac",
+      "design_baseline_commit": "5fc90484f1fc4b7fa0cf21a92b41274414c24d24",
+      "artifacts_sha256": {
+        "SRE-V1-NULL-MODEL-SPECIFICATION.md": "6e75fadf27b0f2a774b48910483229babf7e7961b433d7e5ab264c7b6c07b668",
+        "SRE-V1-STATISTICAL-DESIGN-SPECIFICATION.md": "fcca7a3fb69832c3ec01453c625f5cc46e5d1cd47154898a1f6201a3a04077e7",
+        "SRE-V1-RECONCILIATION-MATRIX.md": "387931285854f3ffa038134c8e3bf53349b584026f6cde9c7c6de5aee3cb81a0",
+        "SRE-V1-PREREGISTRATION-STATISTICAL-SECTION.md": "795893e279b1046d45872d8b9b92d678b3a5f06b2715c7e1a542a4e895b11bc2",
+        "SRE-V1-STATISTICAL-PARAMETERS.json": "db756dc39bff40aa20c8b2f6169ba2298c5ac88f6edb5c2a4f3074bfca5a8fd8"
+      },
+      "frozen_parameters_echo": {
+        "N": 9,
+        "p0": "1/3",
+        "k_star_at_9": 6,
+        "k_star_at_8": 6,
+        "alpha": "0.05 one-sided upper (actual size 835/19683 = 0.042423)",
+        "power_target": "0.80",
+        "power_achieved": "P(Bin(9, 4/5) >= 6) = 1785856/1953125 = 0.914358",
+        "test": "exact one-sided binomial test (survival function of Bin(N_obs, p0))",
+        "ci_decision_bound": "one-sided 95% Clopper-Pearson lower bound on X/N_obs",
+        "frozen_case_count": 9
+      },
+      "verification": "working-tree SHA-256 == committed blobs at HEAD for all five artifacts (re-verified this session, 19/19 checks PASS)"
+    },
+    "frozen_case_set_binding": {
+      "rule": "SRE-v1 uses EXACTLY the 9 frozen cases of SRE-V1-STATISTICAL-PARAMETERS.json::frozen_case_set; no add, delete, replacement, regeneration, rebalancing, or content change is permitted",
+      "binding_verification": "9/9 content hashes re-derived with the repository canonical hashing (ecp.hashing.hash_document over the content sub-object) == embedded == frozen_case_set == provenance/m3-population-namespace-manifest.json candidate_index (four surfaces, this session)",
+      "cases": [
+        {
+          "case_id": "ECP-CAND-000101",
+          "family": "transitive-relational",
+          "difficulty": "MEDIUM",
+          "sealed_gt_key_class": "YES",
+          "gt_class": "DERIVABLE",
+          "content_sha256": "28562c5ca5bedc911f7a124e7ca31103703c5ae27df401e1c0672cf5a275ecd9",
+          "source_case_id": "N-001"
+        },
+        {
+          "case_id": "ECP-CAND-000102",
+          "family": "transitive-relational",
+          "difficulty": "SHALLOW",
+          "sealed_gt_key_class": "CANNOT-DETERMINE",
+          "gt_class": "INDETERMINATE",
+          "content_sha256": "17fcf09cd9826ace859e4349fd46479417258022f9a87d180167b5a4d891d2bf",
+          "source_case_id": "N-002"
+        },
+        {
+          "case_id": "ECP-CAND-000106",
+          "family": "conditional-chaining",
+          "difficulty": "MEDIUM",
+          "sealed_gt_key_class": "YES",
+          "gt_class": "DERIVABLE",
+          "content_sha256": "8cfe7c6489de605965156ecdec479179a1a6bd4ae49094ed1fef3a1dc61484fb",
+          "source_case_id": "N-006"
+        },
+        {
+          "case_id": "ECP-CAND-000107",
+          "family": "conditional-chaining",
+          "difficulty": "MEDIUM",
+          "sealed_gt_key_class": "NO",
+          "gt_class": "CONTRADICTED",
+          "content_sha256": "6b039d54864235b7cf19c4c98f4aa31a17e6704561ba3b66ff2a351678a63bc1",
+          "source_case_id": "N-007"
+        },
+        {
+          "case_id": "ECP-CAND-000116",
+          "family": "relational-discrimination",
+          "difficulty": "MEDIUM",
+          "sealed_gt_key_class": "NO",
+          "gt_class": "CONTRADICTED",
+          "content_sha256": "f9db2a4eb8734761b76ff5cc6efe3f52a675dc33588b26aef032e83c6104ecb9",
+          "source_case_id": "N-016"
+        },
+        {
+          "case_id": "ECP-CAND-000117",
+          "family": "relational-discrimination",
+          "difficulty": "MEDIUM",
+          "sealed_gt_key_class": "YES",
+          "gt_class": "DERIVABLE",
+          "content_sha256": "dd267e6df60e4b492eeff22cd5b5038d042934132c28d025b07a97a802b7017c",
+          "source_case_id": "N-017"
+        },
+        {
+          "case_id": "ECP-CAND-000123",
+          "family": "constraint-quantitative",
+          "difficulty": "MEDIUM",
+          "sealed_gt_key_class": "CANNOT-DETERMINE",
+          "gt_class": "INDETERMINATE",
+          "content_sha256": "99a53a6d194a55fae3d4240f10da81a17b50e2c349c213243699acc2799664d8",
+          "source_case_id": "N-023"
+        },
+        {
+          "case_id": "ECP-CAND-000128",
+          "family": "default-exception",
+          "difficulty": "MEDIUM",
+          "sealed_gt_key_class": "NO",
+          "gt_class": "CONTRADICTED",
+          "content_sha256": "043b1fec80836f4d8fd83ef8db4ee0a2779597067b6fb298f07bfa4cb5aa38f9",
+          "source_case_id": "N-028"
+        },
+        {
+          "case_id": "ECP-CAND-000129",
+          "family": "default-exception",
+          "difficulty": "DEEP",
+          "sealed_gt_key_class": "CANNOT-DETERMINE",
+          "gt_class": "INDETERMINATE",
+          "content_sha256": "35cd41b5cb29e30e42aa5533705092cefed7b65947e90d0a8206b4ee20df9199",
+          "source_case_id": "N-029"
+        }
+      ]
+    },
+    "ground_truth_binding": {
+      "rule": "the per-case sealed key class is the frozen ground truth of the answer lottery; the key balance 3/3/3 is preregistered public structure; GT classes (DERIVABLE / INDETERMINATE / CONTRADICTED) are registered as listed above; Ground Truth may NOT be modified in this phase",
+      "scoring_contract": "per_case_success_criterion (frozen): declared final answer in {YES, NO, CANNOT-BE-DETERMINED} matching the preregistered key class AND explicit citation of at least one premise (premise index or verbatim fragment of >= 5 consecutive words); mechanical and auditor-replayable from the raw response payload alone",
+      "source_pins_per_governance_records": {
+        "candidate_set_document_sha256": "8144818cc37f0aa8b41d99f4a3cfacb5d5082aa1a97170fd1f61c4f86b0f425d",
+        "provenance_sidecar_sha256": "0f4e2318a1a086aae87fcd792b64920463c70f53887e7d9138f40c3f14579e80",
+        "intake_report_sha256": "fc8a35320c2a54e9cb9bafbd3fe971fc7b29c2748bd04fa3fdb4ccc16d2077a4"
+      },
+      "chain_status": "frozen case -> sealed GT is verified (9/9, hash-bound); the DEME -> frozen-case link activates only when the owner declaration closes this gate"
+    },
+    "console_reconciliation": {
+      "classification_rule": "console sessions are conformance / integration probes; they are NEVER SRE-v1 scientific results; ECP-CONFORMANCE-OK and OpenRouter connectivity are NOT evidence of SRE-v1 scientific readiness",
+      "observed_sessions_all_case_id_null": [
+        {
+          "evaluation_id": "ECP-EVAL-DEMO-OFFLINE-1 (x3)",
+          "model": "offline-demo-model-1",
+          "classification": "CONFORMANCE DEMO / NON-SCIENTIFIC"
+        },
+        {
+          "evaluation_id": "ECP-EVAL-REE-ZAI-GATEWAY-1",
+          "model": "glm-4-plus",
+          "classification": "gateway session probe / NON-SCIENTIFIC"
+        },
+        {
+          "evaluation_id": "ECP-EVAL-SESSION-FB1AD54C03A6C079",
+          "model": "inclusionai/ling-3.0-flash-sante:free",
+          "classification": "session probe / NON-SCIENTIFIC"
+        },
+        {
+          "evaluation_id": "ECP-INTEGRATION-EVALUATION-OPENROUTER",
+          "model": "n/a (honest 401 on synthetic credential)",
+          "classification": "integration probe / NON-SCIENTIFIC"
+        }
+      ],
+      "sre_v1_scientific_executions_recorded": 0
+    }
+  },
+  "owner_decision_required": {
+    "gate_id": "SRE-V1-EVALUATED-SYSTEM-DEME-GATE-V1",
+    "statement": "The owner must declare the evaluated system, the evaluation condition, and the complete DEME contract. No field below may be filled by inference, availability, or convenience. Unfilled substantive fields keep this gate OPEN; the gate closes only by a complete owner declaration recorded as an explicit amendment to this artifact (append-only; fresh hash; cross-reference).",
+    "evaluated_system_declaration": {
+      "required_fields": {
+        "system_id": "REQUIRED — unique registered system identifier (ECP-SYSTEM-… namespace per spec/ECP-SPEC.md object hierarchy)",
+        "official_name": "REQUIRED — official name of the evaluated system",
+        "system_type": "REQUIRED — e.g. model-only / model+tools / agent framework / self-hosted system / gateway-mediated system",
+        "runtime_deployment_identity": "REQUIRED — runtime and deployment identity (region, container digest, package/version snapshot, or equivalent reproducible identity)",
+        "provider": "provider organization, or explicit NOT_APPLICABLE",
+        "model_identifier": "exact model identifier, or explicit NOT_APPLICABLE — a model ID alone is NEVER a complete system identity (OWNER-DECISION-ESV-AVAILABILITY-V1 prohibition)",
+        "system_level_configuration": "REQUIRED — all generation / safety / system / sampling / context / runtime parameters frozen before eligibility",
+        "tool_state": "REQUIRED — tool list, schemas, permissions, versions, invocation policy; or explicit NOT_APPLICABLE (no tools)",
+        "retrieval_state": "REQUIRED — retrieval indexes, corpora, external services, network policy, snapshots; or explicit NOT_APPLICABLE (disabled)",
+        "adapters_gateways": "REQUIRED — any adapter or gateway inside the evaluated-system boundary, or explicit NOT_APPLICABLE"
+      },
+      "constraints": [
+        "the identity must distinguish the complete versioned system configuration, not merely the model name (SRE-V1-NULL-MODEL-SPECIFICATION.md §11; M3 versioned-system-configuration requirement)",
+        "the ESV eligibility standard is UNCHANGED (identity / execution / evidence / attribution / integrity / independence — esv-provisioning-readiness-record.json)",
+        "JARVIS, OpenRouter, offline-demo-model-1, google/gemma-4-31b-it:free, and any console-discovered model are NOT registered evaluated systems; technical availability is not eligibility",
+        "ECP is the evaluation infrastructure and is NEVER the evaluated system"
+      ]
+    },
+    "evaluation_condition_declaration": {
+      "required_fields": {
+        "condition_id": "REQUIRED",
+        "deme_identifier": "REQUIRED — the DEME identifier this condition defines",
+        "model_state": "REQUIRED — a registered value (e.g. MODEL-ENABLED or MODEL-DISABLED or another explicitly registered value); MODEL-DISABLED must block model-mediated reasoning / retrieval / ranking / embedding / transformation / hidden fallback — not merely API calls",
+        "exact_operating_condition": "REQUIRED",
+        "allowed_usage": "REQUIRED — what the system is permitted to use",
+        "forbidden_usage": "REQUIRED — what the system is prohibited from using",
+        "tools": "REQUIRED — ALLOWED or FORBIDDEN, with specification",
+        "retrieval": "REQUIRED — ALLOWED or FORBIDDEN, with specification",
+        "memory": "REQUIRED — ALLOWED or FORBIDDEN, with specification",
+        "other_constraints": "REQUIRED — any further condition-defining constraint, or explicit NONE"
+      }
+    },
+    "deme_contract_required_fields": {
+      "fields": [
+        "DEME_ID",
+        "SYSTEM_ID",
+        "CONDITION_ID",
+        "MODEL_STATE",
+        "PROVIDER",
+        "RUNTIME",
+        "TOOLS",
+        "RETRIEVAL",
+        "MEMORY",
+        "SYSTEM_PROMPT_CONTROL_CONTEXT",
+        "INPUT_CHANNEL",
+        "OUTPUT_CHANNEL",
+        "EVIDENCE_CAPTURE",
+        "AUDIT_CAPTURE",
+        "EXECUTION_BOUNDARY"
+      ],
+      "rules": [
+        "each field receives an owner-sourced value or an explicit NOT_APPLICABLE",
+        "any substantive field left unknown => BLOCKED — DEME INCOMPLETE (no guessing)",
+        "the completed DEME must answer unambiguously: what exactly is tested, under which operating condition, with which boundary, and what is NOT part of the system",
+        "the DEME must be frozen and sealed BEFORE the first case execution and must reference the statistical registration by commit and hashes"
+      ]
+    },
+    "reasoning_path_declaration": {
+      "required": "the reasoning capability evaluated by SRE-v1 must be bound to a reachable, documented reasoning implementation / path INSIDE the evaluated system; the chain SRE-v1 -> DEME -> frozen case -> execution entry point -> reasoning path must be complete and provable",
+      "interface_requirements": [
+        "raw response capture",
+        "reasoning / evidence artifact, if the system provides one",
+        "outcome-relevant evidence",
+        "execution metadata",
+        "audit facts"
+      ],
+      "prohibitions": [
+        "ECP is NOT required to become a reasoning engine",
+        "no new reasoning engine may be built inside ECP to bypass this gate",
+        "if the actual reasoning path is not reachable or documentable => BLOCKED — REASONING PATH NOT BOUND"
+      ]
+    },
+    "binding_completions_required_before_execution": [
+      "evidence/audit path: SYSTEM -> DEME -> CASE -> EXECUTION -> RAW OUTPUT -> EVIDENCE -> SCORING -> OUTCOME must be structurally provable",
+      "execution identity: single frozen system, one execution per case, sealed per-case contexts, no cross-case information channel",
+      "void-retry fidelity: the single permitted VOID re-execution runs under the IDENTICAL frozen DEME configuration",
+      "ground-truth isolation: GT never enters the execution payload, metadata, prompts, environment, adapters, logs, or runtime state"
+    ]
+  },
+  "no_invention_rule": "No evaluated-system identity, evaluation condition, DEME value, model binding, runtime, adapter, or reasoning-path value may be inferred from availability, convenience, console discovery, or any non-authoritative source. Fields without an authoritative owner-sourced value remain OPEN; they are never defaulted.",
+  "prohibitions_preserved": [
+    "no change to N, p0, k*, alpha, test method, CI method, or the frozen 9-case set",
+    "no ground-truth rewriting; no modification of historical results, M1/M2/T1, or historical audits",
+    "no scientific case execution; no provider/model call for SRE-v1; no scoring; no statistical analysis; no outcome extraction",
+    "no DEME modification after any outcome is observed",
+    "do not treat a model ID as a complete system identity",
+    "do not choose a system merely because it is technically available",
+    "no retroactive repair of frozen artifacts (formal amendment path only)"
+  ],
+  "known_discrepancies_recorded_not_repaired": [
+    {
+      "finding": "SRE-V1-NULL-MODEL-SPECIFICATION.md §10 cites the candidate-set-document SHA-256 as 8144818c…99c4a3… while the CA0v1 governance records (evidence matrix + population namespace manifest) and the recovered artifact carry 8144818c…99f4a3… (one hex digit)",
+      "action": "RECORDED ONLY — the frozen artifact is untouched; the only lawful repair is the formal amendment procedure of SRE-V1-PREREGISTRATION-STATISTICAL-SECTION.md §5; no DEME field depends on it; frozen parameters and 9-case identity are unaffected"
+    }
+  ],
+  "scope": "DESIGN / REGISTRATION ONLY",
+  "boundary_checks": {
+    "scientific_cases_executed": 0,
+    "provider_calls_for_scientific_evaluation": 0,
+    "model_calls": 0,
+    "scoring": false,
+    "statistical_analysis": false,
+    "experimental_outcomes_collected": 0,
+    "frozen_artifacts_modified": false,
+    "frozen_cases_modified": false,
+    "ground_truth_modified": false,
+    "historical_records_modified": false
+  },
+  "registration": {
+    "canonicalization": "ECP-CANONICAL-JSON-1.0",
+    "hash_algorithm": "sha256",
+    "registration_hash_definition": "SHA-256 over the canonical JSON serialization of this document with registration_hash removed",
+    "reproducibility": "re-parse the file, canonicalize (ECP-CANONICAL-JSON-1.0), remove registration_hash, re-hash — a byte-identical hash is required",
+    "immutability": "immutable after registration except through an explicit recorded amendment (append-only; a superseding version carries a fresh SHA-256 and a cross-reference to this gate)",
+    "linked_statistical_registration": {
+      "closure_commit": "5c14d2a5ed5d8a7884b474ac428c226d2a15bbac",
+      "artifacts_sha256": {
+        "SRE-V1-NULL-MODEL-SPECIFICATION.md": "6e75fadf27b0f2a774b48910483229babf7e7961b433d7e5ab264c7b6c07b668",
+        "SRE-V1-STATISTICAL-DESIGN-SPECIFICATION.md": "fcca7a3fb69832c3ec01453c625f5cc46e5d1cd47154898a1f6201a3a04077e7",
+        "SRE-V1-RECONCILIATION-MATRIX.md": "387931285854f3ffa038134c8e3bf53349b584026f6cde9c7c6de5aee3cb81a0",
+        "SRE-V1-PREREGISTRATION-STATISTICAL-SECTION.md": "795893e279b1046d45872d8b9b92d678b3a5f06b2715c7e1a542a4e895b11bc2",
+        "SRE-V1-STATISTICAL-PARAMETERS.json": "db756dc39bff40aa20c8b2f6169ba2298c5ac88f6edb5c2a4f3074bfca5a8fd8"
+      }
+    }
+  },
+  "verdict": {
+    "final": "OWNER DECISION REQUIRED",
+    "blocker": "No authoritative source (repository, immutable project records, or external design package) identifies the SRE-v1 evaluated system, evaluation condition, or DEME; the frozen statistical registration explicitly defers the DEME declaration to a separate owner order; establishing any field would require an owner scientific choice",
+    "not_pass_because": [
+      "evaluated-system identity is not authoritatively established",
+      "DEME is not complete (no condition, no contract values)",
+      "reasoning path is not bound to any evaluated system"
+    ],
+    "not_blocked_because": "the system identity is not tentatively known with an inaccessible path — it is entirely undeclared; the missing element is an owner decision, not a repairable defect",
+    "not_fail_because": "no frozen design changed; no case or ground truth modified; zero scientific executions; zero provider/model calls; no identity invented; no probe recorded as a scientific result",
+    "next_authorized_action": "the owner issues the evaluated-system + evaluation-condition + DEME declaration (every required field above) as a registered amendment closing this gate; SRE-v1 scientific execution remains forbidden until a separate execution order"
+  },
+  "protocol_version": "0.7.0",
+  "registration_hash": "461bba57d524d8ec1fc90408b61fb099e787cba9bcfc3f91c3486fa5833ef119"
+}
