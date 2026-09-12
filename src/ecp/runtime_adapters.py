@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from dataclasses import dataclass
 from typing import Any, Callable, Mapping
 from urllib import error as urllib_error
@@ -193,7 +194,30 @@ class GeminiGenerateContentAdapter:
 
 
 class OpenRouterChatCompletionsAdapter:
-    """One controlled OpenRouter Chat Completions API conformance implementation."""
+    """One controlled OpenRouter Chat Completions API conformance implementation.
+
+    The chat-completions HTTP dialect is shared by many OpenAI-compatible
+    gateways. Some of those gateways place the released credential in a
+    provider-specific header (instead of, or alongside, the standard bearer
+    header) and require additional static, non-secret routing headers. To keep
+    ONE protocol implementation for all of them (build once, configure many),
+    the constructor accepts three OPTIONAL, provider-neutral configuration
+    knobs; their values always come from target configuration and never from
+    source code:
+
+    * ``token_header`` — name of the header that carries the credential
+      lease value (e.g. ``"X-Token"``). When ``None`` (default) the lease
+      value is sent as ``Authorization: Bearer <lease>``, exactly the
+      historical contract.
+    * ``bearer_value`` — non-secret literal for the ``Authorization`` header
+      when ``token_header`` is used (some gateways expect a public product
+      marker there). Requires ``token_header``; never accepts the secret.
+    * ``extra_headers`` — additional static, non-secret headers (routing or
+      product markers) merged into the request.
+
+    The secret itself continues to flow ONLY through the credential lease; it
+    is never stored on the adapter and never appears in results or errors.
+    """
 
     provider = "example-provider"
     adapter_id = "example-adapter"
@@ -207,6 +231,9 @@ class OpenRouterChatCompletionsAdapter:
         adapter_id: str = "ECP-ADAPTER-OPENROUTER-CHAT-COMPLETIONS",
         transport: Callable[[str, Mapping[str, str], bytes, float], tuple[int, bytes]] | None = None,
         prompt: str = "ECP controlled conformance probe. Reply with exactly: ECP-CONFORMANCE-OK",
+        token_header: str | None = None,
+        bearer_value: str | None = None,
+        extra_headers: Mapping[str, str] | None = None,
     ) -> None:
         if not model or not endpoint:
             raise ValueError("model and endpoint are required")
@@ -216,6 +243,9 @@ class OpenRouterChatCompletionsAdapter:
         self.adapter_id = adapter_id
         self.prompt = prompt
         self._transport = transport or _post_json
+        self._token_header, self._bearer_value, self._extra_headers = _validate_gateway_headers(
+            token_header, bearer_value, extra_headers
+        )
 
     def execute(self, lease: Any, request: Mapping[str, str]) -> Mapping[str, Any]:
         payload = json.dumps({
@@ -223,7 +253,9 @@ class OpenRouterChatCompletionsAdapter:
             "messages": [{"role": "user", "content": self.prompt}],
             "stream": False,
         }).encode("utf-8")
-        headers = {"Authorization": f"Bearer {lease.value}", "Content-Type": "application/json"}
+        headers = _chat_completions_headers(
+            lease, self._token_header, self._bearer_value, self._extra_headers
+        )
         try:
             status, body = self._transport(self.endpoint, headers, payload, 30.0)
         except (OSError, urllib_error.URLError, TimeoutError) as exc:
@@ -252,6 +284,74 @@ class OpenRouterChatCompletionsAdapter:
             "output_text": output,
             "request_id": request["request_id"],
         }
+
+
+def _validate_gateway_headers(
+    token_header: str | None,
+    bearer_value: str | None,
+    extra_headers: Mapping[str, str] | None,
+) -> "tuple[str | None, str | None, dict[str, str]]":
+    """Validate provider-neutral gateway header configuration.
+
+    Returns the normalized ``(token_header, bearer_value, extra_headers)``
+    triple. Rejects anything that could displace the credential, shadow the
+    transport's own headers, or smuggle an empty value.
+    """
+
+    if token_header is not None and (not isinstance(token_header, str) or not _valid_header_name(token_header)):
+        raise ValueError("token_header must be a valid HTTP header name")
+    if bearer_value is not None:
+        if token_header is None:
+            raise ValueError("bearer_value requires token_header; without it the lease is the bearer credential")
+        if not isinstance(bearer_value, str) or not bearer_value.strip():
+            raise ValueError("bearer_value must be a non-empty non-secret string")
+    normalized_extra: dict[str, str] = {}
+    if extra_headers is not None:
+        if not isinstance(extra_headers, Mapping):
+            raise ValueError("extra_headers must be a mapping of header names to non-secret values")
+        for name, value in extra_headers.items():
+            if not isinstance(name, str) or not _valid_header_name(name):
+                raise ValueError("extra_headers keys must be valid HTTP header names")
+            if not isinstance(value, str) or not value.strip():
+                raise ValueError("extra_headers values must be non-empty non-secret strings")
+            normalized_extra[name] = value
+    reserved = {name.lower() for name in ("Authorization", "Content-Type")}
+    if token_header is not None and token_header.lower() in reserved:
+        raise ValueError("token_header must not shadow the Authorization or Content-Type headers")
+    for name in normalized_extra:
+        if name.lower() in reserved:
+            raise ValueError("extra_headers must not shadow the Authorization or Content-Type headers")
+        if token_header is not None and name.lower() == token_header.lower():
+            raise ValueError("extra_headers must not shadow the configured token_header")
+    return token_header, bearer_value, normalized_extra
+
+
+def _valid_header_name(name: str) -> bool:
+    return bool(re.fullmatch(r"[A-Za-z0-9-]+", name))
+
+
+def _chat_completions_headers(
+    lease: Any,
+    token_header: str | None,
+    bearer_value: str | None,
+    extra_headers: Mapping[str, str],
+) -> dict[str, str]:
+    """Build request headers for the chat-completions dialect.
+
+    Default (``token_header is None``): exactly the historical contract
+    ``Authorization: Bearer <lease>`` plus JSON content type. With a
+    configured ``token_header`` the lease value is placed in that header and
+    the ``Authorization`` header carries the configured non-secret literal.
+    """
+
+    headers: dict[str, str] = {"Content-Type": "application/json"}
+    if token_header is None:
+        headers["Authorization"] = f"Bearer {lease.value}"
+    else:
+        headers["Authorization"] = f"Bearer {bearer_value}"
+        headers[token_header] = lease.value
+    headers.update(extra_headers)
+    return headers
 
 
 def _post_json(endpoint: str, headers: Mapping[str, str], payload: bytes, timeout: float) -> tuple[int, bytes]:

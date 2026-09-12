@@ -160,6 +160,88 @@ def test_openrouter_adapter_maps_provider_failures_safely():
     assert "synthetic-secret" not in str(exc_info.value)
 
 
+# Gateway-header dialect (generic OpenAI-compatible chat-completions gateways)
+
+
+def test_openrouter_adapter_default_contract_is_byte_identical():
+    seen = {}
+
+    def transport(endpoint, headers, payload, timeout):
+        seen["headers"] = dict(headers)
+        return 200, json.dumps({"id": "gen-default", "choices": [{"message": {"content": "ECP-CONFORMANCE-OK"}}]}).encode()
+
+    adapter = OpenRouterChatCompletionsAdapter(model="dialect-model", endpoint="https://gateway.invalid/api/v1/chat/completions", transport=transport)
+    adapter.execute(SecretLease("synthetic-secret", {}), {"request_id": "request-dialect-default"})
+    assert seen["headers"] == {"Authorization": "Bearer synthetic-secret", "Content-Type": "application/json"}
+
+
+def test_openrouter_adapter_places_lease_in_configured_gateway_header():
+    seen = {}
+
+    def transport(endpoint, headers, payload, timeout):
+        seen["headers"] = dict(headers)
+        request = json.loads(payload)
+        assert request["model"] == "dialect-model"
+        assert request["stream"] is False
+        return 200, json.dumps({"id": "gen-gateway", "choices": [{"message": {"content": "ECP-CONFORMANCE-OK"}}]}).encode()
+
+    adapter = OpenRouterChatCompletionsAdapter(
+        model="dialect-model",
+        endpoint="https://gateway.invalid/api/v1/chat/completions",
+        transport=transport,
+        token_header="X-Gateway-Token",
+        bearer_value="public-product-marker",
+        extra_headers={"X-Gateway-Route": "route-1"},
+    )
+    result = adapter.execute(SecretLease("synthetic-secret", {}), {"request_id": "request-dialect-gateway"})
+    assert seen["headers"] == {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer public-product-marker",
+        "X-Gateway-Token": "synthetic-secret",
+        "X-Gateway-Route": "route-1",
+    }
+    assert result["provider_status"] == "RECEIVED"
+    assert result["output_text"] == "ECP-CONFORMANCE-OK"
+    assert "synthetic-secret" not in json.dumps(result)
+
+
+def test_openrouter_adapter_gateway_failures_never_leak_lease():
+    def transport(endpoint, headers, payload, timeout):
+        return 403, b"gateway rejection body"
+
+    adapter = OpenRouterChatCompletionsAdapter(
+        model="dialect-model",
+        endpoint="https://gateway.invalid/api/v1/chat/completions",
+        transport=transport,
+        token_header="X-Gateway-Token",
+        bearer_value="public-product-marker",
+    )
+    with pytest.raises(RuntimeAdapterTransportError, match="PROVIDER_AUTHENTICATION_FAILED") as exc_info:
+        adapter.execute(SecretLease("synthetic-secret", {}), {"request_id": "request-dialect-403"})
+    assert "synthetic-secret" not in str(exc_info.value)
+    assert "gateway rejection body" not in str(exc_info.value)
+
+
+def test_openrouter_adapter_rejects_invalid_gateway_header_configuration():
+    base = {"model": "dialect-model", "endpoint": "https://gateway.invalid/api/v1/chat/completions"}
+    with pytest.raises(ValueError, match="token_header"):
+        OpenRouterChatCompletionsAdapter(**base, token_header="Bad Header Name")
+    with pytest.raises(ValueError, match="token_header"):
+        OpenRouterChatCompletionsAdapter(**base, token_header="Authorization")
+    with pytest.raises(ValueError, match="token_header"):
+        OpenRouterChatCompletionsAdapter(**base, token_header="Content-Type")
+    with pytest.raises(ValueError, match="bearer_value requires token_header"):
+        OpenRouterChatCompletionsAdapter(**base, bearer_value="orphan-marker")
+    with pytest.raises(ValueError, match="bearer_value"):
+        OpenRouterChatCompletionsAdapter(**base, token_header="X-Gateway-Token", bearer_value="  ")
+    with pytest.raises(ValueError, match="extra_headers"):
+        OpenRouterChatCompletionsAdapter(**base, extra_headers={"X-Gateway-Route": ""})
+    with pytest.raises(ValueError, match="extra_headers"):
+        OpenRouterChatCompletionsAdapter(**base, extra_headers={"Authorization": "shadow"})
+    with pytest.raises(ValueError, match="extra_headers"):
+        OpenRouterChatCompletionsAdapter(**base, token_header="X-Gateway-Token", extra_headers={"x-gateway-token": "shadow"})
+
+
 def test_openai_adapter_exposes_safe_transport_reason():
     def transport(endpoint, headers, payload, timeout):
         raise OSError("network unreachable")

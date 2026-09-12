@@ -123,6 +123,30 @@ python run_console.py                 # built-in offline configuration
 python run_console.py --config my-onboarding-config.json
 ```
 
+## Generic chat-completions gateway dialect (configuration only)
+
+The `openrouter-chat-completions` adapter kind is the generic implementation
+of the OpenAI-compatible chat-completions HTTP dialect. Because many gateways
+speak that dialect but differ in WHERE the credential travels and WHICH static
+routing headers they require, the kind accepts three optional, provider-neutral
+knobs read from the target entry configuration:
+
+* `token_header` — name of the header that carries the released credential
+  lease (default `null`: the lease is the `Authorization: Bearer` credential,
+  byte-identical to the historical contract);
+* `bearer_value` — a NON-SECRET public marker sent as the bearer credential
+  when `token_header` is configured (some gateways expect a product marker
+  there; the secret never takes this slot);
+* `extra_headers` — additional static, non-secret routing headers.
+
+A gateway target therefore requires ZERO source-code changes: it is a
+configuration entry (see `examples/launcher/onboarding-chat-completions-gateway.example.json`),
+and the secret continues to flow only through the credential gateway's
+environment-variable store (`secret_environment_variable`). The adapter
+rejects header configurations that could displace the credential or shadow
+the transport's own headers, and the default contract is locked
+byte-identical by tests.
+
 ## Scope boundary
 
 This phase is infrastructure only. It changes no scientific cases, no

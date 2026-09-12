@@ -1043,3 +1043,81 @@ def test_shipped_onboarding_example_is_recomputable(repo_root):
     assert all(c["result"] == "PASS" for c in example["readiness_checks"])
     assert [c["check"] for c in example["readiness_checks"]] == list(READINESS_CHECKS)
     assert is_valid(example, "onboarding-record")
+
+
+# ---------------------------------------------------------------------------
+# Launcher: generic chat-completions gateway dialect (real kind, offline tests)
+# ---------------------------------------------------------------------------
+
+
+def test_launcher_builds_gateway_target_from_shipped_gateway_example(repo_root, tmp_path, monkeypatch):
+    launcher = _import_launcher(repo_root)
+    example_path = repo_root / "examples" / "launcher" / "onboarding-chat-completions-gateway.example.json"
+    configuration = launcher.load_configuration(example_path)
+    monkeypatch.setenv("EXAMPLE_GATEWAY_TOKEN", "example-synthetic-token")
+    gateway_config = GatewayConfig(
+        frozenset({"http://127.0.0.1:8766"}), artifact_root=tmp_path
+    )
+    gateway, service = launcher.build_gateway(configuration, gateway_config)
+    catalog_ids = [e["evaluation_id"] for e in gateway.catalog()["evaluations"]]
+    assert catalog_ids == ["ECP-EVAL-EXAMPLE-GATEWAY-1"]
+    # The runtime adapter carries the generic gateway knobs from configuration.
+    adapter = service.runtime.get("ECP-ADAPTER-EXAMPLE-GATEWAY-CHAT-COMPLETIONS")
+    assert adapter.model == "example-gateway-model-1"
+    assert adapter.endpoint == "https://gateway.example.invalid/api/v1/chat/completions"
+    assert adapter._token_header == "X-Example-Token"
+    assert adapter._bearer_value == "example-public-marker"
+    assert adapter._extra_headers == {"X-Example-Route": "example-route", "X-Example-Client": "example-client"}
+    # Readiness is fully offline: the onboarding record is READY without any
+    # provider call (the real call is a separately authorized phase).
+    records = service.records
+    assert len(records) == 1
+    assert records[0]["readiness_state"] == "READY"
+    assert records[0]["model_identifier"] == "example-gateway-model-1"
+
+
+def test_launcher_gateway_example_fails_closed_without_environment_credential(repo_root, tmp_path, monkeypatch):
+    launcher = _import_launcher(repo_root)
+    example_path = repo_root / "examples" / "launcher" / "onboarding-chat-completions-gateway.example.json"
+    configuration = launcher.load_configuration(example_path)
+    monkeypatch.delenv("EXAMPLE_GATEWAY_TOKEN", raising=False)
+    gateway_config = GatewayConfig(
+        frozenset({"http://127.0.0.1:8766"}), artifact_root=tmp_path
+    )
+    with pytest.raises(RuntimeError, match="EXAMPLE_GATEWAY_TOKEN"):
+        launcher.build_gateway(configuration, gateway_config)
+
+
+def test_shipped_gateway_example_is_schematic_and_secret_free(repo_root):
+    example_path = repo_root / "examples" / "launcher" / "onboarding-chat-completions-gateway.example.json"
+    text = example_path.read_text()
+    example = json.loads(text)
+    entry = example["targets"][0]
+    # Generic gateway knobs are present and come from configuration only.
+    assert entry["adapter_kind"] == "openrouter-chat-completions"
+    assert entry["token_header"] == "X-Example-Token"
+    assert entry["bearer_value"] == "example-public-marker"
+    assert entry["extra_headers"] == {"X-Example-Route": "example-route", "X-Example-Client": "example-client"}
+    # Placeholder endpoint only (reserved .invalid TLD): no real host.
+    assert entry["endpoint"].endswith(".invalid/api/v1/chat/completions")
+    # The credential references an environment variable NAME only.
+    credential = example["credentials"][0]
+    assert credential["secret_environment_variable"] == "EXAMPLE_GATEWAY_TOKEN"
+    assert credential["credential_id"] == entry["target"]["credential_ref"]
+    # No secret-shaped material anywhere in the shipped file.
+    for forbidden in ("sk-", "Bearer ", "api_key", "secret-"):
+        assert forbidden not in text, forbidden
+
+
+def test_launcher_rejects_malformed_gateway_header_configuration(repo_root):
+    launcher = _import_launcher(repo_root)
+    target = launcher.BUILTIN_DEMO_CONFIGURATION["targets"][0]["target"]
+    good = {"adapter_kind": "openrouter-chat-completions", "model": "m", "endpoint": "https://gateway.invalid/api/v1/chat/completions"}
+    with pytest.raises(ValueError, match="token_header"):
+        launcher._build_runtime_adapter({**good, "token_header": 7}, target)
+    with pytest.raises(ValueError, match="bearer_value"):
+        launcher._build_runtime_adapter({**good, "bearer_value": []}, target)
+    with pytest.raises(ValueError, match="extra_headers"):
+        launcher._build_runtime_adapter({**good, "extra_headers": "not-an-object"}, target)
+    with pytest.raises(ValueError, match="token_header"):
+        launcher._build_runtime_adapter({**good, "token_header": "Bad Name"}, target)

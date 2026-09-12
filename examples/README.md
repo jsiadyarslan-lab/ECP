@@ -38,6 +38,7 @@ all embedded hashes/commitments are real (recomputed and verified by the test su
 | `review-adjudication.example.json` | `review-adjudication` (0.3.0) | an owner decision record for the OQ-NOV-EXTERNAL open question (the §9 human seam) |
 | `case-amendment.example.json` | `case-amendment` (0.4.0) | a TWO-PHASE case amendment (draft then separate disclosure; both hashes real) on a synthetic dual-block candidate |
 | `onboarding.example.json` | `onboarding-record` (0.8.0) | a deterministic universal target onboarding record (READY verdict, real target_hash and onboarding_id) |
+| `launcher/onboarding-chat-completions-gateway.example.json` | launcher configuration | a universal onboarding configuration for an OpenAI-compatible chat-completions GATEWAY target: credential in a configured `token_header`, non-secret `bearer_value` marker, static non-secret `extra_headers`, secret supplied only via `EXAMPLE_GATEWAY_TOKEN` at runtime (placeholders throughout; `.invalid` endpoint) |
 | `artifacts/raw-output.demo.txt` | — | simulated raw output artifact (hashed) |
 | `artifacts/execution-trace.demo.txt` | — | simulated execution trace artifact (hashed) |
 

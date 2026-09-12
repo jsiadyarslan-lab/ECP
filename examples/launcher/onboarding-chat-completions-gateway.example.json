@@ -1,0 +1,104 @@
+{
+  "configuration_version": "1.0.0",
+  "note": "FORMAT EXAMPLE — universal target onboarding configuration for an OpenAI-compatible chat-completions GATEWAY target (real external execution; requires the separately authorized real external evaluation phase). All values are placeholders: no real endpoint, no real identifiers, no secret. The secret is supplied ONLY through the secret_environment_variable at runtime and never appears in this file. token_header names the header that carries the released credential lease; bearer_value is a NON-SECRET public marker sent as the bearer credential when token_header is used; extra_headers are additional static non-secret routing headers.",
+  "providers": [
+    {
+      "ecp_object": "provider",
+      "provider_id": "ECP-PROVIDER-EXAMPLE-GATEWAY",
+      "provider_version": "1.0.0",
+      "interfaces": ["chat-completions-gateway-api"],
+      "status": "active",
+      "description": "Example OpenAI-compatible chat-completions gateway provider; transport is external to this metadata boundary."
+    }
+  ],
+  "adapters": [
+    {
+      "ecp_object": "adapter",
+      "adapter_id": "ECP-ADAPTER-EXAMPLE-GATEWAY-CHAT-COMPLETIONS",
+      "adapter_version": "1.0.0",
+      "provider_id": "ECP-PROVIDER-EXAMPLE-GATEWAY",
+      "provider_interface": "chat-completions-gateway-api",
+      "supported_system_kinds": ["model-only"],
+      "supported_capabilities": ["text-generation"],
+      "status": "active"
+    }
+  ],
+  "credentials": [
+    {
+      "credential_id": "ECP-EXAMPLE-GATEWAY-CREDENTIAL",
+      "provider": "ECP-PROVIDER-EXAMPLE-GATEWAY",
+      "purpose": "authorized real external evaluation through the universal fabric",
+      "scope": ["real-external-evaluation"],
+      "secret_environment_variable": "EXAMPLE_GATEWAY_TOKEN"
+    }
+  ],
+  "targets": [
+    {
+      "target": {
+        "ecp_object": "target",
+        "target_id": "ECP-TARGET-EXAMPLE-GATEWAY-1",
+        "target_version": "1.0.0",
+        "system": {
+          "system_id": "ECP-SYSTEM-EXAMPLE-GATEWAY-1",
+          "system_version": "1.0.0",
+          "system_kind": "model-only",
+          "configuration_ref": null
+        },
+        "provider": {
+          "provider_id": "ECP-PROVIDER-EXAMPLE-GATEWAY",
+          "provider_version": "1.0.0",
+          "interface": "chat-completions-gateway-api"
+        },
+        "adapter": {
+          "adapter_id": "ECP-ADAPTER-EXAMPLE-GATEWAY-CHAT-COMPLETIONS",
+          "adapter_version": "1.0.0",
+          "provider_id": "ECP-PROVIDER-EXAMPLE-GATEWAY"
+        },
+        "credential_ref": "ECP-EXAMPLE-GATEWAY-CREDENTIAL",
+        "authorization_ref": "ECP-AUTH-EXAMPLE-GATEWAY-1",
+        "evaluation_bindings": ["ECP-EVAL-EXAMPLE-GATEWAY-1"],
+        "test_bindings": ["ECP-TEST-EXAMPLE-GATEWAY-1"],
+        "execution_environment": {
+          "environment_id": "authorized-gateway-execution",
+          "runtime_version": "python>=3.10",
+          "network": "controlled"
+        },
+        "required_capabilities": ["text-generation"]
+      },
+      "adapter_kind": "openrouter-chat-completions",
+      "model": "example-gateway-model-1",
+      "endpoint": "https://gateway.example.invalid/api/v1/chat/completions",
+      "token_header": "X-Example-Token",
+      "bearer_value": "example-public-marker",
+      "extra_headers": {
+        "X-Example-Route": "example-route",
+        "X-Example-Client": "example-client"
+      },
+      "binding": {
+        "binding_id": "ECP-BIND-EXAMPLE-GATEWAY-1",
+        "requirement_id": "ECP-REQ-EXAMPLE-GATEWAY-1",
+        "target_id": "ECP-TARGET-EXAMPLE-GATEWAY-1",
+        "provider_id": "ECP-PROVIDER-EXAMPLE-GATEWAY",
+        "interface": "chat-completions-gateway-api",
+        "purpose": "real-external-evaluation",
+        "credential_ref": "ECP-EXAMPLE-GATEWAY-CREDENTIAL",
+        "scope": ["real-external-evaluation"]
+      },
+      "grant": {
+        "authorization_ref": "ECP-AUTH-EXAMPLE-GATEWAY-1",
+        "binding_id": "ECP-BIND-EXAMPLE-GATEWAY-1",
+        "target_id": "ECP-TARGET-EXAMPLE-GATEWAY-1",
+        "purpose": "real-external-evaluation",
+        "scope": ["real-external-evaluation"],
+        "expires_at": "2099-01-01T00:00:00Z"
+      },
+      "tests": [
+        {
+          "test_id": "ECP-TEST-EXAMPLE-GATEWAY-1",
+          "label": "Example authorized gateway conformance probe",
+          "scope": "real-external-evaluation"
+        }
+      ]
+    }
+  ]
+}

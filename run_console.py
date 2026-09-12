@@ -25,7 +25,15 @@ configuration can never trigger arbitrary code execution:
                                   requires the separately authorized real
                                   external evaluation phase)
     gemini-generate-content       Gemini generateContent adapter (real; same gate)
-    openrouter-chat-completions   OpenRouter chat completions adapter (same gate)
+    openrouter-chat-completions   generic OpenAI-compatible chat-completions
+                                  adapter (real; same gate). Optional
+                                  provider-neutral gateway knobs from the
+                                  target entry: ``token_header`` (header name
+                                  that carries the credential lease),
+                                  ``bearer_value`` (non-secret literal sent
+                                  as the bearer credential when token_header
+                                  is used) and ``extra_headers`` (additional
+                                  static non-secret routing headers).
 
 Secrets are read ONLY from environment variables into the credential
 gateway's private store (existing boundary); they never appear in the
@@ -278,6 +286,16 @@ def _build_runtime_adapter(entry: Mapping[str, Any], target: Mapping[str, Any]) 
 
     Only built-in kinds are constructible; anything else — including module
     paths, class names or shell fragments — is rejected deterministically.
+
+    The ``openrouter-chat-completions`` kind (the generic OpenAI-compatible
+    chat-completions dialect) additionally accepts three OPTIONAL
+    provider-neutral gateway knobs read straight from configuration:
+    ``token_header``, ``bearer_value`` and ``extra_headers``. They exist so
+    that chat-completions gateways which place the credential in a custom
+    header and/or require additional static non-secret routing headers can be
+    onboarded through configuration alone — no source-code change per target.
+    All values are non-secret; the secret continues to flow only through the
+    credential gateway's environment-variable store.
     """
     kind = entry.get("adapter_kind")
     if not isinstance(kind, str) or kind not in BUILTIN_ADAPTER_KINDS:
@@ -302,7 +320,26 @@ def _build_runtime_adapter(entry: Mapping[str, Any], target: Mapping[str, Any]) 
         return OpenAIResponsesAdapter(model=model, endpoint=endpoint, provider=provider, adapter_id=adapter_id)
     if kind == "gemini-generate-content":
         return GeminiGenerateContentAdapter(model=model, endpoint=endpoint, provider=provider, adapter_id=adapter_id)
-    return OpenRouterChatCompletionsAdapter(model=model, endpoint=endpoint, provider=provider, adapter_id=adapter_id)
+    # kind == "openrouter-chat-completions": the generic chat-completions
+    # dialect; optional non-secret gateway-header knobs from configuration.
+    token_header = entry.get("token_header")
+    if token_header is not None and not isinstance(token_header, str):
+        raise ValueError("'token_header' must be a header-name string or null")
+    bearer_value = entry.get("bearer_value")
+    if bearer_value is not None and not isinstance(bearer_value, str):
+        raise ValueError("'bearer_value' must be a non-secret string or null")
+    extra_headers = entry.get("extra_headers")
+    if extra_headers is not None and not isinstance(extra_headers, dict):
+        raise ValueError("'extra_headers' must be an object of non-secret header values or null")
+    return OpenRouterChatCompletionsAdapter(
+        model=model,
+        endpoint=endpoint,
+        provider=provider,
+        adapter_id=adapter_id,
+        token_header=token_header,
+        bearer_value=bearer_value,
+        extra_headers=extra_headers,
+    )
 
 
 def build_gateway(
