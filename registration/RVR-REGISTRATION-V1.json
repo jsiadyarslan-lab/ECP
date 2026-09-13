@@ -1,0 +1,4435 @@
+{
+  "campaign_id": "ECP-EVAL-RVR-1",
+  "schema_version": "RVR-REG-1.0",
+  "package_id": "ECP-REG-RVR-V1",
+  "ecp_object": "rvr-registration-package",
+  "generation": {
+    "tool": "tools/rvr_case_generator.py",
+    "worlds_module": "tools/rvr_worlds.py",
+    "seed": "ECP-EVAL-RVR-1::SEED-V1",
+    "determinism": "SHA-256 decision derivation from the registered seed; no runtime PRNG; reproducible across Python versions",
+    "name_screens": [
+      "M3 exclusion tokens (file sha256 recorded in the validation record)",
+      "curated benchmark/common-word screen",
+      "/usr/share/dict/words when present",
+      "registered vocabulary screen"
+    ]
+  },
+  "campaign_size": {
+    "mvs_count": 24,
+    "case_count": 96,
+    "execution_count": 96,
+    "attempts_per_case": 1,
+    "retry_policy": "NONE"
+  },
+  "grid": {
+    "families": [
+      "F1",
+      "F2",
+      "F3",
+      "F4"
+    ],
+    "depths": [
+      1,
+      2,
+      3
+    ],
+    "mvs_per_cell": 2,
+    "family_names": {
+      "F1": "transitive-compositional-relational",
+      "F2": "quantitative-comparison",
+      "F3": "consistency-contradiction",
+      "F4": "multi-premise-evidence-integration"
+    },
+    "f3_subform_assignment": {
+      "D1": [
+        "consistency",
+        "underdetermined"
+      ],
+      "D2": [
+        "consistency",
+        "consistency"
+      ],
+      "D3": [
+        "consistency",
+        "underdetermined"
+      ]
+    }
+  },
+  "prompt_envelope": {
+    "id": "RVR-ENVELOPE-1",
+    "template": "Think as needed, then give your final answer as the LAST line of your reply, in exactly this format:\nANSWER: <token>\nwhere <token> is one of: {tokens}\nYou may optionally add one line 'CITED: <premise numbers>' immediately before the final line; it is optional and never affects scoring.",
+    "template_sha256": "bf080faa0a166290f0545015c2c156fabf8fd4e4aac0d547e475fe672f699b49",
+    "note": "constant across all cases; only registered fields vary"
+  },
+  "answer_space_distribution": {
+    "value_enum_cases": 36,
+    "yes_no_cannot_cases": 60,
+    "gt_yes": 29,
+    "gt_no": 25,
+    "gt_cannot": 6
+  },
+  "mvs": [
+    {
+      "set_id": "ECP-MVS-RVR-001",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 1,
+      "cell_index": 0,
+      "variants": {
+        "V-BASE": "ECP-CASE-RVR-001",
+        "V-RPT": "ECP-CASE-RVR-002",
+        "V-FLIP": "ECP-CASE-RVR-003",
+        "V-LURE": "ECP-CASE-RVR-004"
+      },
+      "mvs_sha256": "e96504a0c68613fdbdd43292b2d2b7e663d5ec49e33ad1bf30cede4cfa556ba4"
+    },
+    {
+      "set_id": "ECP-MVS-RVR-002",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 1,
+      "cell_index": 1,
+      "variants": {
+        "V-BASE": "ECP-CASE-RVR-005",
+        "V-RPT": "ECP-CASE-RVR-006",
+        "V-FLIP": "ECP-CASE-RVR-007",
+        "V-LURE": "ECP-CASE-RVR-008"
+      },
+      "mvs_sha256": "fe4d4406827f908571a298c49e4b74a970a3379926a1e572c7c868a990c632fb"
+    },
+    {
+      "set_id": "ECP-MVS-RVR-003",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 2,
+      "cell_index": 0,
+      "variants": {
+        "V-BASE": "ECP-CASE-RVR-009",
+        "V-RPT": "ECP-CASE-RVR-010",
+        "V-FLIP": "ECP-CASE-RVR-011",
+        "V-LURE": "ECP-CASE-RVR-012"
+      },
+      "mvs_sha256": "87382143d482ee8affb33eeb31ff9828048b1aea4a13426446f86d8635fad7dd"
+    },
+    {
+      "set_id": "ECP-MVS-RVR-004",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 2,
+      "cell_index": 1,
+      "variants": {
+        "V-BASE": "ECP-CASE-RVR-013",
+        "V-RPT": "ECP-CASE-RVR-014",
+        "V-FLIP": "ECP-CASE-RVR-015",
+        "V-LURE": "ECP-CASE-RVR-016"
+      },
+      "mvs_sha256": "c195a4d85c12d4004437741316832fd7ef5fe16eac7d70078b4358ae59b1ee53"
+    },
+    {
+      "set_id": "ECP-MVS-RVR-005",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 3,
+      "cell_index": 0,
+      "variants": {
+        "V-BASE": "ECP-CASE-RVR-017",
+        "V-RPT": "ECP-CASE-RVR-018",
+        "V-FLIP": "ECP-CASE-RVR-019",
+        "V-LURE": "ECP-CASE-RVR-020"
+      },
+      "mvs_sha256": "dd174555d9ccd4da4150d1709172d5b0df76f101272358ceb962a4d41a3c8570"
+    },
+    {
+      "set_id": "ECP-MVS-RVR-006",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 3,
+      "cell_index": 1,
+      "variants": {
+        "V-BASE": "ECP-CASE-RVR-021",
+        "V-RPT": "ECP-CASE-RVR-022",
+        "V-FLIP": "ECP-CASE-RVR-023",
+        "V-LURE": "ECP-CASE-RVR-024"
+      },
+      "mvs_sha256": "1fed8782417ecaf33a909220f47b73a63fbc565da5c9c6ec3c4b73e9a91d107d"
+    },
+    {
+      "set_id": "ECP-MVS-RVR-007",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 1,
+      "cell_index": 0,
+      "variants": {
+        "V-BASE": "ECP-CASE-RVR-025",
+        "V-RPT": "ECP-CASE-RVR-026",
+        "V-FLIP": "ECP-CASE-RVR-027",
+        "V-LURE": "ECP-CASE-RVR-028"
+      },
+      "mvs_sha256": "d05e20cec663a1df0f67b873c0745560b37b0c786c102b5dd16867a1194d2fc1"
+    },
+    {
+      "set_id": "ECP-MVS-RVR-008",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 1,
+      "cell_index": 1,
+      "variants": {
+        "V-BASE": "ECP-CASE-RVR-029",
+        "V-RPT": "ECP-CASE-RVR-030",
+        "V-FLIP": "ECP-CASE-RVR-031",
+        "V-LURE": "ECP-CASE-RVR-032"
+      },
+      "mvs_sha256": "4ce48683c79bb2e28b4c7a7b881e64376daded11a1eac1f97b264423fe7cb07d"
+    },
+    {
+      "set_id": "ECP-MVS-RVR-009",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 2,
+      "cell_index": 0,
+      "variants": {
+        "V-BASE": "ECP-CASE-RVR-033",
+        "V-RPT": "ECP-CASE-RVR-034",
+        "V-FLIP": "ECP-CASE-RVR-035",
+        "V-LURE": "ECP-CASE-RVR-036"
+      },
+      "mvs_sha256": "39f294cfffdad965e42a92115140b0c9457c6f52d2fe483cbbe021123fe7514a"
+    },
+    {
+      "set_id": "ECP-MVS-RVR-010",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 2,
+      "cell_index": 1,
+      "variants": {
+        "V-BASE": "ECP-CASE-RVR-037",
+        "V-RPT": "ECP-CASE-RVR-038",
+        "V-FLIP": "ECP-CASE-RVR-039",
+        "V-LURE": "ECP-CASE-RVR-040"
+      },
+      "mvs_sha256": "ffcbab31a95cb5d6938ec469b4bfb3d22f4e7ec3fc8960e94aa392e2d9dfbe28"
+    },
+    {
+      "set_id": "ECP-MVS-RVR-011",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 3,
+      "cell_index": 0,
+      "variants": {
+        "V-BASE": "ECP-CASE-RVR-041",
+        "V-RPT": "ECP-CASE-RVR-042",
+        "V-FLIP": "ECP-CASE-RVR-043",
+        "V-LURE": "ECP-CASE-RVR-044"
+      },
+      "mvs_sha256": "b7fb062753d1a148acf250ca78dfcca4c71bc8b94f3ee1fe1de3fbb57d5ca7e3"
+    },
+    {
+      "set_id": "ECP-MVS-RVR-012",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 3,
+      "cell_index": 1,
+      "variants": {
+        "V-BASE": "ECP-CASE-RVR-045",
+        "V-RPT": "ECP-CASE-RVR-046",
+        "V-FLIP": "ECP-CASE-RVR-047",
+        "V-LURE": "ECP-CASE-RVR-048"
+      },
+      "mvs_sha256": "48c782a1f456a74277cf4fd2b0d20e85453cf3d97b5548d3adea826cdfc7b4aa"
+    },
+    {
+      "set_id": "ECP-MVS-RVR-013",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 1,
+      "cell_index": 0,
+      "variants": {
+        "V-BASE": "ECP-CASE-RVR-049",
+        "V-RPT": "ECP-CASE-RVR-050",
+        "V-FLIP": "ECP-CASE-RVR-051",
+        "V-LURE": "ECP-CASE-RVR-052"
+      },
+      "mvs_sha256": "9079bbd7bc929d8715eb36e98b52bf37d4a253e6852ea9094fac9905402d887b"
+    },
+    {
+      "set_id": "ECP-MVS-RVR-014",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 1,
+      "cell_index": 1,
+      "variants": {
+        "V-BASE": "ECP-CASE-RVR-053",
+        "V-RPT": "ECP-CASE-RVR-054",
+        "V-FLIP": "ECP-CASE-RVR-055",
+        "V-LURE": "ECP-CASE-RVR-056"
+      },
+      "mvs_sha256": "392bed4a6f924888610c6a8bbd80c2c99d5be1968e7c4203b9c56b5e1223e822"
+    },
+    {
+      "set_id": "ECP-MVS-RVR-015",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 2,
+      "cell_index": 0,
+      "variants": {
+        "V-BASE": "ECP-CASE-RVR-057",
+        "V-RPT": "ECP-CASE-RVR-058",
+        "V-FLIP": "ECP-CASE-RVR-059",
+        "V-LURE": "ECP-CASE-RVR-060"
+      },
+      "mvs_sha256": "7adf49c011f933b98089cc8e6d89f8d25681d05884f004a017612e9b7bcec88d"
+    },
+    {
+      "set_id": "ECP-MVS-RVR-016",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 2,
+      "cell_index": 1,
+      "variants": {
+        "V-BASE": "ECP-CASE-RVR-061",
+        "V-RPT": "ECP-CASE-RVR-062",
+        "V-FLIP": "ECP-CASE-RVR-063",
+        "V-LURE": "ECP-CASE-RVR-064"
+      },
+      "mvs_sha256": "6b48ae9edb938035cd790503be5c3b26e5e205aefe535c556a73f3d6c9f8297b"
+    },
+    {
+      "set_id": "ECP-MVS-RVR-017",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 3,
+      "cell_index": 0,
+      "variants": {
+        "V-BASE": "ECP-CASE-RVR-065",
+        "V-RPT": "ECP-CASE-RVR-066",
+        "V-FLIP": "ECP-CASE-RVR-067",
+        "V-LURE": "ECP-CASE-RVR-068"
+      },
+      "mvs_sha256": "e4ed7b3cead5188c7373c1bf749651d93614788b1c15009a4ab8ae73a433b7d6"
+    },
+    {
+      "set_id": "ECP-MVS-RVR-018",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 3,
+      "cell_index": 1,
+      "variants": {
+        "V-BASE": "ECP-CASE-RVR-069",
+        "V-RPT": "ECP-CASE-RVR-070",
+        "V-FLIP": "ECP-CASE-RVR-071",
+        "V-LURE": "ECP-CASE-RVR-072"
+      },
+      "mvs_sha256": "44c4b4aef4b6128c4dc596e8317cd8fbc622e1974d90a4432d229640f500f112"
+    },
+    {
+      "set_id": "ECP-MVS-RVR-019",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 1,
+      "cell_index": 0,
+      "variants": {
+        "V-BASE": "ECP-CASE-RVR-073",
+        "V-RPT": "ECP-CASE-RVR-074",
+        "V-FLIP": "ECP-CASE-RVR-075",
+        "V-LURE": "ECP-CASE-RVR-076"
+      },
+      "mvs_sha256": "3e9fbd1f2dd0ce3f3fb11cf4586da22307b1aa42ab43474692228dc544585494"
+    },
+    {
+      "set_id": "ECP-MVS-RVR-020",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 1,
+      "cell_index": 1,
+      "variants": {
+        "V-BASE": "ECP-CASE-RVR-077",
+        "V-RPT": "ECP-CASE-RVR-078",
+        "V-FLIP": "ECP-CASE-RVR-079",
+        "V-LURE": "ECP-CASE-RVR-080"
+      },
+      "mvs_sha256": "fefb43a408e0b5421658f1a314754a47a3d5d0765a8714b115b5701b438765b2"
+    },
+    {
+      "set_id": "ECP-MVS-RVR-021",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 2,
+      "cell_index": 0,
+      "variants": {
+        "V-BASE": "ECP-CASE-RVR-081",
+        "V-RPT": "ECP-CASE-RVR-082",
+        "V-FLIP": "ECP-CASE-RVR-083",
+        "V-LURE": "ECP-CASE-RVR-084"
+      },
+      "mvs_sha256": "6cb37c711bc8a8d26d9c1952886649f5e927cd13a3da6342da2fb481b25997eb"
+    },
+    {
+      "set_id": "ECP-MVS-RVR-022",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 2,
+      "cell_index": 1,
+      "variants": {
+        "V-BASE": "ECP-CASE-RVR-085",
+        "V-RPT": "ECP-CASE-RVR-086",
+        "V-FLIP": "ECP-CASE-RVR-087",
+        "V-LURE": "ECP-CASE-RVR-088"
+      },
+      "mvs_sha256": "ba36b2b5599b1ea9139751d0896d6aad93bcc299c252608062f084717a1b0388"
+    },
+    {
+      "set_id": "ECP-MVS-RVR-023",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 3,
+      "cell_index": 0,
+      "variants": {
+        "V-BASE": "ECP-CASE-RVR-089",
+        "V-RPT": "ECP-CASE-RVR-090",
+        "V-FLIP": "ECP-CASE-RVR-091",
+        "V-LURE": "ECP-CASE-RVR-092"
+      },
+      "mvs_sha256": "c8e0848776fbde0ae66f2015cd543a13c8dd622545e08ec2bd5cae4ce553b570"
+    },
+    {
+      "set_id": "ECP-MVS-RVR-024",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 3,
+      "cell_index": 1,
+      "variants": {
+        "V-BASE": "ECP-CASE-RVR-093",
+        "V-RPT": "ECP-CASE-RVR-094",
+        "V-FLIP": "ECP-CASE-RVR-095",
+        "V-LURE": "ECP-CASE-RVR-096"
+      },
+      "mvs_sha256": "d8bf3f42c542b33257ac7397d850d2bf9bbf37ab73397c20c91906111f32d7bd"
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "ECP-CASE-RVR-001",
+      "set_id": "ECP-MVS-RVR-001",
+      "variant": "V-BASE",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 1,
+      "premises": [
+        "The shetais is taller than the gikougous.",
+        "The gikougous is taller than the bretumesk."
+      ],
+      "question": "Which of these is the tallest: shetais, gikougous, or bretumesk?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "shetais",
+          "gikougous",
+          "bretumesk"
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::001",
+        "decision_log_index": 1
+      },
+      "prompt_sha256": "2f63a43f4ca469d9767a84882db9d23675edf2388957f281f5191c805c3de70f",
+      "gt_commitment": "fa6b573b29ae26e889bdc51f79a39d79f067d6fafef451c496683f014bb860db",
+      "case_sha256": "fbd7f53866e129568a59ef5597e881ffeaabd3c360babe9382f4410967c3d88c"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-002",
+      "set_id": "ECP-MVS-RVR-001",
+      "variant": "V-RPT",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 1,
+      "premises": [
+        "The zumograim is shorter than the daidailur.",
+        "The daidailur is shorter than the proshi."
+      ],
+      "question": "Of the items listed, which one stands the tallest: proshi, daidailur, or zumograim?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "proshi",
+          "daidailur",
+          "zumograim"
+        ]
+      },
+      "transform": {
+        "rename_map": {
+          "shetais": "proshi",
+          "gikougous": "daidailur",
+          "bretumesk": "zumograim"
+        },
+        "paraphrase": true,
+        "premise_order": [
+          1,
+          0
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::001",
+        "decision_log_index": 1
+      },
+      "prompt_sha256": "fc30d8f85cec63f1d1475679b2704d8261d93952e706bf80bfd8a81fada7dc23",
+      "gt_commitment": "d7814962019039e8b92d17fa6da5b0a222ee1a1056596aec833d48be214c4e16",
+      "case_sha256": "1856ecc92315856e7892a90f991f7f119e3b17e8b771c73b83957cef4f1211e9"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-003",
+      "set_id": "ECP-MVS-RVR-001",
+      "variant": "V-FLIP",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 1,
+      "premises": [
+        "The gikougous is taller than the shetais.",
+        "The gikougous is taller than the bretumesk."
+      ],
+      "question": "Which of these is the tallest: shetais, gikougous, or bretumesk?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "shetais",
+          "gikougous",
+          "bretumesk"
+        ]
+      },
+      "flip": {
+        "premise_index": 0,
+        "class": "relation_reversal",
+        "old": "The shetais is taller than the gikougous.",
+        "new": "The gikougous is taller than the shetais."
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::001",
+        "decision_log_index": 1
+      },
+      "prompt_sha256": "22bd67f1626cc5f743a2c55ca17f97b8d98c3b7a918fa02da793f6b96d26bdec",
+      "gt_commitment": "afa0341d11798f827822bb3a9080dae7953c0734cd949d18bc6db680531f2960",
+      "case_sha256": "0edefc4ad7f2b00453c6618609dcdabccfafc6f82af090761387176a822500c1"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-004",
+      "set_id": "ECP-MVS-RVR-001",
+      "variant": "V-LURE",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 1,
+      "premises": [
+        "The shetais is taller than the gikougous.",
+        "The gikougous is taller than the bretumesk."
+      ],
+      "question": "Which of these is the tallest: shetais, gikougous, or bretumesk?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "shetais",
+          "gikougous",
+          "bretumesk"
+        ]
+      },
+      "lure": {
+        "class": "LC-1",
+        "template_id": "L-F1-ENUM-1",
+        "lure_answer": "gikougous"
+      },
+      "lure_note": "(Note: the gikougous is the most talked-about item in the collection.)",
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::001",
+        "decision_log_index": 1
+      },
+      "prompt_sha256": "1f69885d4a436ee0071d3d8d193aeaffeb5bbecc7e2174f90821ebed0ec0d6b4",
+      "gt_commitment": "186727156388a5c445db6491a6b7125c4e797b9f07c815e75a031479507c7cfc",
+      "case_sha256": "143f65cdaa617c0c9c086c7baf7d19e6f5e098a3548927e341f99701ef7f62d5"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-005",
+      "set_id": "ECP-MVS-RVR-002",
+      "variant": "V-BASE",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 1,
+      "premises": [
+        "The leadresk is older than the baucras.",
+        "The baucras is older than the mishaind."
+      ],
+      "question": "Which of these is the youngest: leadresk, baucras, or mishaind?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "leadresk",
+          "baucras",
+          "mishaind"
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::002",
+        "decision_log_index": 2
+      },
+      "prompt_sha256": "c0b6fb50161f098206bf8435ff84de0cfb8f419995f5cba2bb7930e902a71cef",
+      "gt_commitment": "64e305b12c84fe30c55ed8852afac1eca4f30b6947883b17dd64cea54e0cdd45",
+      "case_sha256": "6d7d0d31c2d0416c274d3168a0e8e00681399fdf3799c31b70ecfc11ad3f9f3f"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-006",
+      "set_id": "ECP-MVS-RVR-002",
+      "variant": "V-RPT",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 1,
+      "premises": [
+        "The raureern is younger than the jaigoun.",
+        "The jaigoun is younger than the jubrabous."
+      ],
+      "question": "Of the items listed, which one has the smallest age: jubrabous, jaigoun, or raureern?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "jubrabous",
+          "jaigoun",
+          "raureern"
+        ]
+      },
+      "transform": {
+        "rename_map": {
+          "leadresk": "jubrabous",
+          "baucras": "jaigoun",
+          "mishaind": "raureern"
+        },
+        "paraphrase": true,
+        "premise_order": [
+          1,
+          0
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::002",
+        "decision_log_index": 2
+      },
+      "prompt_sha256": "a715a8c6db7af3912490d96a7682af11a83ec3917a2929f9c33a03b10f0e8963",
+      "gt_commitment": "1bd22f9117911808e46872dae0ff62b12e7d9c5580887f1b6a7c79672f4df98f",
+      "case_sha256": "48206937acf5bbf9b24e19170b2515db9127d45ee0df41ad2f572f7ed2d25e5c"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-007",
+      "set_id": "ECP-MVS-RVR-002",
+      "variant": "V-FLIP",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 1,
+      "premises": [
+        "The leadresk is older than the baucras.",
+        "The mishaind is older than the baucras."
+      ],
+      "question": "Which of these is the youngest: leadresk, baucras, or mishaind?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "leadresk",
+          "baucras",
+          "mishaind"
+        ]
+      },
+      "flip": {
+        "premise_index": 1,
+        "class": "relation_reversal",
+        "old": "The baucras is older than the mishaind.",
+        "new": "The mishaind is older than the baucras."
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::002",
+        "decision_log_index": 2
+      },
+      "prompt_sha256": "ab90a1c16e33b08510625669b62ffbb1a713bfef31bcc01e31d6ea3c10189947",
+      "gt_commitment": "d2fa9164f397411b6ff65778effe22f0d45cd591cfce4d41b406e50a4496a18c",
+      "case_sha256": "47d1a346ac3e4a28486d2aa207985c28e9490443a3b6196fe840dc76cff18bb3"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-008",
+      "set_id": "ECP-MVS-RVR-002",
+      "variant": "V-LURE",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 1,
+      "premises": [
+        "The leadresk is older than the baucras.",
+        "The baucras is older than the mishaind."
+      ],
+      "question": "Which of these is the youngest: leadresk, baucras, or mishaind?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "leadresk",
+          "baucras",
+          "mishaind"
+        ]
+      },
+      "lure": {
+        "class": "LC-1",
+        "template_id": "L-F1-ENUM-1",
+        "lure_answer": "baucras"
+      },
+      "lure_note": "(Note: the baucras is the most talked-about item in the collection.)",
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::002",
+        "decision_log_index": 2
+      },
+      "prompt_sha256": "d1d69ad09a45ea93b1122136558e2b60e4f00d567ee60698c233827f036a3251",
+      "gt_commitment": "991f214504e0982b18c4410cb5913719b9ea6fa4c2fbc8e3e24878696981f5bf",
+      "case_sha256": "d280f78e287b41392f98c703b8428c917f44032d9d3eeae671589f453b8b2bb4"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-009",
+      "set_id": "ECP-MVS-RVR-003",
+      "variant": "V-BASE",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 2,
+      "premises": [
+        "The jopreabir is faster than the zudunisk.",
+        "The zudunisk is faster than the pojokaun.",
+        "The pojokaun is faster than the tethousk."
+      ],
+      "question": "Which of these is the fastest: jopreabir, zudunisk, pojokaun, or tethousk?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "jopreabir",
+          "zudunisk",
+          "pojokaun",
+          "tethousk"
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::003",
+        "decision_log_index": 3
+      },
+      "prompt_sha256": "28aba63e8c141e1f91a8c9800fd44c5ab6efbda05a577c29c1a61ba4be27ec79",
+      "gt_commitment": "cb8e58f1e4e1b5459fd370257b21fd23f7c5e3e9e0ab0861e7fb4e38df428a68",
+      "case_sha256": "407a65a477d4386c6f1692d9ee1cd3194d7cc5eff1ed136f4ef5d8240a0260d4"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-010",
+      "set_id": "ECP-MVS-RVR-003",
+      "variant": "V-RPT",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 2,
+      "premises": [
+        "The kouklath is slower than the kajees.",
+        "The kajees is slower than the troudo.",
+        "The zaibe is slower than the kouklath."
+      ],
+      "question": "Of the items listed, which one moves the fastest: troudo, kajees, kouklath, or zaibe?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "troudo",
+          "kajees",
+          "kouklath",
+          "zaibe"
+        ]
+      },
+      "transform": {
+        "rename_map": {
+          "jopreabir": "troudo",
+          "zudunisk": "kajees",
+          "pojokaun": "kouklath",
+          "tethousk": "zaibe"
+        },
+        "paraphrase": true,
+        "premise_order": [
+          1,
+          0,
+          2
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::003",
+        "decision_log_index": 3
+      },
+      "prompt_sha256": "fc0f1bc6bd29b792c9f29a315a06d118f0205d51a1c93e5290280147364e70c6",
+      "gt_commitment": "6092e4b912c810a304dd2346e9ba4968960a83c6b9c0f4022506665176412369",
+      "case_sha256": "ef7cfb8c696df3930f1fc0dc0036d52693160e1c65a84ac4d8f8ad95585a426f"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-011",
+      "set_id": "ECP-MVS-RVR-003",
+      "variant": "V-FLIP",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 2,
+      "premises": [
+        "The zudunisk is faster than the jopreabir.",
+        "The zudunisk is faster than the pojokaun.",
+        "The pojokaun is faster than the tethousk."
+      ],
+      "question": "Which of these is the fastest: jopreabir, zudunisk, pojokaun, or tethousk?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "jopreabir",
+          "zudunisk",
+          "pojokaun",
+          "tethousk"
+        ]
+      },
+      "flip": {
+        "premise_index": 0,
+        "class": "relation_reversal",
+        "old": "The jopreabir is faster than the zudunisk.",
+        "new": "The zudunisk is faster than the jopreabir."
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::003",
+        "decision_log_index": 3
+      },
+      "prompt_sha256": "4b559e5109e0d75c523c3ad72d3ba150ae66342de715c9a19ff8f85f96dd5344",
+      "gt_commitment": "9fc5d781c8e733fa363b6c621ffcb13590fe471ed1bcb7084a9ba5ad5e4a270f",
+      "case_sha256": "d8a580a5d68ffb6bc64437431bad06ef22398856b05b24bffb2b90dcbd8d63aa"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-012",
+      "set_id": "ECP-MVS-RVR-003",
+      "variant": "V-LURE",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 2,
+      "premises": [
+        "The jopreabir is faster than the zudunisk.",
+        "The zudunisk is faster than the pojokaun.",
+        "The pojokaun is faster than the tethousk."
+      ],
+      "question": "Which of these is the fastest: jopreabir, zudunisk, pojokaun, or tethousk?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "jopreabir",
+          "zudunisk",
+          "pojokaun",
+          "tethousk"
+        ]
+      },
+      "lure": {
+        "class": "LC-1",
+        "template_id": "L-F1-ENUM-1",
+        "lure_answer": "pojokaun"
+      },
+      "lure_note": "(Note: the pojokaun is the most talked-about item in the collection.)",
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::003",
+        "decision_log_index": 3
+      },
+      "prompt_sha256": "5020258eb56e70e018dc55c47fea51441e66b40466922aba020815fb98ede30d",
+      "gt_commitment": "2ac0d429872fd3bd0700265bee90dcdf5fc4429a1cd0d585c04d43e3e1f3ddb1",
+      "case_sha256": "0dc036451eb4ba5a8c7e1eba15685509181a237cc761ecdcba4bf29235a56e54"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-013",
+      "set_id": "ECP-MVS-RVR-004",
+      "variant": "V-BASE",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 2,
+      "premises": [
+        "The sheegream is faster than the gatrul.",
+        "The gatrul is faster than the creathaul.",
+        "The creathaul is faster than the truzeek."
+      ],
+      "question": "Which of these is the slowest: sheegream, gatrul, creathaul, or truzeek?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "sheegream",
+          "gatrul",
+          "creathaul",
+          "truzeek"
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::004",
+        "decision_log_index": 4
+      },
+      "prompt_sha256": "8a717aa326c40d86f054e3b19d56d8336c62f712d6ca32f15b4510a7dac36578",
+      "gt_commitment": "0c01ad53f0e401a2ac7d9a2b0e260bfc3594b925b76c783a63aac55ae5d0e74c",
+      "case_sha256": "9e90c70805d3010a3e255abba57774be9758f339f07a81308419cfc2362415ef"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-014",
+      "set_id": "ECP-MVS-RVR-004",
+      "variant": "V-RPT",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 2,
+      "premises": [
+        "The kulilt is slower than the zulaitos.",
+        "The lelound is slower than the kulilt.",
+        "The zulaitos is slower than the gupound."
+      ],
+      "question": "Of the items listed, which one moves the slowest: gupound, zulaitos, kulilt, or lelound?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "gupound",
+          "zulaitos",
+          "kulilt",
+          "lelound"
+        ]
+      },
+      "transform": {
+        "rename_map": {
+          "sheegream": "gupound",
+          "gatrul": "zulaitos",
+          "creathaul": "kulilt",
+          "truzeek": "lelound"
+        },
+        "paraphrase": true,
+        "premise_order": [
+          1,
+          2,
+          0
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::004",
+        "decision_log_index": 4
+      },
+      "prompt_sha256": "379660023ebd07602e11c302d68a394355539cd5d090194d7f98c5eaecc2b9c1",
+      "gt_commitment": "bb82e7d303f5644d4cef62c9f25d90f6c8553784b1ce2939bae1067baec0b330",
+      "case_sha256": "68e8eabcdff4de581730ca525f680627300a3bdbaf82be3759d52a2bd529c481"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-015",
+      "set_id": "ECP-MVS-RVR-004",
+      "variant": "V-FLIP",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 2,
+      "premises": [
+        "The sheegream is faster than the gatrul.",
+        "The gatrul is faster than the creathaul.",
+        "The truzeek is faster than the creathaul."
+      ],
+      "question": "Which of these is the slowest: sheegream, gatrul, creathaul, or truzeek?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "sheegream",
+          "gatrul",
+          "creathaul",
+          "truzeek"
+        ]
+      },
+      "flip": {
+        "premise_index": 2,
+        "class": "relation_reversal",
+        "old": "The creathaul is faster than the truzeek.",
+        "new": "The truzeek is faster than the creathaul."
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::004",
+        "decision_log_index": 4
+      },
+      "prompt_sha256": "741095e51d0e2631f8525c1cf2e2c6cf20474a456bc808f01aa8fdf1437421f0",
+      "gt_commitment": "8a5eee78415f54a092a943401523baaa45a154b2a946e345b889a5190d860828",
+      "case_sha256": "aef1e070278c13020dffb1b07bf8fbd60e071baac36790b35cdfacad530499ce"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-016",
+      "set_id": "ECP-MVS-RVR-004",
+      "variant": "V-LURE",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 2,
+      "premises": [
+        "The sheegream is faster than the gatrul.",
+        "The gatrul is faster than the creathaul.",
+        "The creathaul is faster than the truzeek."
+      ],
+      "question": "Which of these is the slowest: sheegream, gatrul, creathaul, or truzeek?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "sheegream",
+          "gatrul",
+          "creathaul",
+          "truzeek"
+        ]
+      },
+      "lure": {
+        "class": "LC-1",
+        "template_id": "L-F1-ENUM-1",
+        "lure_answer": "creathaul"
+      },
+      "lure_note": "(Note: the creathaul is the most talked-about item in the collection.)",
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::004",
+        "decision_log_index": 4
+      },
+      "prompt_sha256": "ff0f3bf7d6a51c4b931e9a5c55df1bc14397a93a142cc9f7f8580376f8b341c4",
+      "gt_commitment": "7ae644665737feb315903bffe181f11c5431ee4d85ecf5b1be7063396d084f34",
+      "case_sha256": "19de50944777d443042ea88238de7d6dac5945cb4fd4990fc495bb4b6fc5a486"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-017",
+      "set_id": "ECP-MVS-RVR-005",
+      "variant": "V-BASE",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 3,
+      "premises": [
+        "The vinazais is older than the zitheesk.",
+        "The zitheesk is older than the beepom.",
+        "The beepom is older than the neegrisk.",
+        "The neegrisk is older than the darothik."
+      ],
+      "question": "Which of these is the oldest: vinazais, zitheesk, beepom, neegrisk, or darothik?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "vinazais",
+          "zitheesk",
+          "beepom",
+          "neegrisk",
+          "darothik"
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::005",
+        "decision_log_index": 5
+      },
+      "prompt_sha256": "833641f2caef600a1f18c6e113921514388130defb7e7ec9ff9e80ef742f1807",
+      "gt_commitment": "1295cd4d4f7c485c5c5117e51d3dea3c5c6a0752dd98f4c5806a7a7b10d032e9",
+      "case_sha256": "5609155d6cc6fa6d5ae74d6ed1d752c083b1b728cb7e2f28a3852b8fffb10ad6"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-018",
+      "set_id": "ECP-MVS-RVR-005",
+      "variant": "V-RPT",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 3,
+      "premises": [
+        "The klautrol is younger than the jousivuth.",
+        "The trikem is younger than the klautrol.",
+        "The kofausath is younger than the deprofur.",
+        "The deprofur is younger than the trikem."
+      ],
+      "question": "Of the items listed, which one has the greatest age: jousivuth, klautrol, trikem, deprofur, or kofausath?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "jousivuth",
+          "klautrol",
+          "trikem",
+          "deprofur",
+          "kofausath"
+        ]
+      },
+      "transform": {
+        "rename_map": {
+          "vinazais": "jousivuth",
+          "zitheesk": "klautrol",
+          "beepom": "trikem",
+          "neegrisk": "deprofur",
+          "darothik": "kofausath"
+        },
+        "paraphrase": true,
+        "premise_order": [
+          0,
+          1,
+          3,
+          2
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::005",
+        "decision_log_index": 5
+      },
+      "prompt_sha256": "89e3c9b5ff376b02f66120546125fda739cf5e57831329a44b2d3b2b1d7e35b8",
+      "gt_commitment": "214787c84dcf1125811536ed68201df7c4fb07de85b5b11db641ae3d80901879",
+      "case_sha256": "ae1ca7d9b89ea38367e7c88ab0932d3d44ad79a862503d8e6ff378d981a76e91"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-019",
+      "set_id": "ECP-MVS-RVR-005",
+      "variant": "V-FLIP",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 3,
+      "premises": [
+        "The zitheesk is older than the vinazais.",
+        "The zitheesk is older than the beepom.",
+        "The beepom is older than the neegrisk.",
+        "The neegrisk is older than the darothik."
+      ],
+      "question": "Which of these is the oldest: vinazais, zitheesk, beepom, neegrisk, or darothik?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "vinazais",
+          "zitheesk",
+          "beepom",
+          "neegrisk",
+          "darothik"
+        ]
+      },
+      "flip": {
+        "premise_index": 0,
+        "class": "relation_reversal",
+        "old": "The vinazais is older than the zitheesk.",
+        "new": "The zitheesk is older than the vinazais."
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::005",
+        "decision_log_index": 5
+      },
+      "prompt_sha256": "6c1578bb3d3cce40f53ab50e995002461085c725c3fb22872e27fdedbb1b5c09",
+      "gt_commitment": "b1154bbdcdc7cc022f227fe2cd66f0ea3ce68306c270b05d048d21f8ba133a43",
+      "case_sha256": "8d209effbac29667d5b83e7d1c35587dd8123e1301e20099b9b0bfcf2df72da9"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-020",
+      "set_id": "ECP-MVS-RVR-005",
+      "variant": "V-LURE",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 3,
+      "premises": [
+        "The vinazais is older than the zitheesk.",
+        "The zitheesk is older than the beepom.",
+        "The beepom is older than the neegrisk.",
+        "The neegrisk is older than the darothik."
+      ],
+      "question": "Which of these is the oldest: vinazais, zitheesk, beepom, neegrisk, or darothik?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "vinazais",
+          "zitheesk",
+          "beepom",
+          "neegrisk",
+          "darothik"
+        ]
+      },
+      "lure": {
+        "class": "LC-1",
+        "template_id": "L-F1-ENUM-1",
+        "lure_answer": "beepom"
+      },
+      "lure_note": "(Note: the beepom is the most talked-about item in the collection.)",
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::005",
+        "decision_log_index": 5
+      },
+      "prompt_sha256": "73726c9527f14bb99a9a94e6c5c2b568b7c84c2df68ebfb7b2296912d2285717",
+      "gt_commitment": "f2d7f990619b1a5411108924aab0e3b3780e05360639367885ac9b52e81619e9",
+      "case_sha256": "bac46d63865b584a1ed32b55bb58bf9850343bbda82ce67fd7391a54b9cc3439"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-021",
+      "set_id": "ECP-MVS-RVR-006",
+      "variant": "V-BASE",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 3,
+      "premises": [
+        "The seeklugau is faster than the fibrulen.",
+        "The fibrulen is faster than the doudrak.",
+        "The doudrak is faster than the steevilt.",
+        "The steevilt is faster than the zejak."
+      ],
+      "question": "Which of these is the slowest: seeklugau, fibrulen, doudrak, steevilt, or zejak?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "seeklugau",
+          "fibrulen",
+          "doudrak",
+          "steevilt",
+          "zejak"
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::006",
+        "decision_log_index": 6
+      },
+      "prompt_sha256": "f4ae446f9a0ea346b2dd7927b1c27b6e42af90ad6bcc83731e785b1fc234c283",
+      "gt_commitment": "f00c2199b1c21d0d2033a225479d0d1d88bc99d0963af8ec39095c425362db35",
+      "case_sha256": "539ef372c5bf478992ed691e12ea77f528b6d766d758c7b59f9ad6274764b015"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-022",
+      "set_id": "ECP-MVS-RVR-006",
+      "variant": "V-RPT",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 3,
+      "premises": [
+        "The broushais is slower than the croprim.",
+        "The solulean is slower than the groucrurn.",
+        "The vufas is slower than the broushais.",
+        "The groucrurn is slower than the vufas."
+      ],
+      "question": "Of the items listed, which one moves the slowest: croprim, broushais, vufas, groucrurn, or solulean?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "croprim",
+          "broushais",
+          "vufas",
+          "groucrurn",
+          "solulean"
+        ]
+      },
+      "transform": {
+        "rename_map": {
+          "seeklugau": "croprim",
+          "fibrulen": "broushais",
+          "doudrak": "vufas",
+          "steevilt": "groucrurn",
+          "zejak": "solulean"
+        },
+        "paraphrase": true,
+        "premise_order": [
+          0,
+          3,
+          1,
+          2
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::006",
+        "decision_log_index": 6
+      },
+      "prompt_sha256": "462adf54cf223a777ec14c9aaaec5b1af629a21d431b1378009501e1199c2481",
+      "gt_commitment": "6a750d227175dd34729e4b543d4d5dea7777e50106d1a0fe9f2125bba7cce212",
+      "case_sha256": "e0e6e2290744fb3756a43d6bd0ba505f8f87c05f6f057d4eac92e8a5574b68ad"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-023",
+      "set_id": "ECP-MVS-RVR-006",
+      "variant": "V-FLIP",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 3,
+      "premises": [
+        "The seeklugau is faster than the fibrulen.",
+        "The fibrulen is faster than the doudrak.",
+        "The doudrak is faster than the steevilt.",
+        "The zejak is faster than the steevilt."
+      ],
+      "question": "Which of these is the slowest: seeklugau, fibrulen, doudrak, steevilt, or zejak?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "seeklugau",
+          "fibrulen",
+          "doudrak",
+          "steevilt",
+          "zejak"
+        ]
+      },
+      "flip": {
+        "premise_index": 3,
+        "class": "relation_reversal",
+        "old": "The steevilt is faster than the zejak.",
+        "new": "The zejak is faster than the steevilt."
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::006",
+        "decision_log_index": 6
+      },
+      "prompt_sha256": "28d7026a2ef86b00f187c33ee6e7be29d78021058df8771b25400c84a6d04a19",
+      "gt_commitment": "1bd10fda37862f66bbf7b685f5a94694c5be8eed377fe68107b1799efb499619",
+      "case_sha256": "0b11f77d12943d33d5ccdeb4a255565ad93beb4cce8245bee3a2cf352c8e2a6a"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-024",
+      "set_id": "ECP-MVS-RVR-006",
+      "variant": "V-LURE",
+      "family": "F1",
+      "family_name": "transitive-compositional-relational",
+      "depth": 3,
+      "premises": [
+        "The seeklugau is faster than the fibrulen.",
+        "The fibrulen is faster than the doudrak.",
+        "The doudrak is faster than the steevilt.",
+        "The steevilt is faster than the zejak."
+      ],
+      "question": "Which of these is the slowest: seeklugau, fibrulen, doudrak, steevilt, or zejak?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "seeklugau",
+          "fibrulen",
+          "doudrak",
+          "steevilt",
+          "zejak"
+        ]
+      },
+      "lure": {
+        "class": "LC-1",
+        "template_id": "L-F1-ENUM-1",
+        "lure_answer": "doudrak"
+      },
+      "lure_note": "(Note: the doudrak is the most talked-about item in the collection.)",
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::006",
+        "decision_log_index": 6
+      },
+      "prompt_sha256": "5576699c115ec5da3944825261bac4ff9b74fd59d2265cbfdb59001755e8618d",
+      "gt_commitment": "52da34661f8dcba0e7732f5d8d903295155ad0eab357572d639b7854c3777ede",
+      "case_sha256": "94ca28061681f0d7b10432bcdb40228e405d4413b631c3912a778ddda6e89c8d"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-025",
+      "set_id": "ECP-MVS-RVR-007",
+      "variant": "V-BASE",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 1,
+      "premises": [
+        "The shadrask tank holds 13 units.",
+        "The sileath tank holds 18 units."
+      ],
+      "question": "Does the shadrask tank hold more units than the sileath tank?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::007",
+        "decision_log_index": 7
+      },
+      "prompt_sha256": "62944a11ced8f3265cc41fea0272544637c9357f51c5cd0532ade54a226c257a",
+      "gt_commitment": "045bbb781cd3315fb3a9ba6b38c87627fa8b388f1484a8c77a583a6f129cc87e",
+      "case_sha256": "b40a35dab1029a69629c8e33ddd3bbfababbe89d3c5129eb7d5266715561b848"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-026",
+      "set_id": "ECP-MVS-RVR-007",
+      "variant": "V-RPT",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 1,
+      "premises": [
+        "The gougaun tank has a capacity of 13 units.",
+        "The deadind tank has a capacity of 18 units."
+      ],
+      "question": "Is the number of units in the gougaun tank greater than the number in the deadind tank?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "transform": {
+        "rename_map": {
+          "shadrask": "gougaun",
+          "sileath": "deadind",
+          "jazas": "deecrear"
+        },
+        "paraphrase": true,
+        "premise_order": [
+          0,
+          1
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::007",
+        "decision_log_index": 7
+      },
+      "prompt_sha256": "b268e02a09d4c23d26300d7de70f80284ec25226c1a0b5985496f60dc6dd4262",
+      "gt_commitment": "a66d07ac4ac8df586c95103962820fde0143b1ee9e1d461b88290f5d2594efa8",
+      "case_sha256": "918373ca7e669585e91f7db2c1a3dfa76af1537a1d2809688780ff25a94e6ee7"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-027",
+      "set_id": "ECP-MVS-RVR-007",
+      "variant": "V-FLIP",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 1,
+      "premises": [
+        "The shadrask tank holds 19 units.",
+        "The sileath tank holds 18 units."
+      ],
+      "question": "Does the shadrask tank hold more units than the sileath tank?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "flip": {
+        "premise_index": 0,
+        "class": "stated_value_change",
+        "old": "The shadrask tank holds 13 units.",
+        "new": "The shadrask tank holds 19 units."
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::007",
+        "decision_log_index": 7
+      },
+      "prompt_sha256": "ba58d4dd0f3ef483b182c8db29c9b75fa1c6496303c9bb07ca5f132a6a81eb5a",
+      "gt_commitment": "484d85d93524bfa698df5bfcb3db54b3ef951d0418ba0326a8ece834973f6fb8",
+      "case_sha256": "cbc3395e0eef28bc9579389bb8e5d255adeea49ba85c08003d2b33350652bacd"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-028",
+      "set_id": "ECP-MVS-RVR-007",
+      "variant": "V-LURE",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 1,
+      "premises": [
+        "The shadrask tank holds 13 units.",
+        "The sileath tank holds 18 units."
+      ],
+      "question": "Does the shadrask tank hold more units than the sileath tank?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "lure": {
+        "class": "LC-2",
+        "template_id": "L-F2YN-PRIZE-1",
+        "lure_answer": "yes"
+      },
+      "lure_note": "(Note: the shadrask tank has taken first prize at every fair for years.)",
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::007",
+        "decision_log_index": 7
+      },
+      "prompt_sha256": "cfcea475c059bbebf0148a3d32794806e225a2381c44ac1d1319b49cb2103ff0",
+      "gt_commitment": "7119b6cde2e7c8902a0a161365edd5bea1e7a714ff4bc042e49f71141128d16f",
+      "case_sha256": "0ad6489ac3ec7cd0454ace7144747f05d593abfbefc07c68c876105b6b9b0db3"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-029",
+      "set_id": "ECP-MVS-RVR-008",
+      "variant": "V-BASE",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 1,
+      "premises": [
+        "The neevend vessel holds 14 units.",
+        "The treadoun vessel holds 12 units.",
+        "The crugraund vessel holds 17 units."
+      ],
+      "question": "Which vessel holds the most units: neevend, treadoun, or crugraund?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "neevend",
+          "treadoun",
+          "crugraund"
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::008",
+        "decision_log_index": 8
+      },
+      "prompt_sha256": "5e95d067e57a28fce8dc152c0d8dd1e7a4ba277f5946c134ee9cd282cdd76e98",
+      "gt_commitment": "d734c7199a2d7be37188db4f298ba708f4d1cb1cae17854d65f3f89fb8bc0230",
+      "case_sha256": "acc8a1153f216843eff547cf0dba2216967234288a4e1dfd9e547a3d60cac300"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-030",
+      "set_id": "ECP-MVS-RVR-008",
+      "variant": "V-RPT",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 1,
+      "premises": [
+        "The naitraun vessel has a capacity of 17 units.",
+        "The foklavas vessel has a capacity of 14 units.",
+        "The keethai vessel has a capacity of 12 units."
+      ],
+      "question": "Of these vessels, which one holds the greatest number of units: foklavas, keethai, or naitraun?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "foklavas",
+          "keethai",
+          "naitraun"
+        ]
+      },
+      "transform": {
+        "rename_map": {
+          "neevend": "foklavas",
+          "treadoun": "keethai",
+          "crugraund": "naitraun"
+        },
+        "paraphrase": true,
+        "premise_order": [
+          2,
+          0,
+          1
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::008",
+        "decision_log_index": 8
+      },
+      "prompt_sha256": "4f2383dba5bd7b2bc6c665d9a08ff5778c794d341fa4799d34769a8d48a60f47",
+      "gt_commitment": "9ac6eba8a602da4ee3fcc5c1287b45eb5785ccfdaa62e7d20aa77978ecc405dd",
+      "case_sha256": "ab8d94f6078e511d5be0233fbd59f4009d020f7e4076ee5857204c72b361a2ee"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-031",
+      "set_id": "ECP-MVS-RVR-008",
+      "variant": "V-FLIP",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 1,
+      "premises": [
+        "The neevend vessel holds 18 units.",
+        "The treadoun vessel holds 12 units.",
+        "The crugraund vessel holds 17 units."
+      ],
+      "question": "Which vessel holds the most units: neevend, treadoun, or crugraund?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "neevend",
+          "treadoun",
+          "crugraund"
+        ]
+      },
+      "flip": {
+        "premise_index": 0,
+        "class": "stated_value_change",
+        "old": "The neevend vessel holds 14 units.",
+        "new": "The neevend vessel holds 18 units."
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::008",
+        "decision_log_index": 8
+      },
+      "prompt_sha256": "fde1977463b9b88089c0f532e2e43691dc7a17575c87edcf9e52bb5fa98a0b59",
+      "gt_commitment": "d9d9f0573897213cf43480edcbf4771efa58ab3656a6247130f191f64407df16",
+      "case_sha256": "808f83adbff2170f4db4c4455a2fa4c3f695654489f5448fb53bf5de233dbf0b"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-032",
+      "set_id": "ECP-MVS-RVR-008",
+      "variant": "V-LURE",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 1,
+      "premises": [
+        "The neevend vessel holds 14 units.",
+        "The treadoun vessel holds 12 units.",
+        "The crugraund vessel holds 17 units."
+      ],
+      "question": "Which vessel holds the most units: neevend, treadoun, or crugraund?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "neevend",
+          "treadoun",
+          "crugraund"
+        ]
+      },
+      "lure": {
+        "class": "LC-2",
+        "template_id": "L-F2-ENUM-1",
+        "lure_answer": "treadoun"
+      },
+      "lure_note": "(Note: the treadoun vessel was observed 51 times last season — a standing record.)",
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::008",
+        "decision_log_index": 8
+      },
+      "prompt_sha256": "8ba07210c7b49d6c2cf7d3a90a4a3093281d2a89e97ac9fcbe978c6aab38222e",
+      "gt_commitment": "f6ad55d0f547bb1c2c373b45bfcacb651ea83ef7f0285ee821e15da1d87c11b7",
+      "case_sha256": "f751b123e10e3e9893684ce540d0ea75b47a6758c116a75527b8f640a50b9381"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-033",
+      "set_id": "ECP-MVS-RVR-009",
+      "variant": "V-BASE",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 2,
+      "premises": [
+        "The drenoth container holds 6 units.",
+        "The meestea container holds 3 times as many units as the drenoth container.",
+        "The klefafirn container holds 5 more units than the meestea container."
+      ],
+      "question": "Does the klefafirn container hold more than 39 units?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::009",
+        "decision_log_index": 9
+      },
+      "prompt_sha256": "88c45f4a3704720e2d35c79c8ca88b974c5a4ee280ca3709ec90db91b05d516f",
+      "gt_commitment": "dca377d7230d7c4894aba195f7f60e2bcefd04a57e3236ffc1725ae8a18726d3",
+      "case_sha256": "b0ba42060632511821639918fda2631d020ea526d930af1d887cc23e37f581f7"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-034",
+      "set_id": "ECP-MVS-RVR-009",
+      "variant": "V-RPT",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 2,
+      "premises": [
+        "The bafus container has a capacity of 6 units.",
+        "The tearauk container's unit count is 3 times the bafus container's.",
+        "The caupee container holds 5 units more than the tearauk container does."
+      ],
+      "question": "Is the unit count of the caupee container greater than 39?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "transform": {
+        "rename_map": {
+          "klefafirn": "caupee",
+          "meestea": "tearauk",
+          "drenoth": "bafus"
+        },
+        "paraphrase": true,
+        "premise_order": [
+          0,
+          1,
+          2
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::009",
+        "decision_log_index": 9
+      },
+      "prompt_sha256": "495dbc8c71910d68ee98ae78d3af644bb50d0e0a65db6c8cbca519eee7175b22",
+      "gt_commitment": "54f8dad7bdf2811a7404e2a99815ff3dd0d7de13c920f1573e735ad8f0b7b584",
+      "case_sha256": "e44123c77f742b7915a0f08f6e8f5c52cec276f7a7fc1aaeefe50e7e07bc8dc9"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-035",
+      "set_id": "ECP-MVS-RVR-009",
+      "variant": "V-FLIP",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 2,
+      "premises": [
+        "The drenoth container holds 12 units.",
+        "The meestea container holds 3 times as many units as the drenoth container.",
+        "The klefafirn container holds 5 more units than the meestea container."
+      ],
+      "question": "Does the klefafirn container hold more than 39 units?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "flip": {
+        "premise_index": 0,
+        "class": "stated_value_change",
+        "old": "The drenoth container holds 6 units.",
+        "new": "The drenoth container holds 12 units."
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::009",
+        "decision_log_index": 9
+      },
+      "prompt_sha256": "ccebd76ba4a8f6b5a75abd817d02b5f31baad38d43a7fe77ec1789c4ae4f3d7f",
+      "gt_commitment": "db92a53e3fb1f16275981c5124d1d8994897aaf2ab2c6e65623b7fa36cd9d9b4",
+      "case_sha256": "577d8e52df4a6c1fbd447c36acd280fb130264b2116793be2ed0302e3b3d1e7e"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-036",
+      "set_id": "ECP-MVS-RVR-009",
+      "variant": "V-LURE",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 2,
+      "premises": [
+        "The drenoth container holds 6 units.",
+        "The meestea container holds 3 times as many units as the drenoth container.",
+        "The klefafirn container holds 5 more units than the meestea container."
+      ],
+      "question": "Does the klefafirn container hold more than 39 units?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "lure": {
+        "class": "LC-2",
+        "template_id": "L-F2YN-PRIZE-1",
+        "lure_answer": "yes"
+      },
+      "lure_note": "(Note: the klefafirn container has taken first prize at every fair for years.)",
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::009",
+        "decision_log_index": 9
+      },
+      "prompt_sha256": "5dc6cc21d2052dda713fb94aa87bfba1363ce54e80117b0b91928029eff22590",
+      "gt_commitment": "55bd85c5036307db7ea73b12126527376ffa3b5f0fd6f1e890e10bf10af08244",
+      "case_sha256": "865bd7e03d608538a185bca33112d7d748ce50978c54cf0c08074829675e2465"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-037",
+      "set_id": "ECP-MVS-RVR-010",
+      "variant": "V-BASE",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 2,
+      "premises": [
+        "The jinuth container holds 4 units.",
+        "The zezoubask container holds 14 units.",
+        "The fobreekos container holds 3 more units than the jinuth container."
+      ],
+      "question": "Which container holds the most units: zezoubask, fobreekos, or jinuth?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "zezoubask",
+          "fobreekos",
+          "jinuth"
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::010",
+        "decision_log_index": 10
+      },
+      "prompt_sha256": "3dd58bc712c1d7246b478294f7a324c0ed1814fa9d7e5f4b522c062d1067eab4",
+      "gt_commitment": "1b5a710617718bdcb530a99f7f952a28648b1288c71c1efa53aa2446d3b3169a",
+      "case_sha256": "0a504b0b919e4727b769cd2fa9954297adfdfd5425d9ef562515f25cf6583846"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-038",
+      "set_id": "ECP-MVS-RVR-010",
+      "variant": "V-RPT",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 2,
+      "premises": [
+        "The brapraund container has a capacity of 4 units.",
+        "The riraiklee container has a capacity of 14 units.",
+        "The jathult container holds 3 units more than the brapraund container does."
+      ],
+      "question": "Of these containers, which one holds the greatest number of units: riraiklee, jathult, or brapraund?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "riraiklee",
+          "jathult",
+          "brapraund"
+        ]
+      },
+      "transform": {
+        "rename_map": {
+          "zezoubask": "riraiklee",
+          "fobreekos": "jathult",
+          "jinuth": "brapraund"
+        },
+        "paraphrase": true,
+        "premise_order": [
+          0,
+          1,
+          2
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::010",
+        "decision_log_index": 10
+      },
+      "prompt_sha256": "3d2b722f1b7d0d3e2c627aa9490c87c1d6edc2338b9c2538edba1d3d938032ad",
+      "gt_commitment": "aca42df8f560c3d5dfd4a1c5e2a2eb3f8e011e6766c9c2a7e1b925fa31586568",
+      "case_sha256": "0df97cf78802a91f19dd35e388907b26d72169798123673d9bb806a8f2ca1039"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-039",
+      "set_id": "ECP-MVS-RVR-010",
+      "variant": "V-FLIP",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 2,
+      "premises": [
+        "The jinuth container holds 12 units.",
+        "The zezoubask container holds 14 units.",
+        "The fobreekos container holds 3 more units than the jinuth container."
+      ],
+      "question": "Which container holds the most units: zezoubask, fobreekos, or jinuth?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "zezoubask",
+          "fobreekos",
+          "jinuth"
+        ]
+      },
+      "flip": {
+        "premise_index": 0,
+        "class": "stated_value_change",
+        "old": "The jinuth container holds 4 units.",
+        "new": "The jinuth container holds 12 units."
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::010",
+        "decision_log_index": 10
+      },
+      "prompt_sha256": "fb32f4b34b4b0cf40aa2600bc645e07dc0537f1246f09da2b4e20382b6abb37a",
+      "gt_commitment": "970bebee16d0fcab264a21ddd39c85539b9e549c47689cd1d3601de5def735fb",
+      "case_sha256": "66c5b1e65b87084fc747a0cc5d37c747336c188ed9c6b6b73852568a91fa6622"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-040",
+      "set_id": "ECP-MVS-RVR-010",
+      "variant": "V-LURE",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 2,
+      "premises": [
+        "The jinuth container holds 4 units.",
+        "The zezoubask container holds 14 units.",
+        "The fobreekos container holds 3 more units than the jinuth container."
+      ],
+      "question": "Which container holds the most units: zezoubask, fobreekos, or jinuth?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "zezoubask",
+          "fobreekos",
+          "jinuth"
+        ]
+      },
+      "lure": {
+        "class": "LC-2",
+        "template_id": "L-F2-ENUM-1",
+        "lure_answer": "jinuth"
+      },
+      "lure_note": "(Note: the jinuth container was observed 44 times last season — a standing record.)",
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::010",
+        "decision_log_index": 10
+      },
+      "prompt_sha256": "41bc16e6f4bc0ddff321ac7249e67fdef47a709cae4dfc3910312d6d8d2cd10d",
+      "gt_commitment": "027897fd709bf8997f8b667b81665b42f7d047d44a6203ace368f3a9ed26859a",
+      "case_sha256": "9ea403abd04012b62dad2189cddc0815bf534f72a1cdf6bae8df429b6f8d900f"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-041",
+      "set_id": "ECP-MVS-RVR-011",
+      "variant": "V-BASE",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 3,
+      "premises": [
+        "The teapind vessel holds 3 units.",
+        "The motour vessel holds 3 times as many units as the teapind vessel.",
+        "The thegrouk vessel holds 2 times as many units as the motour vessel."
+      ],
+      "question": "Does the thegrouk vessel hold more than 26 units?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::011",
+        "decision_log_index": 11
+      },
+      "prompt_sha256": "e94fcec37c15ba20b1ce7dc73692459f0f9cc71e16f5f375934ec13e07ca28be",
+      "gt_commitment": "f5d9b14ccc08592d71f32cb3e671cc187e4ef0a7ff9eca0eb4f3298746c4aa54",
+      "case_sha256": "31bbade198f768d70fc18f3ec3c898f4e749f7c24d6d4cd86ddac49034647cb9"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-042",
+      "set_id": "ECP-MVS-RVR-011",
+      "variant": "V-RPT",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 3,
+      "premises": [
+        "The provom vessel's unit count is 3 times the prikaim vessel's.",
+        "The griripris vessel's unit count is 2 times the provom vessel's.",
+        "The prikaim vessel has a capacity of 3 units."
+      ],
+      "question": "Is the unit count of the griripris vessel greater than 26?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "transform": {
+        "rename_map": {
+          "thegrouk": "griripris",
+          "motour": "provom",
+          "teapind": "prikaim"
+        },
+        "paraphrase": true,
+        "premise_order": [
+          1,
+          2,
+          0
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::011",
+        "decision_log_index": 11
+      },
+      "prompt_sha256": "fa00a33986b28d9407f13abd0af6ea9a0721bf47cd149996fcd6c290fab7f11a",
+      "gt_commitment": "104db9e2bec5bed2939972bf3a67f83438fb57d68b38447f838dc72d311cc9b6",
+      "case_sha256": "2d71e6679ece916f2ca24ee13b8e6807481c7a9f0bf4cb83488bb33e0763598f"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-043",
+      "set_id": "ECP-MVS-RVR-011",
+      "variant": "V-FLIP",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 3,
+      "premises": [
+        "The teapind vessel holds 5 units.",
+        "The motour vessel holds 3 times as many units as the teapind vessel.",
+        "The thegrouk vessel holds 2 times as many units as the motour vessel."
+      ],
+      "question": "Does the thegrouk vessel hold more than 26 units?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "flip": {
+        "premise_index": 0,
+        "class": "stated_value_change",
+        "old": "The teapind vessel holds 3 units.",
+        "new": "The teapind vessel holds 5 units."
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::011",
+        "decision_log_index": 11
+      },
+      "prompt_sha256": "ea973e818a0763b03c779f00583c0767f9ce04267f4740ff71e715ae6c44651d",
+      "gt_commitment": "cddd6cd62cf46182312d886f81ab5556e5974a9328a80b45e93b2acefbb7bace",
+      "case_sha256": "195b3761cae4ce325d68db9c163e069d09ac34478d902321217149cca0692474"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-044",
+      "set_id": "ECP-MVS-RVR-011",
+      "variant": "V-LURE",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 3,
+      "premises": [
+        "The teapind vessel holds 3 units.",
+        "The motour vessel holds 3 times as many units as the teapind vessel.",
+        "The thegrouk vessel holds 2 times as many units as the motour vessel."
+      ],
+      "question": "Does the thegrouk vessel hold more than 26 units?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "lure": {
+        "class": "LC-2",
+        "template_id": "L-F2YN-PRIZE-1",
+        "lure_answer": "yes"
+      },
+      "lure_note": "(Note: the thegrouk vessel has taken first prize at every fair for years.)",
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::011",
+        "decision_log_index": 11
+      },
+      "prompt_sha256": "5d01b4bb21c79396829f2cd2b0a455daf59f60fe31684b0ff0af6e4e918875a9",
+      "gt_commitment": "3d1231d71b652b41d4911384dc17ba85c4bc5a80d55b6bdfb73d6c7e36b9d16a",
+      "case_sha256": "996463cf09e859e88c26ef6da106ad78de59fffdadeeb299baebeb7ff42b080a"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-045",
+      "set_id": "ECP-MVS-RVR-012",
+      "variant": "V-BASE",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 3,
+      "premises": [
+        "The creciku tank holds 6 units.",
+        "The tromecok tank holds 3 times as many units as the creciku tank.",
+        "The fiker tank holds 5 fewer units than the tromecok tank."
+      ],
+      "question": "Which tank holds the most units: fiker, tromecok, or creciku?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "fiker",
+          "tromecok",
+          "creciku"
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::012",
+        "decision_log_index": 12
+      },
+      "prompt_sha256": "b8440cf9eee423a8502919a7edadf49ac639293869a09543490079b6826f3d55",
+      "gt_commitment": "bcb8f30e513655889f0df2c15f197a29b0e653be16c665189eda9685c5f72511",
+      "case_sha256": "878f603048adf663070e901d3448564c0dac7a329784260a8625234798ae9855"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-046",
+      "set_id": "ECP-MVS-RVR-012",
+      "variant": "V-RPT",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 3,
+      "premises": [
+        "The bouvagask tank holds 5 units fewer than the paumi tank does.",
+        "The zeatrirn tank has a capacity of 6 units.",
+        "The paumi tank's unit count is 3 times the zeatrirn tank's."
+      ],
+      "question": "Of these tanks, which one holds the greatest number of units: bouvagask, paumi, or zeatrirn?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "bouvagask",
+          "paumi",
+          "zeatrirn"
+        ]
+      },
+      "transform": {
+        "rename_map": {
+          "fiker": "bouvagask",
+          "tromecok": "paumi",
+          "creciku": "zeatrirn"
+        },
+        "paraphrase": true,
+        "premise_order": [
+          2,
+          0,
+          1
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::012",
+        "decision_log_index": 12
+      },
+      "prompt_sha256": "70933d7bc50b0905e89d96f6e99b34c09ef95ebffcd664f8227ebbeab993b972",
+      "gt_commitment": "363dfe73e2ea1e7a7a06ac2d94b402b25f25e7a791b6412b3169f84d322ffcd4",
+      "case_sha256": "e1d78615e9aea5a1afe0b0231cef3e5ea9b93d93a0bac72ce00fbc6a04e83ff8"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-047",
+      "set_id": "ECP-MVS-RVR-012",
+      "variant": "V-FLIP",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 3,
+      "premises": [
+        "The creciku tank holds 6 units.",
+        "The tromecok tank holds 3 times as many units as the creciku tank.",
+        "The fiker tank holds 6 more units than the tromecok tank."
+      ],
+      "question": "Which tank holds the most units: fiker, tromecok, or creciku?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "fiker",
+          "tromecok",
+          "creciku"
+        ]
+      },
+      "flip": {
+        "premise_index": 2,
+        "class": "delta_change",
+        "old": "The fiker tank holds 5 fewer units than the tromecok tank.",
+        "new": "The fiker tank holds 6 more units than the tromecok tank."
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::012",
+        "decision_log_index": 12
+      },
+      "prompt_sha256": "39c4ce898ea8fab800702e69390d26fc177a7ca01f6d4b7a201ecec4a29db322",
+      "gt_commitment": "95c4ca1261fe8fd9680b93d1f2ab5adc58d58799190fdf7c644e661bafcdafa2",
+      "case_sha256": "9c5ea5898659206bd95baee92536509b203873e01b8371e6ce97962016ac9867"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-048",
+      "set_id": "ECP-MVS-RVR-012",
+      "variant": "V-LURE",
+      "family": "F2",
+      "family_name": "quantitative-comparison",
+      "depth": 3,
+      "premises": [
+        "The creciku tank holds 6 units.",
+        "The tromecok tank holds 3 times as many units as the creciku tank.",
+        "The fiker tank holds 5 fewer units than the tromecok tank."
+      ],
+      "question": "Which tank holds the most units: fiker, tromecok, or creciku?",
+      "answer_grammar": {
+        "type": "value_enum",
+        "tokens": [
+          "fiker",
+          "tromecok",
+          "creciku"
+        ]
+      },
+      "lure": {
+        "class": "LC-2",
+        "template_id": "L-F2-ENUM-1",
+        "lure_answer": "creciku"
+      },
+      "lure_note": "(Note: the creciku tank was observed 42 times last season — a standing record.)",
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::012",
+        "decision_log_index": 12
+      },
+      "prompt_sha256": "1373fbbffede2d64c2e52de7a6cc65bc41ed867bab330845ad1b1984efde3766",
+      "gt_commitment": "394e683d29ba9f3ccee089d12faa7f4dfeadd653168f06da1cd83aeadfbdbee3",
+      "case_sha256": "75b4d1b3d86bab4b043559f9419c4c209069cea5da27f41c1e754a11f7c8252e"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-049",
+      "set_id": "ECP-MVS-RVR-013",
+      "variant": "V-BASE",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 1,
+      "premises": [
+        "The pretirn is faster than the creadeer.",
+        "The creadeer is faster than the rocrour."
+      ],
+      "question": "Do these premises contradict each other?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::013",
+        "decision_log_index": 13
+      },
+      "prompt_sha256": "e73ab2c39d5df9c8532f8e7934ecd18c54b2715d91308adb90c4c8b5149c4688",
+      "gt_commitment": "483d90c2a8653873cbc6d461e7bacc0ed204cd6db4531439aef65703e89d03b1",
+      "case_sha256": "5849246283f336849b46428141faa98147d4a09273cbad3f3c25776b98eb0055"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-050",
+      "set_id": "ECP-MVS-RVR-013",
+      "variant": "V-RPT",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 1,
+      "premises": [
+        "The greetau is slower than the thibrond.",
+        "The thibrond is slower than the nicoun."
+      ],
+      "question": "Do any of these statements conflict with one another?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "transform": {
+        "rename_map": {
+          "pretirn": "nicoun",
+          "creadeer": "thibrond",
+          "rocrour": "greetau"
+        },
+        "paraphrase": true,
+        "premise_order": [
+          1,
+          0
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::013",
+        "decision_log_index": 13
+      },
+      "prompt_sha256": "2c953da4fd3fbdd143eacc5b4dce9fe1a44dafa47eb9874b7d4dff31e419b301",
+      "gt_commitment": "22e1a07205b65bc1e32a5f2a7687622aeddd6ede67c1eee028e6dd5cb6141645",
+      "case_sha256": "f07005119179e3518d2722b767d641043b6b7bb8dae13a4a7a229b13421387bd"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-051",
+      "set_id": "ECP-MVS-RVR-013",
+      "variant": "V-FLIP",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 1,
+      "premises": [
+        "The rocrour is faster than the creadeer.",
+        "The creadeer is faster than the rocrour."
+      ],
+      "question": "Do these premises contradict each other?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "flip": {
+        "premise_index": 0,
+        "class": "entity_substitution",
+        "old": "The pretirn is faster than the creadeer.",
+        "new": "The rocrour is faster than the creadeer."
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::013",
+        "decision_log_index": 13
+      },
+      "prompt_sha256": "652d1e1a18fab906ce7bbf12bf8c94b17ac92ce36ad5bf3336ce7dadbb58b9fb",
+      "gt_commitment": "b32f90a8b70ef67385d8fdb197ef1bb01ddb3c002d0c058ec29e17c010650c1c",
+      "case_sha256": "7b8aad64dd49c6470288c44bee71d974a1a8cbd1825f195e100f7b5889e6948c"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-052",
+      "set_id": "ECP-MVS-RVR-013",
+      "variant": "V-LURE",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 1,
+      "premises": [
+        "The pretirn is faster than the creadeer.",
+        "The creadeer is faster than the rocrour."
+      ],
+      "question": "Do these premises contradict each other?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "lure": {
+        "class": "LC-3",
+        "template_id": "L-F3A-DISPUTE-1",
+        "lure_answer": "yes"
+      },
+      "lure_note": "(Note: these records were filed in a long-standing dispute.)",
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::013",
+        "decision_log_index": 13
+      },
+      "prompt_sha256": "6980aea93dff84093db68f2785fe120437c7608871847c65ec4676fa3f001cfa",
+      "gt_commitment": "8b4d6adc7348af671aa3bd9e2f60e0e1915053eb3dfcf9549f158ccd971739a0",
+      "case_sha256": "b09ee625ca475527539f889249eb038a90a6ac76714262d01776765b26b44e0a"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-053",
+      "set_id": "ECP-MVS-RVR-014",
+      "variant": "V-BASE",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 1,
+      "premises": [
+        "The dautilt is faster than the jaurorn.",
+        "The zeadail is faster than the godragaul."
+      ],
+      "question": "Is the dautilt faster than the zeadail?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::014",
+        "decision_log_index": 14
+      },
+      "prompt_sha256": "75b311b3089dd8c37310c4e4305ff66d03af5cb3bed6fd14518f3c2c5ffa1d36",
+      "gt_commitment": "6ad64d864ab382245a3cbc5e2330bb193cc6385dff04e38a73f4a27c36c55c12",
+      "case_sha256": "94a84ff0f21ca91bd5a5938e9d5b045ec93f7fc820ccadd70beff2bfc36b1801"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-054",
+      "set_id": "ECP-MVS-RVR-014",
+      "variant": "V-RPT",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 1,
+      "premises": [
+        "The brasaresk is slower than the pausedult.",
+        "The boukek is slower than the vaupuvirn."
+      ],
+      "question": "Is the vaupuvirn slower than the pausedult?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "transform": {
+        "rename_map": {
+          "dautilt": "pausedult",
+          "jaurorn": "brasaresk",
+          "zeadail": "vaupuvirn",
+          "godragaul": "boukek"
+        },
+        "paraphrase": true,
+        "premise_order": [
+          0,
+          1
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::014",
+        "decision_log_index": 14
+      },
+      "prompt_sha256": "25f12a01581737d42e1ef0545311878c20f63a43acd9f116ec5d9f52a08f1fd1",
+      "gt_commitment": "d6492f9ad5769de0b051c2edb88a41a77f5c18b58c30310a994eff65af07ee6f",
+      "case_sha256": "ffd3a6d0ec2673d39610b04c33e0fc0c9d31222c311e1f975eff14efe1b76e39"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-055",
+      "set_id": "ECP-MVS-RVR-014",
+      "variant": "V-FLIP",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 1,
+      "premises": [
+        "The dautilt is faster than the zeadail.",
+        "The zeadail is faster than the godragaul."
+      ],
+      "question": "Is the dautilt faster than the zeadail?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "flip": {
+        "premise_index": 0,
+        "class": "entity_substitution",
+        "old": "The dautilt is faster than the jaurorn.",
+        "new": "The dautilt is faster than the zeadail."
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::014",
+        "decision_log_index": 14
+      },
+      "prompt_sha256": "f1f7d98299fc36c1f6a93a45246bc5a878b9715468e170c1fb65fdd3c841ed6f",
+      "gt_commitment": "cba0d5ed8639f5a4b5e5076f41d844dcead976925708cc0fb05e142aaa5bbc6c",
+      "case_sha256": "8e843f4de0d610368c2b724068ac2952896c462470d5a75f83d05f903e223b26"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-056",
+      "set_id": "ECP-MVS-RVR-014",
+      "variant": "V-LURE",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 1,
+      "premises": [
+        "The dautilt is faster than the jaurorn.",
+        "The zeadail is faster than the godragaul."
+      ],
+      "question": "Is the dautilt faster than the zeadail?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "lure": {
+        "class": "LC-3",
+        "template_id": "L-F3B-RANK-1",
+        "lure_answer": "yes"
+      },
+      "lure_note": "(Note: veteran collectors nearly always rank the dautilt above the zeadail.)",
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::014",
+        "decision_log_index": 14
+      },
+      "prompt_sha256": "14602e184ee17c82dbea5d8e4cc0d9944f1dd8583b101e1d7ed1f0433a0cc795",
+      "gt_commitment": "d317e2a2cdf2da8d40416036a600691315f26d3cb40313c67d2b17fb2d22b9b1",
+      "case_sha256": "75c684a13dcb08cfc329dcce121c68d2096b27b4b386f0ba6ec73318daacbc30"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-057",
+      "set_id": "ECP-MVS-RVR-015",
+      "variant": "V-BASE",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 2,
+      "premises": [
+        "The kluthisk is heavier than the tegalt.",
+        "The tegalt is heavier than the cikerausk."
+      ],
+      "question": "Do these premises contradict each other?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::015",
+        "decision_log_index": 15
+      },
+      "prompt_sha256": "d56d14284a5539e48d6648a058acb27c5096a34c0050ab26e1efb600dcfee72d",
+      "gt_commitment": "c48ee7c44907166f8d1aaedb87826d302292e0851740a7f57c04ce9ade3482fb",
+      "case_sha256": "b3620f5344306d312da878ba766ce105c3129c34969df4870578e50bf479064a"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-058",
+      "set_id": "ECP-MVS-RVR-015",
+      "variant": "V-RPT",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 2,
+      "premises": [
+        "The fausi is lighter than the vutraive.",
+        "The steadouk is lighter than the fausi."
+      ],
+      "question": "Do any of these statements conflict with one another?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "transform": {
+        "rename_map": {
+          "kluthisk": "vutraive",
+          "tegalt": "fausi",
+          "cikerausk": "steadouk"
+        },
+        "paraphrase": true,
+        "premise_order": [
+          0,
+          1
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::015",
+        "decision_log_index": 15
+      },
+      "prompt_sha256": "44bc362c3bdd8d91b5b8e7fe9d44bd59f5e3a8aca84c9b1ca02026e275d017a5",
+      "gt_commitment": "675013187614704ed07a4adfb4371257bb0d0ff9986f6c0cbb9981f904742b46",
+      "case_sha256": "7223dddde0911ecad0d40e09533b0042351a925608a6529cc5830966d073b9b9"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-059",
+      "set_id": "ECP-MVS-RVR-015",
+      "variant": "V-FLIP",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 2,
+      "premises": [
+        "The cikerausk is heavier than the tegalt.",
+        "The tegalt is heavier than the cikerausk."
+      ],
+      "question": "Do these premises contradict each other?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "flip": {
+        "premise_index": 0,
+        "class": "entity_substitution",
+        "old": "The kluthisk is heavier than the tegalt.",
+        "new": "The cikerausk is heavier than the tegalt."
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::015",
+        "decision_log_index": 15
+      },
+      "prompt_sha256": "ec506eeba89518a388b741f3a9411ec622148ae418dda22956fcbf6e54df8285",
+      "gt_commitment": "6973d94e02ab6f13b997bc616f0a081659fb9257da1420fd3fb58619a9686ad6",
+      "case_sha256": "4082d6b9f35065de7712f6604d3e3d75656c05d36cccc360cd44d015f77311ee"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-060",
+      "set_id": "ECP-MVS-RVR-015",
+      "variant": "V-LURE",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 2,
+      "premises": [
+        "The kluthisk is heavier than the tegalt.",
+        "The tegalt is heavier than the cikerausk."
+      ],
+      "question": "Do these premises contradict each other?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "lure": {
+        "class": "LC-3",
+        "template_id": "L-F3A-DISPUTE-1",
+        "lure_answer": "yes"
+      },
+      "lure_note": "(Note: these records were filed in a long-standing dispute.)",
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::015",
+        "decision_log_index": 15
+      },
+      "prompt_sha256": "4fbe3ef93cb963331ec126b31ffc7b6414636ed1e3a4319ae057eda160908d6b",
+      "gt_commitment": "726ebb8596cc1279c4bbdabb11001957f9564f890aba05e943b19f6faf63d81f",
+      "case_sha256": "8cbaee37f18dfcabbbb3a10679f8a2513b664da84d6fa85f789858766f3fe52b"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-061",
+      "set_id": "ECP-MVS-RVR-016",
+      "variant": "V-BASE",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 2,
+      "premises": [
+        "The cretrek is taller than the gounand.",
+        "The gounand is taller than the zeazem.",
+        "The zeazem is taller than the cretrek."
+      ],
+      "question": "Do these premises contradict each other?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::016",
+        "decision_log_index": 16
+      },
+      "prompt_sha256": "321e7d2581a897e62d30323c645ecfd38e00edc4992712529c6ca2a398bab3ce",
+      "gt_commitment": "a420774ca7c7e04205af9eb8ff00a8ed964903b44e7ab731268cbdabde53af0e",
+      "case_sha256": "e3033830c6eb0224b89a630bcaec0a4ece294204004cef5182f2461de8528647"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-062",
+      "set_id": "ECP-MVS-RVR-016",
+      "variant": "V-RPT",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 2,
+      "premises": [
+        "The dreatund is shorter than the mupean.",
+        "The mupean is shorter than the dothond.",
+        "The dothond is shorter than the dreatund."
+      ],
+      "question": "Do any of these statements conflict with one another?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "transform": {
+        "rename_map": {
+          "cretrek": "dreatund",
+          "gounand": "dothond",
+          "zeazem": "mupean"
+        },
+        "paraphrase": true,
+        "premise_order": [
+          2,
+          1,
+          0
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::016",
+        "decision_log_index": 16
+      },
+      "prompt_sha256": "887fb509aa05a6a40b1c0279f15a78a8ce180b0a264da65e5593e2d2165394c3",
+      "gt_commitment": "060291e147d009408a4da5dfc1157001650e663ea4ebeb1b9cb9592f302b1c27",
+      "case_sha256": "d2bf3aa20edf627771c905e09f7ba0eb85f80c297030f46a0d41f960ee2f782f"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-063",
+      "set_id": "ECP-MVS-RVR-016",
+      "variant": "V-FLIP",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 2,
+      "premises": [
+        "The gounand is taller than the cretrek.",
+        "The gounand is taller than the zeazem.",
+        "The zeazem is taller than the cretrek."
+      ],
+      "question": "Do these premises contradict each other?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "flip": {
+        "premise_index": 0,
+        "class": "relation_reversal",
+        "old": "The cretrek is taller than the gounand.",
+        "new": "The gounand is taller than the cretrek."
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::016",
+        "decision_log_index": 16
+      },
+      "prompt_sha256": "82fc7406ae2ed960c12af8463987d0c063612a68fdbf850493218ebfc9eef58b",
+      "gt_commitment": "52c9034fbaf537eba3842f65f878f9a25143ad39a21db219a17a6ce38173513f",
+      "case_sha256": "1addd737ef3aaf2ef9315990e7fa7fca18b10537bd8932f33803d2dc96de62ca"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-064",
+      "set_id": "ECP-MVS-RVR-016",
+      "variant": "V-LURE",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 2,
+      "premises": [
+        "The cretrek is taller than the gounand.",
+        "The gounand is taller than the zeazem.",
+        "The zeazem is taller than the cretrek."
+      ],
+      "question": "Do these premises contradict each other?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "lure": {
+        "class": "LC-3",
+        "template_id": "L-F3A-AUTHENTIC-1",
+        "lure_answer": "no"
+      },
+      "lure_note": "(Note: both records are certified authentic by the registry.)",
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::016",
+        "decision_log_index": 16
+      },
+      "prompt_sha256": "6d29e981e0e5603c7da87525efa78727046acbcddc05539e12a6e9e0d4ded42a",
+      "gt_commitment": "8b5663bb286d186597dfc510cdb516d16aaa9c5f67dcb3528b1567ff871993e2",
+      "case_sha256": "278b23f0d049c4f32697394feeb1f3a49b68aa7b2c8b93832933ddc44c7113f4"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-065",
+      "set_id": "ECP-MVS-RVR-017",
+      "variant": "V-BASE",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 3,
+      "premises": [
+        "The rosesheth is taller than the ziseefolt.",
+        "The ziseefolt is taller than the rizoukund.",
+        "The rizoukund is taller than the naiban."
+      ],
+      "question": "Do these premises contradict each other?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::017",
+        "decision_log_index": 17
+      },
+      "prompt_sha256": "d3e480149931a2279e10320cc70fcb6f0bc3b8721a90432ad9f391e2ca5a80bb",
+      "gt_commitment": "e22b0d574f48c6fffc60fee0290d690af5c07582f99c0f86bb954260a3000ff1",
+      "case_sha256": "4f66aabde9e1088fbdbc4771b9665fccda287567f28a9ed4ec94e9dbdbc6c85f"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-066",
+      "set_id": "ECP-MVS-RVR-017",
+      "variant": "V-RPT",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 3,
+      "premises": [
+        "The kleekleas is shorter than the thaishur.",
+        "The neaseelun is shorter than the bouceend.",
+        "The thaishur is shorter than the neaseelun."
+      ],
+      "question": "Do any of these statements conflict with one another?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "transform": {
+        "rename_map": {
+          "rosesheth": "bouceend",
+          "ziseefolt": "neaseelun",
+          "rizoukund": "thaishur",
+          "naiban": "kleekleas"
+        },
+        "paraphrase": true,
+        "premise_order": [
+          2,
+          0,
+          1
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::017",
+        "decision_log_index": 17
+      },
+      "prompt_sha256": "2a2eda7ca3299d54916e5bddc61502198b01e7447185a4c4657e3353d994cff0",
+      "gt_commitment": "e7ec02e39d3fecdc1c668b93f94d40f850dde7c9c4822638227507c794efc72f",
+      "case_sha256": "19003bf94147b8a5eeabe4dfd40bb4aba688bf6be05302ff413b7245e2d5b786"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-067",
+      "set_id": "ECP-MVS-RVR-017",
+      "variant": "V-FLIP",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 3,
+      "premises": [
+        "The rizoukund is taller than the ziseefolt.",
+        "The ziseefolt is taller than the rizoukund.",
+        "The rizoukund is taller than the naiban."
+      ],
+      "question": "Do these premises contradict each other?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "flip": {
+        "premise_index": 0,
+        "class": "entity_substitution",
+        "old": "The rosesheth is taller than the ziseefolt.",
+        "new": "The rizoukund is taller than the ziseefolt."
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::017",
+        "decision_log_index": 17
+      },
+      "prompt_sha256": "1c0aea484c0f3f9b9472a180ab2079463cedb04d1b601b64e8b01479be16c594",
+      "gt_commitment": "f3646431af9f34d35bac1eb82425ce88d63900d5074afc852230aea8b41bca71",
+      "case_sha256": "9aaafe56e61c7340c136ddb9167c520be27e54dfe9394f6ce2283047e2ebca7e"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-068",
+      "set_id": "ECP-MVS-RVR-017",
+      "variant": "V-LURE",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 3,
+      "premises": [
+        "The rosesheth is taller than the ziseefolt.",
+        "The ziseefolt is taller than the rizoukund.",
+        "The rizoukund is taller than the naiban."
+      ],
+      "question": "Do these premises contradict each other?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "lure": {
+        "class": "LC-3",
+        "template_id": "L-F3A-DISPUTE-1",
+        "lure_answer": "yes"
+      },
+      "lure_note": "(Note: these records were filed in a long-standing dispute.)",
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::017",
+        "decision_log_index": 17
+      },
+      "prompt_sha256": "df4972103ba5ae761fdea862535927117c9f69ce56cdb4692d8afb81fae5020d",
+      "gt_commitment": "223def20317199a8d7e4edf5c4695912b4ebb347a31d45805f2993669f2294c8",
+      "case_sha256": "efb954d7e0c1d4bddbfa19e11fd848404cda1e72ec721ef47bdb112c15d8b0f1"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-069",
+      "set_id": "ECP-MVS-RVR-018",
+      "variant": "V-BASE",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 3,
+      "premises": [
+        "The cranosk is taller than the beacaceen.",
+        "The beacaceen is taller than the crutestam.",
+        "The cestithau is taller than the gralail.",
+        "The gralail is taller than the stulaur."
+      ],
+      "question": "Is the cranosk taller than the cestithau?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::018",
+        "decision_log_index": 18
+      },
+      "prompt_sha256": "080ea82710654d72e49fca6aa432dfa6ca9dd8fbe093a5c5c6b80ac30ae1a3af",
+      "gt_commitment": "ea87601aab290835f107bd9549811b89cd016f4a922d13df775e9d08b0e89a85",
+      "case_sha256": "008d5061af03e3850ba2b2505b58b8f42e2b861154ca38b6febc39a1e0156ef2"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-070",
+      "set_id": "ECP-MVS-RVR-018",
+      "variant": "V-RPT",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 3,
+      "premises": [
+        "The braitir is shorter than the keeshask.",
+        "The steenarn is shorter than the staicees.",
+        "The keeshask is shorter than the moubrul.",
+        "The dorel is shorter than the steenarn."
+      ],
+      "question": "Is the moubrul shorter than the staicees?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "transform": {
+        "rename_map": {
+          "cranosk": "staicees",
+          "beacaceen": "steenarn",
+          "crutestam": "dorel",
+          "cestithau": "moubrul",
+          "gralail": "keeshask",
+          "stulaur": "braitir"
+        },
+        "paraphrase": true,
+        "premise_order": [
+          3,
+          0,
+          2,
+          1
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::018",
+        "decision_log_index": 18
+      },
+      "prompt_sha256": "7e54db53e19ed04528e22d99e36fbceceba69891fba1f287c173c8545652ef7d",
+      "gt_commitment": "5878b0a24fb539af98db2437ec4e5adfe963466b00f0a4f798efff471ba615d1",
+      "case_sha256": "a7db46d1ffeaf868ff3ba2601047a62648092f14c8bf6b4fb95afabf3d53e5a5"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-071",
+      "set_id": "ECP-MVS-RVR-018",
+      "variant": "V-FLIP",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 3,
+      "premises": [
+        "The cranosk is taller than the cestithau.",
+        "The beacaceen is taller than the crutestam.",
+        "The cestithau is taller than the gralail.",
+        "The gralail is taller than the stulaur."
+      ],
+      "question": "Is the cranosk taller than the cestithau?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "flip": {
+        "premise_index": 0,
+        "class": "entity_substitution",
+        "old": "The cranosk is taller than the beacaceen.",
+        "new": "The cranosk is taller than the cestithau."
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::018",
+        "decision_log_index": 18
+      },
+      "prompt_sha256": "7997da1d7d3b08795fcd13e1bc91c658e7d6e78c0c2a1a08bfa0de2df1baa9b8",
+      "gt_commitment": "625533d642a3eb7b6e4cf4489bdba8c39b864ec9ea62a362d576de218e24498f",
+      "case_sha256": "75d9733a3e87645cbb71a8a3be501eb7021216ec1463f1788a94d520a60f7c08"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-072",
+      "set_id": "ECP-MVS-RVR-018",
+      "variant": "V-LURE",
+      "family": "F3",
+      "family_name": "consistency-contradiction",
+      "depth": 3,
+      "premises": [
+        "The cranosk is taller than the beacaceen.",
+        "The beacaceen is taller than the crutestam.",
+        "The cestithau is taller than the gralail.",
+        "The gralail is taller than the stulaur."
+      ],
+      "question": "Is the cranosk taller than the cestithau?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "lure": {
+        "class": "LC-3",
+        "template_id": "L-F3B-RANK-1",
+        "lure_answer": "yes"
+      },
+      "lure_note": "(Note: veteran collectors nearly always rank the cranosk above the cestithau.)",
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::018",
+        "decision_log_index": 18
+      },
+      "prompt_sha256": "b8a9b631bf7eb59d515769359795565e3551389248811c9503f87f18008e862e",
+      "gt_commitment": "55cf3a556546f18244c63c61b6334c1300d3fb9f3b419cbb4b2d54521c696eee",
+      "case_sha256": "a48ec21bbb24cee254d5005980e2aaa97c01282663d93fdd81230ba97f13a4dd"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-073",
+      "set_id": "ECP-MVS-RVR-019",
+      "variant": "V-BASE",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 1,
+      "premises": [
+        "Every drozeen is translucent.",
+        "No kouputh is translucent.",
+        "The stitro is a drozeen."
+      ],
+      "question": "Is the stitro translucent?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::019",
+        "decision_log_index": 19
+      },
+      "prompt_sha256": "786ac6180fd745b9da1337b3d4f6353076012f54a4c37288c51eeb68910ca48e",
+      "gt_commitment": "7201539ef4bdd7ef1d923788d82617a0e4dcefd82488503cc735863ab64a1294",
+      "case_sha256": "f3f79334d659efa7f5ea92dec12e2a6dff738f4892660b9a6081d32ad27a88ad"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-074",
+      "set_id": "ECP-MVS-RVR-019",
+      "variant": "V-RPT",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 1,
+      "premises": [
+        "Nothing in the pecim family is translucent.",
+        "Each member of the feraun family is translucent.",
+        "The klugajuk belongs to the feraun family."
+      ],
+      "question": "Does the klugajuk have the property of being translucent?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "transform": {
+        "rename_map": {
+          "stitro": "klugajuk",
+          "drozeen": "feraun",
+          "kouputh": "pecim"
+        },
+        "paraphrase": true,
+        "premise_order": [
+          1,
+          0,
+          2
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::019",
+        "decision_log_index": 19
+      },
+      "prompt_sha256": "eb25008aec7f6ae91af9084013db96b914db5b0375f97fb2d2d4dbf56743f103",
+      "gt_commitment": "8407e8b234d3c44f2b8f063a15dbc354587e0f04a98346ce79edd96c1c111ab0",
+      "case_sha256": "e2106898097c23cee881c1ccf9b7dae47624d14c2d60db6c9d0302dcbcec1ddd"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-075",
+      "set_id": "ECP-MVS-RVR-019",
+      "variant": "V-FLIP",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 1,
+      "premises": [
+        "Every drozeen is translucent.",
+        "No kouputh is translucent.",
+        "The stitro is a kouputh."
+      ],
+      "question": "Is the stitro translucent?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "flip": {
+        "premise_index": 2,
+        "class": "instance_family_reassignment",
+        "old": "The stitro is a drozeen.",
+        "new": "The stitro is a kouputh."
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::019",
+        "decision_log_index": 19
+      },
+      "prompt_sha256": "7487b44b6cf5e02392ab6934f3023f0b9729025747d56abfc102947cb2ce5d6e",
+      "gt_commitment": "f47175b1313988f780fc33cdcf95634e749e95b517415b1570355175ea752c12",
+      "case_sha256": "2ac8af79d4248d0f2ed305b10d80e5ad70715f906b8bb45f72ad6e85e610c710"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-076",
+      "set_id": "ECP-MVS-RVR-019",
+      "variant": "V-LURE",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 1,
+      "premises": [
+        "Every drozeen is translucent.",
+        "No kouputh is translucent.",
+        "The stitro is a drozeen."
+      ],
+      "question": "Is the stitro translucent?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "lure": {
+        "class": "LC-1",
+        "template_id": "L-F4-PROVERB-1",
+        "lure_answer": "no"
+      },
+      "lure_note": "(Note: the saying 'no kouputh is ever translucent' is the best-known proverb of the region.)",
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::019",
+        "decision_log_index": 19
+      },
+      "prompt_sha256": "2f91023292966609e83fc92b81682aa13669e4bbfa0873ad64d9e784db84db4e",
+      "gt_commitment": "90827aeabee82bbf12793a39ed466c7ac7bfb8477ec834bc9c641cf361f2bb9b",
+      "case_sha256": "2f10b48c7e40e456d0d4f6e7d8e5a8e147feaccbf1441cdaef9b808158ca14d9"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-077",
+      "set_id": "ECP-MVS-RVR-020",
+      "variant": "V-BASE",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 1,
+      "premises": [
+        "Every zojupruk is buoyant.",
+        "No gougearn is buoyant.",
+        "The vaimausk is a zojupruk."
+      ],
+      "question": "Is the vaimausk buoyant?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::020",
+        "decision_log_index": 20
+      },
+      "prompt_sha256": "abd8ec5d28083dcb471283d85f3ed3ff3a358f8612849de5d759ed5b63e7a249",
+      "gt_commitment": "ea431928d6a8f1e20d24a02378f695263862e4bb17e6698e239259596042da19",
+      "case_sha256": "96a80c878519ef20e03a474c3ebee44c34891609cb303bfce441a2f52906725b"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-078",
+      "set_id": "ECP-MVS-RVR-020",
+      "variant": "V-RPT",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 1,
+      "premises": [
+        "Each member of the geenidur family is buoyant.",
+        "The klopropes belongs to the geenidur family.",
+        "Nothing in the cuzault family is buoyant."
+      ],
+      "question": "Does the klopropes have the property of being buoyant?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "transform": {
+        "rename_map": {
+          "vaimausk": "klopropes",
+          "zojupruk": "geenidur",
+          "gougearn": "cuzault"
+        },
+        "paraphrase": true,
+        "premise_order": [
+          0,
+          2,
+          1
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::020",
+        "decision_log_index": 20
+      },
+      "prompt_sha256": "ef44fe4f9787d2c05b9e27dfbf547655b4af909110b08db407ce6b312ba79442",
+      "gt_commitment": "43d1d97f00b115fb9c5a772142315e36b5a3ebe9f2e59cdc69af311fd1ae2882",
+      "case_sha256": "0533a57a9d3c5c1212f6f18e39ab4dfad16a9008a19eb025a04cb10938f2df0d"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-079",
+      "set_id": "ECP-MVS-RVR-020",
+      "variant": "V-FLIP",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 1,
+      "premises": [
+        "Every zojupruk is buoyant.",
+        "No gougearn is buoyant.",
+        "The vaimausk is a gougearn."
+      ],
+      "question": "Is the vaimausk buoyant?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "flip": {
+        "premise_index": 2,
+        "class": "instance_family_reassignment",
+        "old": "The vaimausk is a zojupruk.",
+        "new": "The vaimausk is a gougearn."
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::020",
+        "decision_log_index": 20
+      },
+      "prompt_sha256": "753da9609cec3bd643ebda801b5bb0c351c2eb13f118748361ea9a17031ceb4f",
+      "gt_commitment": "3b7a21612289013c6337f28a4e45e1b0799e31b5b4bbb7e19e70837ae77a433b",
+      "case_sha256": "ed650bf97eb75cab17f76aeb455a34b6483483638759b81a88826b5c8e5973f5"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-080",
+      "set_id": "ECP-MVS-RVR-020",
+      "variant": "V-LURE",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 1,
+      "premises": [
+        "Every zojupruk is buoyant.",
+        "No gougearn is buoyant.",
+        "The vaimausk is a zojupruk."
+      ],
+      "question": "Is the vaimausk buoyant?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "lure": {
+        "class": "LC-1",
+        "template_id": "L-F4-PROVERB-1",
+        "lure_answer": "no"
+      },
+      "lure_note": "(Note: the saying 'no gougearn is ever buoyant' is the best-known proverb of the region.)",
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::020",
+        "decision_log_index": 20
+      },
+      "prompt_sha256": "d46dbd9d95b114f3f416c911cc5a33318c3d3dd278a048f70f075571619cec54",
+      "gt_commitment": "57e38891868a7f4deb035d84a209d1ba85c4ce07e5a4cc25c666d6b261aec71b",
+      "case_sha256": "cc0a56effafcb5b32561e6fe68bbc7bbbc4ebeb7731d9475015af0fb84d41057"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-081",
+      "set_id": "ECP-MVS-RVR-021",
+      "variant": "V-BASE",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 2,
+      "premises": [
+        "Every shaidipin is magnetic.",
+        "Every item that is magnetic is also gleaming.",
+        "No moucai is gleaming.",
+        "The thaifund is a shaidipin."
+      ],
+      "question": "Is the thaifund gleaming?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::021",
+        "decision_log_index": 21
+      },
+      "prompt_sha256": "c1e5152f512389d9bcb3d2b8c7ee245bd1b5a30c164c07f6f97ce6da7d2626fd",
+      "gt_commitment": "51f116e27df3af2ad5d089ffba707e2c1c65e81e166a711aa49d921871e0c1fe",
+      "case_sha256": "3bea31f6d00f4f94abbeffc2f90e63399534495c19fa70b6a241837b589fb7cb"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-082",
+      "set_id": "ECP-MVS-RVR-021",
+      "variant": "V-RPT",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 2,
+      "premises": [
+        "Each member of the breefun family is magnetic.",
+        "Every item that is magnetic is also gleaming.",
+        "The teegrund belongs to the breefun family.",
+        "Nothing in the grefaurn family is gleaming."
+      ],
+      "question": "Does the teegrund have the property of being gleaming?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "transform": {
+        "rename_map": {
+          "thaifund": "teegrund",
+          "shaidipin": "breefun",
+          "moucai": "grefaurn"
+        },
+        "paraphrase": true,
+        "premise_order": [
+          0,
+          1,
+          3,
+          2
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::021",
+        "decision_log_index": 21
+      },
+      "prompt_sha256": "f689548934bdc5bb8680dfb1f04652fa6b057f3cd6455cd0774e6834f2c20ab9",
+      "gt_commitment": "afea2dc4047e66416b09b3a5dcf358c6dd47052f534975729ace3008ba5379f5",
+      "case_sha256": "7013ee2bf493ec452d9446ef6eb3d58f51c82f8529eb84f565d6919457eadb0c"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-083",
+      "set_id": "ECP-MVS-RVR-021",
+      "variant": "V-FLIP",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 2,
+      "premises": [
+        "Every shaidipin is magnetic.",
+        "Every item that is magnetic is also gleaming.",
+        "No moucai is gleaming.",
+        "The thaifund is a moucai."
+      ],
+      "question": "Is the thaifund gleaming?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "flip": {
+        "premise_index": 3,
+        "class": "instance_family_reassignment",
+        "old": "The thaifund is a shaidipin.",
+        "new": "The thaifund is a moucai."
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::021",
+        "decision_log_index": 21
+      },
+      "prompt_sha256": "c53a1b3df09725429d4e15fb41110fb34c0867306bdac61f5c5ce04396dfb742",
+      "gt_commitment": "d6ff1d9443270017a89d429bf884d90934236ac103d05409590767a3da900a66",
+      "case_sha256": "665af53f4c103fc2adfc94ce4fceed8981c2662b689117e12e840d7517c98630"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-084",
+      "set_id": "ECP-MVS-RVR-021",
+      "variant": "V-LURE",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 2,
+      "premises": [
+        "Every shaidipin is magnetic.",
+        "Every item that is magnetic is also gleaming.",
+        "No moucai is gleaming.",
+        "The thaifund is a shaidipin."
+      ],
+      "question": "Is the thaifund gleaming?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "lure": {
+        "class": "LC-1",
+        "template_id": "L-F4-PROVERB-1",
+        "lure_answer": "no"
+      },
+      "lure_note": "(Note: the saying 'no moucai is ever gleaming' is the best-known proverb of the region.)",
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::021",
+        "decision_log_index": 21
+      },
+      "prompt_sha256": "c02c119d78af603822ad67877c2a0e125d4e5a62f02ec9b0df0e74213681a6de",
+      "gt_commitment": "692377085865aed3d48356a8028fa3afef1ffb3fc6cc6e9fffcbcf413193c562",
+      "case_sha256": "afccebe3e724f5366a84d7879e87a861a43205ffc55dfccaf23c1a75ead74eb6"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-085",
+      "set_id": "ECP-MVS-RVR-022",
+      "variant": "V-BASE",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 2,
+      "premises": [
+        "Every nafis is buoyant.",
+        "Every item that is buoyant is also drifting.",
+        "No sazor is drifting.",
+        "The klezeeth is a nafis."
+      ],
+      "question": "Is the klezeeth drifting?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::022",
+        "decision_log_index": 22
+      },
+      "prompt_sha256": "7f58600a16f6cd91b4f481c81fc79794a096e0165084b699f70ecb610598ce1d",
+      "gt_commitment": "84d2ba708fb26565befff172169d7069a3b65fc8fd58ef7d8b2e99114f395f5a",
+      "case_sha256": "ee0346ee78eb95df5164f07084233caf092508382e12b70c161c617ecdabd5df"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-086",
+      "set_id": "ECP-MVS-RVR-022",
+      "variant": "V-RPT",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 2,
+      "premises": [
+        "Every item that is buoyant is also drifting.",
+        "Each member of the ribisk family is buoyant.",
+        "The foshith belongs to the ribisk family.",
+        "Nothing in the bethezeas family is drifting."
+      ],
+      "question": "Does the foshith have the property of being drifting?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "transform": {
+        "rename_map": {
+          "klezeeth": "foshith",
+          "nafis": "ribisk",
+          "sazor": "bethezeas"
+        },
+        "paraphrase": true,
+        "premise_order": [
+          1,
+          0,
+          3,
+          2
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::022",
+        "decision_log_index": 22
+      },
+      "prompt_sha256": "e174b79389497d2cc0da1b6c9e06a80622f8746fd739a8a162c9552f3dfdd1d1",
+      "gt_commitment": "efb063efee99ee655e8c67e06840fa70853159df7abe27f5af71552bf1511a28",
+      "case_sha256": "d5c1109a2c1e6f3f7528c02784ba8e45ec99ba5f274145eba93b8d943ecf8f15"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-087",
+      "set_id": "ECP-MVS-RVR-022",
+      "variant": "V-FLIP",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 2,
+      "premises": [
+        "Every nafis is buoyant.",
+        "Every item that is buoyant is also drifting.",
+        "No sazor is drifting.",
+        "The klezeeth is a sazor."
+      ],
+      "question": "Is the klezeeth drifting?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "flip": {
+        "premise_index": 3,
+        "class": "instance_family_reassignment",
+        "old": "The klezeeth is a nafis.",
+        "new": "The klezeeth is a sazor."
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::022",
+        "decision_log_index": 22
+      },
+      "prompt_sha256": "9c92e3183ac9284bed691add65451b9104ebd6301a3ea454a0e8c69b396eaf1e",
+      "gt_commitment": "2659c4721c11c46f850a47f9b79cb522b054b261ac9a2af10a9778cccec64abb",
+      "case_sha256": "43ba4813df878d7ad102048efcd81a8296e7c1e8b77631b6f847212313ad1dfd"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-088",
+      "set_id": "ECP-MVS-RVR-022",
+      "variant": "V-LURE",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 2,
+      "premises": [
+        "Every nafis is buoyant.",
+        "Every item that is buoyant is also drifting.",
+        "No sazor is drifting.",
+        "The klezeeth is a nafis."
+      ],
+      "question": "Is the klezeeth drifting?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "lure": {
+        "class": "LC-1",
+        "template_id": "L-F4-PROVERB-1",
+        "lure_answer": "no"
+      },
+      "lure_note": "(Note: the saying 'no sazor is ever drifting' is the best-known proverb of the region.)",
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::022",
+        "decision_log_index": 22
+      },
+      "prompt_sha256": "ca2fdcb3c6c9a0472d76d5e1ef52c93cc8a750021a2b96e2a38bf83e9da3b1a1",
+      "gt_commitment": "add25f753adfa766b8dedab950625ed041cabc941aaf080e0439122134a63bfe",
+      "case_sha256": "d67c8befd2600e49f3168576cd3e92138b6bf250ccc441f5ddbfc77d331f9210"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-089",
+      "set_id": "ECP-MVS-RVR-023",
+      "variant": "V-BASE",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 3,
+      "premises": [
+        "Every jaudrith is magnetic.",
+        "Every item that is magnetic is also gleaming.",
+        "Every item that is gleaming is also humming.",
+        "No narazearn is humming.",
+        "The thasaisk is a jaudrith."
+      ],
+      "question": "Is the thasaisk humming?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::023",
+        "decision_log_index": 23
+      },
+      "prompt_sha256": "ee6225b69c2e7d787df0d336d32228e718e2fa4813e410a5d64ab111de50c3b6",
+      "gt_commitment": "8ed68b583742aea69363f7920f4ffd425319a5cc5499b077bc6db0aa4210a2bd",
+      "case_sha256": "d6ce9b890813e3bdf7710c54977554d7f949ca38858281825ffaf09f2845ae5b"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-090",
+      "set_id": "ECP-MVS-RVR-023",
+      "variant": "V-RPT",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 3,
+      "premises": [
+        "The moushir belongs to the grauvoth family.",
+        "Every item that is magnetic is also gleaming.",
+        "Each member of the grauvoth family is magnetic.",
+        "Nothing in the fauvau family is humming.",
+        "Every item that is gleaming is also humming."
+      ],
+      "question": "Does the moushir have the property of being humming?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "transform": {
+        "rename_map": {
+          "thasaisk": "moushir",
+          "jaudrith": "grauvoth",
+          "narazearn": "fauvau"
+        },
+        "paraphrase": true,
+        "premise_order": [
+          4,
+          1,
+          0,
+          3,
+          2
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::023",
+        "decision_log_index": 23
+      },
+      "prompt_sha256": "8c8f38408b7be2cc3ff7745adbab6b0f9d5d365345d41216f27cb3f5c0201593",
+      "gt_commitment": "bfe7453d0a382d68959e2c7f5d7da014147be600598d4b722cc99c5121fa7318",
+      "case_sha256": "e37a0d719efb9e01499505ddc2d0ec5ce9192ec88db53e1fbb35b71b8dea6301"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-091",
+      "set_id": "ECP-MVS-RVR-023",
+      "variant": "V-FLIP",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 3,
+      "premises": [
+        "Every jaudrith is magnetic.",
+        "Every item that is magnetic is also gleaming.",
+        "Every item that is gleaming is also humming.",
+        "No narazearn is humming.",
+        "The thasaisk is a narazearn."
+      ],
+      "question": "Is the thasaisk humming?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "flip": {
+        "premise_index": 4,
+        "class": "instance_family_reassignment",
+        "old": "The thasaisk is a jaudrith.",
+        "new": "The thasaisk is a narazearn."
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::023",
+        "decision_log_index": 23
+      },
+      "prompt_sha256": "1cbcc4a9324e436adb4c311d174315b0a7b3668a48d89f40450a2df421d68c3e",
+      "gt_commitment": "cd72eaa04cdaf937aca8b73c37235f8ceb67ac7a5e33b3df68d3dabf71906c3b",
+      "case_sha256": "840659ff3d4f6a84d8c0a4026d8ec216a9a275ecaaecc34997da4783d1cb991d"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-092",
+      "set_id": "ECP-MVS-RVR-023",
+      "variant": "V-LURE",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 3,
+      "premises": [
+        "Every jaudrith is magnetic.",
+        "Every item that is magnetic is also gleaming.",
+        "Every item that is gleaming is also humming.",
+        "No narazearn is humming.",
+        "The thasaisk is a jaudrith."
+      ],
+      "question": "Is the thasaisk humming?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "lure": {
+        "class": "LC-1",
+        "template_id": "L-F4-PROVERB-1",
+        "lure_answer": "no"
+      },
+      "lure_note": "(Note: the saying 'no narazearn is ever humming' is the best-known proverb of the region.)",
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::023",
+        "decision_log_index": 23
+      },
+      "prompt_sha256": "ccf4c9692d577c392576fdd19adfb72eef08cbca3cc5e7a90547923e6a85e702",
+      "gt_commitment": "4dc046b0a261925c1a4a280cc83b2bb9b38631cffe7dd9ea785d814423a54b67",
+      "case_sha256": "e7fb227c448d9681e6976fc1f6d8038b000a96d05704b7df4cd34002519c9a60"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-093",
+      "set_id": "ECP-MVS-RVR-024",
+      "variant": "V-BASE",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 3,
+      "premises": [
+        "Every stunoun is magnetic.",
+        "Every item that is magnetic is also gleaming.",
+        "Every item that is gleaming is also humming.",
+        "No cripurn is humming.",
+        "The cretralt is a stunoun."
+      ],
+      "question": "Is the cretralt humming?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::024",
+        "decision_log_index": 24
+      },
+      "prompt_sha256": "42c9165406bcfaa099ebefb4415ba132a348cba5513a9c5bc2a126d4b963e8ed",
+      "gt_commitment": "4027b81ea05bd3f3288aee4f50bd0ca16c199181367e894fc0722e41194f35d5",
+      "case_sha256": "46e9024bdc66eb8dd8edadfe3393711a94c8cfd62d7560677853631997c62f0c"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-094",
+      "set_id": "ECP-MVS-RVR-024",
+      "variant": "V-RPT",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 3,
+      "premises": [
+        "Each member of the dribel family is magnetic.",
+        "Every item that is gleaming is also humming.",
+        "The gilailt belongs to the dribel family.",
+        "Nothing in the lizith family is humming.",
+        "Every item that is magnetic is also gleaming."
+      ],
+      "question": "Does the gilailt have the property of being humming?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "transform": {
+        "rename_map": {
+          "cretralt": "gilailt",
+          "stunoun": "dribel",
+          "cripurn": "lizith"
+        },
+        "paraphrase": true,
+        "premise_order": [
+          0,
+          2,
+          4,
+          3,
+          1
+        ]
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::024",
+        "decision_log_index": 24
+      },
+      "prompt_sha256": "7efd93c436acdff26f62c3d4a8880fb90819591dea758610234f10c59862bd85",
+      "gt_commitment": "57ccf031c584c970fbfdc6b8441ba8512898913db0573a4521001c9e762237c0",
+      "case_sha256": "27758e0876c5e336160ab5d0676b4d04b35a449809d175de41d386f572e75268"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-095",
+      "set_id": "ECP-MVS-RVR-024",
+      "variant": "V-FLIP",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 3,
+      "premises": [
+        "Every stunoun is magnetic.",
+        "Every item that is magnetic is also gleaming.",
+        "Every item that is gleaming is also humming.",
+        "No cripurn is humming.",
+        "The cretralt is a cripurn."
+      ],
+      "question": "Is the cretralt humming?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "flip": {
+        "premise_index": 4,
+        "class": "instance_family_reassignment",
+        "old": "The cretralt is a stunoun.",
+        "new": "The cretralt is a cripurn."
+      },
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::024",
+        "decision_log_index": 24
+      },
+      "prompt_sha256": "9f4c596a24d834a7885231b4bcd3c9dfd6dcfff594cdf4679b1560e174237325",
+      "gt_commitment": "86408525ac468d284d372c3d996cd65b402554a76ff2f925b617aaf2ce6c7aea",
+      "case_sha256": "60f258a97d58d9c51c568ab91008e106118d399d775d5cc1cb41884b5ca1e060"
+    },
+    {
+      "case_id": "ECP-CASE-RVR-096",
+      "set_id": "ECP-MVS-RVR-024",
+      "variant": "V-LURE",
+      "family": "F4",
+      "family_name": "multi-premise-evidence-integration",
+      "depth": 3,
+      "premises": [
+        "Every stunoun is magnetic.",
+        "Every item that is magnetic is also gleaming.",
+        "Every item that is gleaming is also humming.",
+        "No cripurn is humming.",
+        "The cretralt is a stunoun."
+      ],
+      "question": "Is the cretralt humming?",
+      "answer_grammar": {
+        "type": "yes_no_cannot",
+        "tokens": [
+          "yes",
+          "no",
+          "cannot"
+        ]
+      },
+      "lure": {
+        "class": "LC-1",
+        "template_id": "L-F4-PROVERB-1",
+        "lure_answer": "no"
+      },
+      "lure_note": "(Note: the saying 'no cripurn is ever humming' is the best-known proverb of the region.)",
+      "prompt_envelope": "RVR-ENVELOPE-1",
+      "provenance": {
+        "generator": "tools/rvr_case_generator.py",
+        "seed": "ECP-EVAL-RVR-1::SEED-V1",
+        "set_key": "ECP-EVAL-RVR-1::SEED-V1::MVS::024",
+        "decision_log_index": 24
+      },
+      "prompt_sha256": "a2dc225f49f3a72a729a33ad849e51365e78a032e8cc4481c3a4521a06296674",
+      "gt_commitment": "807a72d99e609f9f26066432e4c5558be1ead01be98077cee8fd086222c7b30e",
+      "case_sha256": "fb496377e4103c5c989e2ff35e9c5f55a69d8ca55da6c427a06b881a46daf707"
+    }
+  ],
+  "mvs_binding_map": {
+    "ECP-MVS-RVR-001": {
+      "V-BASE": "ECP-CASE-RVR-001",
+      "V-RPT": "ECP-CASE-RVR-002",
+      "V-FLIP": "ECP-CASE-RVR-003",
+      "V-LURE": "ECP-CASE-RVR-004"
+    },
+    "ECP-MVS-RVR-002": {
+      "V-BASE": "ECP-CASE-RVR-005",
+      "V-RPT": "ECP-CASE-RVR-006",
+      "V-FLIP": "ECP-CASE-RVR-007",
+      "V-LURE": "ECP-CASE-RVR-008"
+    },
+    "ECP-MVS-RVR-003": {
+      "V-BASE": "ECP-CASE-RVR-009",
+      "V-RPT": "ECP-CASE-RVR-010",
+      "V-FLIP": "ECP-CASE-RVR-011",
+      "V-LURE": "ECP-CASE-RVR-012"
+    },
+    "ECP-MVS-RVR-004": {
+      "V-BASE": "ECP-CASE-RVR-013",
+      "V-RPT": "ECP-CASE-RVR-014",
+      "V-FLIP": "ECP-CASE-RVR-015",
+      "V-LURE": "ECP-CASE-RVR-016"
+    },
+    "ECP-MVS-RVR-005": {
+      "V-BASE": "ECP-CASE-RVR-017",
+      "V-RPT": "ECP-CASE-RVR-018",
+      "V-FLIP": "ECP-CASE-RVR-019",
+      "V-LURE": "ECP-CASE-RVR-020"
+    },
+    "ECP-MVS-RVR-006": {
+      "V-BASE": "ECP-CASE-RVR-021",
+      "V-RPT": "ECP-CASE-RVR-022",
+      "V-FLIP": "ECP-CASE-RVR-023",
+      "V-LURE": "ECP-CASE-RVR-024"
+    },
+    "ECP-MVS-RVR-007": {
+      "V-BASE": "ECP-CASE-RVR-025",
+      "V-RPT": "ECP-CASE-RVR-026",
+      "V-FLIP": "ECP-CASE-RVR-027",
+      "V-LURE": "ECP-CASE-RVR-028"
+    },
+    "ECP-MVS-RVR-008": {
+      "V-BASE": "ECP-CASE-RVR-029",
+      "V-RPT": "ECP-CASE-RVR-030",
+      "V-FLIP": "ECP-CASE-RVR-031",
+      "V-LURE": "ECP-CASE-RVR-032"
+    },
+    "ECP-MVS-RVR-009": {
+      "V-BASE": "ECP-CASE-RVR-033",
+      "V-RPT": "ECP-CASE-RVR-034",
+      "V-FLIP": "ECP-CASE-RVR-035",
+      "V-LURE": "ECP-CASE-RVR-036"
+    },
+    "ECP-MVS-RVR-010": {
+      "V-BASE": "ECP-CASE-RVR-037",
+      "V-RPT": "ECP-CASE-RVR-038",
+      "V-FLIP": "ECP-CASE-RVR-039",
+      "V-LURE": "ECP-CASE-RVR-040"
+    },
+    "ECP-MVS-RVR-011": {
+      "V-BASE": "ECP-CASE-RVR-041",
+      "V-RPT": "ECP-CASE-RVR-042",
+      "V-FLIP": "ECP-CASE-RVR-043",
+      "V-LURE": "ECP-CASE-RVR-044"
+    },
+    "ECP-MVS-RVR-012": {
+      "V-BASE": "ECP-CASE-RVR-045",
+      "V-RPT": "ECP-CASE-RVR-046",
+      "V-FLIP": "ECP-CASE-RVR-047",
+      "V-LURE": "ECP-CASE-RVR-048"
+    },
+    "ECP-MVS-RVR-013": {
+      "V-BASE": "ECP-CASE-RVR-049",
+      "V-RPT": "ECP-CASE-RVR-050",
+      "V-FLIP": "ECP-CASE-RVR-051",
+      "V-LURE": "ECP-CASE-RVR-052"
+    },
+    "ECP-MVS-RVR-014": {
+      "V-BASE": "ECP-CASE-RVR-053",
+      "V-RPT": "ECP-CASE-RVR-054",
+      "V-FLIP": "ECP-CASE-RVR-055",
+      "V-LURE": "ECP-CASE-RVR-056"
+    },
+    "ECP-MVS-RVR-015": {
+      "V-BASE": "ECP-CASE-RVR-057",
+      "V-RPT": "ECP-CASE-RVR-058",
+      "V-FLIP": "ECP-CASE-RVR-059",
+      "V-LURE": "ECP-CASE-RVR-060"
+    },
+    "ECP-MVS-RVR-016": {
+      "V-BASE": "ECP-CASE-RVR-061",
+      "V-RPT": "ECP-CASE-RVR-062",
+      "V-FLIP": "ECP-CASE-RVR-063",
+      "V-LURE": "ECP-CASE-RVR-064"
+    },
+    "ECP-MVS-RVR-017": {
+      "V-BASE": "ECP-CASE-RVR-065",
+      "V-RPT": "ECP-CASE-RVR-066",
+      "V-FLIP": "ECP-CASE-RVR-067",
+      "V-LURE": "ECP-CASE-RVR-068"
+    },
+    "ECP-MVS-RVR-018": {
+      "V-BASE": "ECP-CASE-RVR-069",
+      "V-RPT": "ECP-CASE-RVR-070",
+      "V-FLIP": "ECP-CASE-RVR-071",
+      "V-LURE": "ECP-CASE-RVR-072"
+    },
+    "ECP-MVS-RVR-019": {
+      "V-BASE": "ECP-CASE-RVR-073",
+      "V-RPT": "ECP-CASE-RVR-074",
+      "V-FLIP": "ECP-CASE-RVR-075",
+      "V-LURE": "ECP-CASE-RVR-076"
+    },
+    "ECP-MVS-RVR-020": {
+      "V-BASE": "ECP-CASE-RVR-077",
+      "V-RPT": "ECP-CASE-RVR-078",
+      "V-FLIP": "ECP-CASE-RVR-079",
+      "V-LURE": "ECP-CASE-RVR-080"
+    },
+    "ECP-MVS-RVR-021": {
+      "V-BASE": "ECP-CASE-RVR-081",
+      "V-RPT": "ECP-CASE-RVR-082",
+      "V-FLIP": "ECP-CASE-RVR-083",
+      "V-LURE": "ECP-CASE-RVR-084"
+    },
+    "ECP-MVS-RVR-022": {
+      "V-BASE": "ECP-CASE-RVR-085",
+      "V-RPT": "ECP-CASE-RVR-086",
+      "V-FLIP": "ECP-CASE-RVR-087",
+      "V-LURE": "ECP-CASE-RVR-088"
+    },
+    "ECP-MVS-RVR-023": {
+      "V-BASE": "ECP-CASE-RVR-089",
+      "V-RPT": "ECP-CASE-RVR-090",
+      "V-FLIP": "ECP-CASE-RVR-091",
+      "V-LURE": "ECP-CASE-RVR-092"
+    },
+    "ECP-MVS-RVR-024": {
+      "V-BASE": "ECP-CASE-RVR-093",
+      "V-RPT": "ECP-CASE-RVR-094",
+      "V-FLIP": "ECP-CASE-RVR-095",
+      "V-LURE": "ECP-CASE-RVR-096"
+    }
+  },
+  "integrity": {
+    "canonicalization": "ECP-CANONICAL-JSON-1.0 (src/ecp/canonical.py)",
+    "case_hash_rule": "sha256 over canonical case record with the case_sha256 field excluded",
+    "mvs_hash_rule": "sha256 over canonical {variant: case_id} map",
+    "gt_commitment_rule": "sha256 over canonical {case_id, ground_truth}",
+    "ordered_case_hash": "e4fe3ad81e595946461c7a045b83c1138c71322a2936dc2cef03402a673f6b6a",
+    "note": "package_hash and classifier hash are recorded by the registration freeze orchestrator after assembly",
+    "package_hash_rule": "SHA-256 over ECP-CANONICAL-JSON-1.0 of the package document with the integrity.package_hash field excluded",
+    "classifier_hash": "901a90ac53714974eb153078ee5d776fbf72f3647f587da64c5c803045281bb3",
+    "sidecar_sha256_note": "the private GT sidecar sha256 is recorded in the hash record and delivered owner-side; the sidecar is never committed",
+    "session_screen_inputs": {
+      "m3_exclusion_tokens_sha256": "b6e25ecff2fb631c50ed243172552e4fdad7b3f14213a1658718e4d75758407b",
+      "m3_fivegrams_sha256": "1a08804ebdbd8a1ad9d082d0eadace1ed879a181721092c3ba2f07a16cc4999b",
+      "note": "session-side screen inputs, hash-pinned here; contents not published (M3 material)"
+    },
+    "package_hash": "c84a98321562ccd5322398c37b2310388c5090bcbd397c52bb638c2c3767d44c"
+  },
+  "registered_at": "2026-09-13",
+  "order_reference": "ECP — REASONING vs RETRIEVAL PREREGISTRATION FREEZE v1",
+  "design_reference": {
+    "design": "ECP — REASONING vs RETRIEVAL EXPERIMENT DESIGN v1.1",
+    "design_report_sha256": "cc2d66d8abc5ff89fed08c766c0321b212cde6ab29abf9f4432bd7a63a6f793a",
+    "design_machine_record_sha256": "4cf4918f4236228ae9b3947528a88c1526250d35857f3481db6b71aa6ffc31f9"
+  },
+  "baseline": {
+    "repository": "jsiadyarslan-lab/ECP",
+    "branch": "main",
+    "sha": "562e18809bcb448bd2e1717e73c2fd9386a7fa8a",
+    "verified": "HEAD == origin/main == baseline, tracked tree clean immediately before the registration write"
+  },
+  "owner_freeze": {
+    "frozen_by": "owner order ECP — REASONING vs RETRIEVAL PREREGISTRATION FREEZE v1 (2026-09-13), §3",
+    "campaign_size": {
+      "mvs_count": 24,
+      "case_count": 96,
+      "execution_count": 96,
+      "attempts_per_case": 1,
+      "retry_policy": "NONE",
+      "note": "default size frozen; NO silent expansion to 32 MVS; any change would require a recorded pre-execution registration amendment by the owner"
+    },
+    "thresholds": {
+      "G0_BCR_min": 0.6,
+      "G0_evaluable_CFTR_denominator_min": 15,
+      "G0_IVR_plus_EFR_max": 0.25,
+      "R1_CFTR_min": 0.7,
+      "R2_RIR_min": 0.7,
+      "R3_rule": "LCR <= 0.25 OR LRR >= BCR - 0.15 (one compound rule)",
+      "R4_EFR_max": 0.15,
+      "M1_rule": "BCR >= 0.60 AND CFTR <= 0.40",
+      "M2_LCR_min": 0.5,
+      "M3_rule": "BCR >= 0.60 AND RIR <= 0.50"
+    },
+    "adoption_note": "All values adopted verbatim from Design v1.1 §G as reviewed and confirmed by the owner (review of 2026-09-13 quoting CFTR 0.70/0.40, RIR 0.70/0.50, LCR 0.25/0.50 without change). No pre-execution registration amendment was required or made. No threshold may be selected or altered after any experimental execution."
+  },
+  "hypotheses": {
+    "H-RVR-1": {
+      "statement": "Under the registered RvR condition, the evaluated system's outcome pattern on matched variant sets will satisfy the registered structure-tracking criterion (frozen thresholds in owner_freeze).",
+      "falsifiable_via": "association-override or lure-capture signatures at the registered strengths (Pattern M criteria)"
+    },
+    "H-RVR-2": {
+      "statement": "Any structure-tracking satisfaction additionally holds under the registered synthetic-world, novelty, and anti-leakage conditions."
+    },
+    "H-RVR-3": {
+      "statement": "The protocol classifies all executions according to the frozen taxonomy without post-hoc modification, evaluated independently of the behavioral result."
+    },
+    "interpretation_boundary": [
+      "Failure to satisfy H-RVR-1 does not by itself prove retrieval, memorization, or surface matching.",
+      "A Pattern-M conclusion requires the registered Pattern-M criteria to be met.",
+      "Pattern R, when satisfied, constitutes behavioral evidence more consistent with the registered reasoning-like structure-tracking explanation than with the registered alternatives — no stronger claim is licensed."
+    ],
+    "prohibited_phrasings": [
+      "the model reasons",
+      "reasoning has been proven",
+      "memorization has been proven absent"
+    ],
+    "alternative_explanations": {
+      "E-R": "reasoning-like compositional processing (Claim-C level only)",
+      "E-M": "memorization / answer-association",
+      "E-S": "surface matching / pattern completion",
+      "E-X": "execution/format artifacts"
+    }
+  },
+  "claim_boundaries": {
+    "investigates": [
+      "CLAIM A (as context only)",
+      "CLAIM B (core)",
+      "CLAIM C (maximum licensable claim)"
+    ],
+    "prohibited": "CLAIM D — internal/mechanistic/human-like reasoning assertions from behavioral results",
+    "indeterminate_is_valid": true
+  },
+  "endpoints": {
+    "primary": {
+      "name": "CFTR — Counterfactual Flip-Tracking Rate",
+      "numerator": "evaluable MVS whose V-FLIP execution is classified CORRECT against the sealed flipped GT",
+      "denominator": "registered MVS with V-BASE CORRECT, both executions VALID, and V-FLIP producing a classifiable outcome (abstentions, malformed and non-answers counted in the denominator)",
+      "exclusions_reported_never_silent": [
+        "V-BASE not CORRECT (reported as BCR context)",
+        "INVALID_EXECUTION / UNOBSERVABLE (reported as IVR on the attempt denominator)"
+      ],
+      "aggregation": "one pooled rate across families and depths; family/depth breakdowns as descriptive counts; single-system bound"
+    },
+    "secondary_labeled_never_promoted": {
+      "RIR": "RPT Invariance Rate",
+      "LRR": "Lure Resistance Rate",
+      "LCR": "Lure Capture Rate",
+      "BCR": "Base Correctness Rate",
+      "STP": "Structure-Tracking Profile (4-variant outcome vectors)",
+      "EFR": "Envelope-Failure Rate",
+      "IVR": "Invalid/Unobservable Rate",
+      "ECCE-RVR": "Evidence-Complete Classified Execution rate (protocol layer, M3 ECCE semantics, RVR scope)",
+      "CIT": "Citation accuracy (optional CITED line; provenance aid only — NEVER correctness-gating)"
+    },
+    "promotion_rule": "No endpoint promotion or denominator alteration is permitted after execution begins."
+  },
+  "decision_rules": {
+    "gate_G0": "BCR >= 0.60 AND evaluable CFTR denominator >= 15 AND IVR + EFR <= 0.25; otherwise INDETERMINATE (capability/artifact dominance)",
+    "pattern_R": "CFTR >= 0.70 AND RIR >= 0.70 AND (LCR <= 0.25 OR LRR >= BCR - 0.15) AND EFR <= 0.15",
+    "pattern_M": "(BCR >= 0.60 AND CFTR <= 0.40) OR LCR >= 0.50 OR (BCR >= 0.60 AND RIR <= 0.50)",
+    "pattern_I": "everything else, including mixed profiles and family-level contradictions (dominance rule: pooled pattern matches AND at most one contradicting family -> that pattern with the family split disclosed)",
+    "firewalls": [
+      "INDETERMINATE is a legitimate scientific outcome and MUST NOT be converted into evidence for either explanation class",
+      "Pattern R supports Claim C only — never Claim D",
+      "Pattern M conclusions are bounded to the registered lure/flip/surface classes",
+      "full STP disclosure accompanies every adjudication"
+    ]
+  },
+  "classifier": {
+    "identity": "RVR-CLASSIFIER-1",
+    "version": 1,
+    "implementation": "src/ecp/rvr_classifier.py",
+    "sha256": "901a90ac53714974eb153078ee5d776fbf72f3647f587da64c5c803045281bb3",
+    "frozen_behaviour": [
+      "terminal ANSWER: envelope parsing only (D2 resolution — prose never classifies)",
+      "registered answer grammar per case; malformed routed to MALFORMED_ANSWER, never INCORRECT (D3 resolution)",
+      "ten-state taxonomy: CORRECT / INCORRECT / CORRECT_ABSTENTION / INCORRECT_ABSTENTION / MALFORMED_ANSWER / NON_ANSWER / INVALID_EXECUTION / UNOBSERVABLE (+ execution-layer assignment)",
+      "CITATION: optional CITED line extracted as provenance information only — never determines correctness (D1 resolution)",
+      "ground truth enters only from the sealed private sidecar, verified against gt_commitment by the classification path"
+    ],
+    "self_test": "13 constructed trials, all passing (validation CL-01)"
+  },
+  "execution_lock": {
+    "status": "PREREGISTERED — EXECUTION LOCKED",
+    "scientific_execution": "FORBIDDEN until a separate owner order authorizes REGISTRATION -> EXECUTION",
+    "provider_calls": "FORBIDDEN",
+    "model_calls": "FORBIDDEN",
+    "experimental_scoring": "FORBIDDEN",
+    "gt_exposure": "sealed as commitments; plaintext GT only in the owner-held private sidecar (never in this repository)"
+  },
+  "m3_separation": {
+    "m3_results_as_reasoning_evidence": "FORBIDDEN and unused",
+    "m3_pool_in_authoring": "excluded; screens enforced (generated names and composed surfaces disjoint from the M3 pool)",
+    "exposed_18_component2_candidates": "REQUIRES REAUTHORING — PENDING OWNER DECISION (OD-03 stands); default INELIGIBLE; no dependency in this registration",
+    "m3_file_modifications": "NONE — this registration is strictly additive"
+  }
+}

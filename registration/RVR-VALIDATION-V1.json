@@ -1,0 +1,123 @@
+{
+  "battery": "RVR-VALIDATION-V1",
+  "checks": [
+    {
+      "id": "MV-01",
+      "status": "PASS",
+      "detail": "independent GT derivation matches sidecar 96/96; commitments match 96/96"
+    },
+    {
+      "id": "MV-02",
+      "status": "PASS",
+      "detail": "V-RPT: rename bijection + semantic premise equivalence + GT equality + order permutation: 24/24 sets"
+    },
+    {
+      "id": "MV-03",
+      "status": "PASS",
+      "detail": "V-FLIP: exactly one premise changed at the registered index, metadata matches text, GT moves to a different registered token: 24/24 sets"
+    },
+    {
+      "id": "MV-04",
+      "status": "PASS",
+      "detail": "V-LURE: premises identical to base, note is a parenthetical non-premise, registered lure answer is a grammar token distinct from GT: 24/24 sets"
+    },
+    {
+      "id": "MV-05",
+      "status": "PASS",
+      "detail": "answer grammars consistent (polar fixed; enum tokens appear in case text): 96/96"
+    },
+    {
+      "id": "MV-06",
+      "status": "PASS",
+      "detail": "rendered prompts: independent re-render reproduces every prompt_sha256; envelope tail constant: 96/96"
+    },
+    {
+      "id": "MV-07",
+      "status": "PASS",
+      "detail": "case hashes 96/96, all mvs hashes, ordered_case_hash re-derived"
+    },
+    {
+      "id": "MV-08",
+      "status": "PASS",
+      "detail": "no duplicate (premises, question) pairs; no duplicate MVS premise sets (24 unique)"
+    },
+    {
+      "id": "LK-01",
+      "status": "PASS",
+      "detail": "M3 reuse screen on generated material: 164 distinct generated names — 0 M3 collisions; 1571 composed 5-grams — 0 shared with the M3 corpus; shared function/predicate vocabulary (registered template language, disclosed): 44 tokens ['about', 'above', 'always', 'being', 'both', 'conflict', 'container', 'count', 'does', 'each', 'every', 'family', 'fewer', 'first', 'heavier', 'hold', 'holds', 'item', 'known', 'last', 'long', 'many', 'member', 'more', 'most', 'note', 'nothing', 'number', 'older', 'other', 'premises', 'property', 'record', 'records', 'smallest', 'standing', 'stands', 'statements', 'taller', 'than', 'that', 'these', 'which', 'with']"
+    },
+    {
+      "id": "LK-02",
+      "status": "PASS",
+      "detail": "exposed-GT reuse screen: generated names and composed surfaces are disjoint from the M3 pool (all M3 answer-bearing tokens are members of the exclusion set)"
+    },
+    {
+      "id": "LK-03",
+      "status": "PASS",
+      "detail": "benchmark-name screen: collisions 0"
+    },
+    {
+      "id": "LK-04",
+      "status": "PASS",
+      "detail": "entity names vs dictionary: 66 distinct entity names, 0 dictionary collisions"
+    },
+    {
+      "id": "LK-05",
+      "status": "PASS",
+      "detail": "single terminal ANSWER envelope, constant template across all 96 prompts (verified in MV-06); no position variance"
+    },
+    {
+      "id": "LK-06",
+      "status": "PASS",
+      "detail": "public package key scan for GT-bearing fields: 0 found"
+    },
+    {
+      "id": "LK-07",
+      "status": "PASS",
+      "detail": "plaintext GT absent from public package (enum GT values scanned): 0 leaks"
+    },
+    {
+      "id": "LK-08",
+      "status": "PASS",
+      "detail": "transformation consistency aggregated from MV-02/MV-03/MV-04"
+    },
+    {
+      "id": "LK-09",
+      "status": "PASS",
+      "detail": "no duplicate MVS (aggregated from MV-08)"
+    },
+    {
+      "id": "LK-10",
+      "status": "PASS",
+      "detail": "entity/family-name screen vs registered vocabulary, grammar words, benchmark names and curated screen: 102 distinct names, 0 collisions"
+    },
+    {
+      "id": "CL-01",
+      "status": "PASS",
+      "detail": "RVR-CLASSIFIER-1 self-test: 13/13 constructed trials classify as registered"
+    },
+    {
+      "id": "INT-01",
+      "status": "PASS",
+      "detail": "campaign size integrity: 24 MVS / 96 cases / 96 one-shot executions (retry NONE)"
+    },
+    {
+      "id": "INT-02",
+      "status": "PASS",
+      "detail": "answer-space distribution sums to 96; cannot-GT cases = 6 (registered F3 underdetermined minority)"
+    },
+    {
+      "id": "INT-03",
+      "status": "PASS",
+      "detail": "owner freeze §3: campaign size 24 MVS = 96 executions (no silent expansion to 32)"
+    },
+    {
+      "id": "INT-04",
+      "status": "PASS",
+      "detail": "package_hash / classifier_hash recorded by the freeze orchestrator (post-assembly); envelope template hash present in package"
+    }
+  ],
+  "failures": [],
+  "summary": "23/23 checks PASS; 0 failures",
+  "verdict": "PASS — REGISTRATION VALIDATION COMPLETE"
+}
