@@ -1,0 +1,75 @@
+{
+  "amendment_disclosure": "The frozen registration package registered the case population, thresholds, endpoints, decision rules and classifier without binding a target system (no target had been designated at freeze time). This record binds the evaluated system and the execution condition BEFORE any execution: zero executions, zero outcomes, zero experimental scores and zero model calls exist at binding time; the only provider interaction is the public, credential-free catalog listing below. The frozen package is unchanged and remains authoritative; this record is additive and hash-sealed. Any later change would require a new recorded owner order.",
+  "binding_class": "PRE-EXECUTION TARGET AND CONDITION BINDING (owner-authorized, data-blind, additive)",
+  "binding_hash": "25f8590798215900163c2cedde05eed168ef294468aaafa489ee037a30dc19cc",
+  "binding_id": "ECP-REG-RVR-BINDING-V1",
+  "binding_version": 1,
+  "campaign_id": "ECP-EVAL-RVR-1",
+  "classifier_sha256": "901a90ac53714974eb153078ee5d776fbf72f3647f587da64c5c803045281bb3",
+  "condition": {
+    "condition_id": "ECP-COND-RVR-1",
+    "external_context_injection": "NONE",
+    "level": "L1 model-only",
+    "max_tokens": 1024,
+    "model_state": "MODEL-ENABLED",
+    "prompt_authority": "the frozen registration package case record is the sole prompt authority: the rendered presentation (premises + question + registered envelope) is the complete model input; no client prompt path exists",
+    "provider_nondeterminism": "disclosed: provider-side sampling nondeterminism may persist at temperature 0.0; recorded per execution; one-shot retry-NONE contract (M3 execution-contract semantics)",
+    "retrieval": "NONE",
+    "system_prompt": "NONE",
+    "temperature": 0.0,
+    "tools": "NONE",
+    "transport_timeout_seconds": 90
+  },
+  "ecp_object": "rvr-execution-binding",
+  "execution_contract": {
+    "adjudication": "downstream, post-campaign, mechanical: tools/rvr_adjudicate.py applies the frozen G-0 / R / M / I decision rules over the sealed outputs (thresholds read from the frozen package; never re-selected)",
+    "attempts_per_case": 1,
+    "case_order": "the frozen package registered case order (ordered_case_hash e4fe3ad8…), unmodified",
+    "credential": "OPENROUTER_API_KEY resolved at launch through the authorized session credential gateway only; never in Git, never in records, never in evidence",
+    "execution_count": 96,
+    "execution_surface": "python run_rvr_console.py",
+    "ground_truth_flow": "the private GT sidecar is verified against the public gt_commitment hashes at load; plaintext answers reach ONLY the in-process frozen classifier call site and are never persisted",
+    "one_campaign_per_evidence_root": "the console refuses to start when a campaign ledger already exists under the evidence root (one-shot discipline)",
+    "retry_policy": "NONE (a retry would violate the frozen execution contract)"
+  },
+  "execution_surface_identity": {
+    "files": {
+      "run_rvr_console.py": "d8eb300443e697217e83240612ffa5496e5ac89ce0e02c382e470f28b3450184",
+      "src/ecp/rvr_campaign.py": "00cc33dec7edc6e46b809ebfe72cfa7dcf61d98e6a0fd0f6da7252168babc908",
+      "src/ecp/rvr_classifier.py": "901a90ac53714974eb153078ee5d776fbf72f3647f587da64c5c803045281bb3",
+      "src/ecp/rvr_registration.py": "cc344795dc23dd0126cdbc7d214112fd4f34268aa24086b4087da50f72c35aa7",
+      "tests/test_rvr_campaign.py": "11fafd425d3f0b6592fc5e21aafade0bcf053f9385c2a6dbea38f52ff3b01888",
+      "tools/rvr_adjudicate.py": "ea5de3b3960da591fb7e439672528535c92dc5680017717dd92ec93f67bcbd37"
+    },
+    "note": "SHA-256 over the raw bytes of each file at binding time"
+  },
+  "owner_authorization": {
+    "authorizes": "REGISTRATION -> EXECUTION (the owner's console launch is the execution act)",
+    "order": "Owner execution-preparation order, 2026-09-13 (ECP-EVAL-RVR-1 session): the owner designated google/gemma-4-26b-a4b-it:free as the evaluated model and ordered the execution surface prepared with the console commands delivered for the owner's own launch ('prepare everything; when ready give me the commands; then I place the key in the console and test').",
+    "scientific_execution_performed_at_binding": "NONE"
+  },
+  "package_hash": "c84a98321562ccd5322398c37b2310388c5090bcbd397c52bb638c2c3767d44c",
+  "package_id": "ECP-REG-RVR-V1",
+  "registered_at": "2026-09-13",
+  "target": {
+    "adapter": "ECP-ADAPTER-OPENROUTER-CHAT-COMPLETIONS",
+    "api_interface": "openrouter-chat-completions-api (POST /api/v1/chat/completions, OpenAI-compatible dialect)",
+    "catalog_verification": {
+      "context_length": 262144,
+      "credential_used": "NONE",
+      "identifier_present": true,
+      "method": "public GET https://openrouter.ai/api/v1/models (no credential, no model call)",
+      "model_called": "NONE",
+      "verified_at": "2026-09-13"
+    },
+    "exact_model_api_identifier": "google/gemma-4-26b-a4b-it:free",
+    "independence_classification": "EXTERNAL-INDEPENDENT",
+    "model_identity_rule": "the openrouter/free moving alias is NEVER a scientific model identity; the exact identifier is pinned at registration and recorded in every evidence record; a snapshot date is recorded per execution in evidence (created_at) since the provider may update the served weights behind a stable identifier",
+    "official_name": "Google Gemma 4 26B A4B IT served via OpenRouter",
+    "pinned_by_exact_identifier": true,
+    "provider": "ECP-PROVIDER-OPENROUTER",
+    "provider_organization": "OpenRouter",
+    "system_id": "ECP-SYSTEM-RVR-001",
+    "system_type": "model-only"
+  }
+}
